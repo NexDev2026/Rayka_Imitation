@@ -16,9 +16,13 @@
     # ---------------------------------------------------------------
     RewriteRule ^(app|vendor|database|storage|bootstrap)(/|$) - [F,L]
 
-    <FilesMatch "\.(env|json|lock|git|sql|log|bak|md|txt)$|^artisan$">
+    <FilesMatch "\.(env|json|lock|git|sql|log|bak|md|txt)$">
         Require all denied
     </FilesMatch>
+
+    <Files "artisan">
+        Require all denied
+    </Files>
 
     # ---------------------------------------------------------------
     # 2. Rewrite uploads, build, and assets to the public subfolder
