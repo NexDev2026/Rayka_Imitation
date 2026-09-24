@@ -237,25 +237,46 @@ Route::get('/rayka-deploy', function (\Illuminate\Http\Request $request) {
         abort(403, 'Unauthorized deployment token.');
     }
 
-    \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
-    $migrateOutput = \Illuminate\Support\Facades\Artisan::output();
+    $dbStatus = '';
+    $migrateOutput = '';
+    try {
+        \Illuminate\Support\Facades\DB::connection()->getPdo();
+        $dbName = \Illuminate\Support\Facades\DB::connection()->getDatabaseName();
+        $dbStatus = "Connected successfully to database: {$dbName}";
 
-    \Illuminate\Support\Facades\Artisan::call('rayka:setup-storage');
-    $storageOutput = \Illuminate\Support\Facades\Artisan::output();
+        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        $migrateOutput = \Illuminate\Support\Facades\Artisan::output();
+    } catch (\Throwable $e) {
+        $dbStatus = 'Database issue: ' . $e->getMessage();
+        $migrateOutput = 'Migration skipped due to database status: ' . $e->getMessage();
+    }
 
-    \Illuminate\Support\Facades\Artisan::call('optimize:clear');
-    $cacheOutput = \Illuminate\Support\Facades\Artisan::output();
+    $storageOutput = '';
+    try {
+        \Illuminate\Support\Facades\Artisan::call('rayka:setup-storage');
+        $storageOutput = \Illuminate\Support\Facades\Artisan::output();
+    } catch (\Throwable $e) {
+        $storageOutput = 'Storage setup note: ' . $e->getMessage();
+    }
 
-    return response("<div style='background:#1a1412;color:#FAF7F0;padding:30px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;max-width:800px;margin:40px auto;border-radius:16px;border:1px solid #D4AF6A;box-shadow:0 10px 25px rgba(0,0,0,0.5);'>
+    $cacheOutput = '';
+    try {
+        \Illuminate\Support\Facades\Artisan::call('optimize:clear');
+        $cacheOutput = \Illuminate\Support\Facades\Artisan::output();
+    } catch (\Throwable $e) {
+        $cacheOutput = 'Cache note: ' . $e->getMessage();
+    }
+
+    return response("<div style='background:#1a1412;color:#FAF7F0;padding:30px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;max-width:850px;margin:40px auto;border-radius:16px;border:1px solid #D4AF6A;box-shadow:0 10px 25px rgba(0,0,0,0.5);'>
         <h2 style='color:#E7C77B;margin-top:0;border-bottom:1px solid #D4AF6A;padding-bottom:10px;'>✨ Rayka Auto-Deploy & Migration Report</h2>
-        <h4 style='color:#D4AF6A;margin-bottom:6px;'>1. Database Migrations:</h4>
-        <pre style='background:#2E180E;padding:12px;border-radius:8px;overflow-x:auto;color:#E7C77B;font-size:12px;'>".e($migrateOutput)."</pre>
+        <h4 style='color:#D4AF6A;margin-bottom:6px;'>1. Database Status:</h4>
+        <pre style='background:#2E180E;padding:12px;border-radius:8px;overflow-x:auto;color:#E7C77B;font-size:12px;'>".e($dbStatus)."\n\n".e($migrateOutput)."</pre>
         <h4 style='color:#D4AF6A;margin-bottom:6px;'>2. Storage & Backups Setup:</h4>
         <pre style='background:#2E180E;padding:12px;border-radius:8px;overflow-x:auto;color:#E7C77B;font-size:12px;'>".e($storageOutput)."</pre>
         <h4 style='color:#D4AF6A;margin-bottom:6px;'>3. Application Cache Refresh:</h4>
         <pre style='background:#2E180E;padding:12px;border-radius:8px;overflow-x:auto;color:#E7C77B;font-size:12px;'>".e($cacheOutput)."</pre>
-        <p style='color:#4ade80;font-weight:bold;margin-top:20px;font-size:14px;'>✔ Rayka Jewellery is successfully migrated, configured and ready on this server!</p>
-        <p><a href='/' style='color:#E7C77B;text-decoration:underline;'>→ Go to Storefront Home</a></p>
+        <p style='color:#4ade80;font-weight:bold;margin-top:20px;font-size:14px;'>✔ Rayka Jewellery deployment routine completed!</p>
+        <p><a href='/' style='color:#E7C77B;text-decoration:underline;font-weight:bold;'>→ Go to Storefront Home</a></p>
     </div>");
 })->name('rayka.deploy');
 
