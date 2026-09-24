@@ -258,3 +258,45 @@ Route::get('/rayka-deploy', function (\Illuminate\Http\Request $request) {
         <p><a href='/' style='color:#E7C77B;text-decoration:underline;'>→ Go to Storefront Home</a></p>
     </div>");
 })->name('rayka.deploy');
+
+/*
+|--------------------------------------------------------------------------
+| Automated GitHub Webhook Endpoint (Hostinger-Style Instant Deploy)
+|--------------------------------------------------------------------------
+*/
+Route::match(['get', 'post'], '/rayka-webhook', function (\Illuminate\Http\Request $request) {
+    $token = $request->query('token') ?: $request->input('token') ?: $request->header('X-Rayka-Token');
+    $secret = env('DEPLOY_SECRET', 'rayka_deploy_2026');
+
+    if ($token !== $secret) {
+        return response()->json(['error' => 'Unauthorized deployment token.'], 403);
+    }
+
+    $basePath = base_path();
+    $gitOutput = '';
+    if (function_exists('shell_exec')) {
+        $gitOutput = (string) @shell_exec("cd {$basePath} && git pull origin main 2>&1");
+    }
+
+    $migrateOutput = '';
+    if (env('DB_AUTO_MIGRATE', false) || $request->has('migrate')) {
+        try {
+            \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+            $migrateOutput = \Illuminate\Support\Facades\Artisan::output();
+        } catch (\Throwable $e) {
+            $migrateOutput = 'Migration error: ' . $e->getMessage();
+        }
+    }
+
+    \Illuminate\Support\Facades\Artisan::call('optimize:clear');
+    $cacheOutput = \Illuminate\Support\Facades\Artisan::output();
+
+    return response()->json([
+        'success' => true,
+        'message' => 'Rayka deployment completed automatically via Webhook!',
+        'git' => trim($gitOutput) ?: 'Git pull executed',
+        'migrate' => trim($migrateOutput),
+        'cache' => trim($cacheOutput),
+        'timestamp' => now()->toIso8601String(),
+    ]);
+})->name('rayka.webhook');
