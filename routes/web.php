@@ -44,6 +44,32 @@ Route::get('/policy/{page}', [StorefrontController::class, 'policy'])->name('pol
 
 /*
 |--------------------------------------------------------------------------
+| Storage & Media Direct Fallback Delivery (Zero-Error Safety Net)
+|--------------------------------------------------------------------------
+*/
+Route::get('/storage/{path}', function (string $path) {
+    $filePath = storage_path('app/public/' . $path);
+    if (! file_exists($filePath)) {
+        abort(404);
+    }
+    return response()->file($filePath, [
+        'Cache-Control' => 'public, max-age=31536000',
+    ]);
+})->where('path', '.*')->name('media.storage');
+
+Route::get('/images/{path}', function (string $path) {
+    $filePath = public_path('images/' . $path);
+    if (! file_exists($filePath)) {
+        abort(404);
+    }
+    return response()->file($filePath, [
+        'Cache-Control' => 'public, max-age=31536000',
+    ]);
+})->where('path', '.*')->name('media.images');
+
+
+/*
+|--------------------------------------------------------------------------
 | Wishlist & Cart API
 |--------------------------------------------------------------------------
 */
@@ -250,15 +276,26 @@ Route::get('/rayka-deploy', function (\Illuminate\Http\Request $request) {
         } else {
             \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
             $migrateOutput = \Illuminate\Support\Facades\Artisan::output();
-            
-            if ($request->query('seed')) {
+
+            if ($request->query('seed') || $request->query('sync') || $request->query('sync_data')) {
                 \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
-                $migrateOutput .= "\nSEEDED:\n" . \Illuminate\Support\Facades\Artisan::output();
+                $migrateOutput .= "\nFULL CATALOGUE SEEDED:\n" . \Illuminate\Support\Facades\Artisan::output();
             }
         }
     } catch (\Throwable $e) {
         $dbStatus = 'Database issue: ' . $e->getMessage();
         $migrateOutput = 'Migration skipped due to database status: ' . $e->getMessage();
+    }
+
+    $catalogueStats = '';
+    try {
+        $pCount = \App\Models\Product::count();
+        $cCount = \App\Models\Category::count();
+        $bCount = \App\Models\HomeBanner::count();
+        $iCount = \App\Models\ProductImage::count();
+        $catalogueStats = "Products: {$pCount} | Categories: {$cCount} | Banners: {$bCount} | Product Images: {$iCount}";
+    } catch (\Throwable $e) {
+        $catalogueStats = 'Catalogue note: ' . $e->getMessage();
     }
 
     $storageOutput = '';
@@ -277,16 +314,29 @@ Route::get('/rayka-deploy', function (\Illuminate\Http\Request $request) {
         $cacheOutput = 'Cache note: ' . $e->getMessage();
     }
 
-    return response("<div style='background:#1a1412;color:#FAF7F0;padding:30px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;max-width:850px;margin:40px auto;border-radius:16px;border:1px solid #D4AF6A;box-shadow:0 10px 25px rgba(0,0,0,0.5);'>
-        <h2 style='color:#E7C77B;margin-top:0;border-bottom:1px solid #D4AF6A;padding-bottom:10px;'>✨ Rayka Auto-Deploy & Migration Report</h2>
-        <h4 style='color:#D4AF6A;margin-bottom:6px;'>1. Database Status:</h4>
+    $tokenParam = urlencode($secret);
+
+    return response("<div style='background:#1a1412;color:#FAF7F0;padding:30px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;max-width:880px;margin:40px auto;border-radius:16px;border:1px solid #D4AF6A;box-shadow:0 10px 25px rgba(0,0,0,0.5);'>
+        <h2 style='color:#E7C77B;margin-top:0;border-bottom:1px solid #D4AF6A;padding-bottom:10px;'>✨ Rayka Auto-Deploy & Sync Report</h2>
+        
+        <h4 style='color:#D4AF6A;margin-bottom:6px;'>1. Current Database & Catalogue Status:</h4>
+        <div style='background:#2E180E;padding:12px;border-radius:8px;border-left:4px solid #4ade80;margin-bottom:10px;'>
+            <p style='margin:0;color:#FAF7F0;font-weight:bold;font-size:13px;'>📊 {$catalogueStats}</p>
+        </div>
         <pre style='background:#2E180E;padding:12px;border-radius:8px;overflow-x:auto;color:#E7C77B;font-size:12px;'>".e($dbStatus)."\n\n".e($migrateOutput)."</pre>
-        <h4 style='color:#D4AF6A;margin-bottom:6px;'>2. Storage & Backups Setup:</h4>
+        
+        <h4 style='color:#D4AF6A;margin-bottom:6px;'>2. Storage & Static Media Routing:</h4>
         <pre style='background:#2E180E;padding:12px;border-radius:8px;overflow-x:auto;color:#E7C77B;font-size:12px;'>".e($storageOutput)."</pre>
+        
         <h4 style='color:#D4AF6A;margin-bottom:6px;'>3. Application Cache Refresh:</h4>
         <pre style='background:#2E180E;padding:12px;border-radius:8px;overflow-x:auto;color:#E7C77B;font-size:12px;'>".e($cacheOutput)."</pre>
-        <p style='color:#4ade80;font-weight:bold;margin-top:20px;font-size:14px;'>✔ Rayka Jewellery deployment routine completed!</p>
-        <p><a href='/' style='color:#E7C77B;text-decoration:underline;font-weight:bold;'>→ Go to Storefront Home</a></p>
+        
+        <div style='background:rgba(212,175,106,0.1);padding:15px;border-radius:10px;border:1px solid #D4AF6A;margin-top:20px;'>
+            <p style='color:#E7C77B;font-weight:bold;margin:0 0 10px 0;'>⚡ Quick Sync Actions:</p>
+            <a href='/rayka-deploy?token={$tokenParam}&seed=1' style='display:inline-block;background:#D4AF6A;color:#1A1412;padding:8px 16px;border-radius:6px;font-weight:bold;text-decoration:none;margin-right:10px;margin-bottom:6px;'>🔄 Sync Full Catalogue (741 Products & Images)</a>
+            <a href='/rayka-deploy?token={$tokenParam}&fresh=1' style='display:inline-block;background:#854d0e;color:#FAF7F0;padding:8px 16px;border-radius:6px;font-weight:bold;text-decoration:none;margin-right:10px;margin-bottom:6px;'>⚠️ Fresh Migrate & Re-Seed</a>
+            <a href='/' style='display:inline-block;background:#16a34a;color:#fff;padding:8px 16px;border-radius:6px;font-weight:bold;text-decoration:none;'>🏠 Go to Storefront</a>
+        </div>
     </div>");
 })->name('rayka.deploy');
 

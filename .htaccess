@@ -2,38 +2,42 @@
     RewriteEngine On
 
     # ---------------------------------------------------------------
-    # 0. Pass through already rewritten public paths directly
+    # 0. Direct Pass-Through for already rewritten public paths
     # ---------------------------------------------------------------
     RewriteRule ^public/ - [L]
 
     # ---------------------------------------------------------------
-    # 0.5 Pass through known root-level static files
+    # 0.5 Static Files at Root
     # ---------------------------------------------------------------
     RewriteRule ^(favicon\.ico|robots\.txt|site\.webmanifest)$ public/$1 [L]
 
     # ---------------------------------------------------------------
-    # 1. Block direct access to sensitive backend directories & files
+    # 1. Public Media & Static Assets Rewrites (BEFORE Security Rules)
     # ---------------------------------------------------------------
-    RewriteRule ^(app|vendor|database|storage|bootstrap)(/|$) - [F,L]
-
-    RewriteRule ^(\.env|composer\.(json|lock)|package(-lock)?\.json|\.git|artisan|\.sql|\.log|\.bak)$ - [F,L]
-
-    # ---------------------------------------------------------------
-    # 2. Rewrite uploads, build, and assets to the public subfolder
-    # ---------------------------------------------------------------
+    RewriteRule ^images/(.+)$ public/images/$1 [L]
     RewriteRule ^uploads/(.+)$ public/uploads/$1 [L]
     RewriteRule ^assets/(.+)$ public/assets/$1 [L]
     RewriteRule ^build/(.+)$ public/build/$1 [L]
-    RewriteRule ^storage/(.+)$ public/storage/$1 [L]
+
+    # Storage Media: serve directly from physical storage/app/public/
+    RewriteRule ^storage/(?!app/public/)(.+)$ storage/app/public/$1 [L]
 
     # ---------------------------------------------------------------
-    # 3. Pass through real files that exist inside /public
+    # 2. Block Direct Access to Backend & Sensitive Paths
+    # ---------------------------------------------------------------
+    # Block internal storage folders (logs, framework, backups), but allow storage/app/public
+    RewriteRule ^storage/(?!app/public/).* - [F,L]
+    RewriteRule ^(app|vendor|database|bootstrap)(/|$) - [F,L]
+    RewriteRule ^(\.env|composer\.(json|lock)|package(-lock)?\.json|\.git|artisan|\.sql|\.log|\.bak|\.sqlite)$ - [F,L]
+
+    # ---------------------------------------------------------------
+    # 3. Pass through any real file that exists directly
     # ---------------------------------------------------------------
     RewriteCond %{REQUEST_FILENAME} -f
     RewriteRule ^ - [L]
 
     # ---------------------------------------------------------------
-    # 4. Route all other requests to public/index.php
+    # 4. Route all other requests to public/index.php (Laravel Router)
     # ---------------------------------------------------------------
     RewriteRule ^(.*)$ public/index.php [QSA,L]
 </IfModule>

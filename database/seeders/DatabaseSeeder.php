@@ -22,6 +22,7 @@ use App\Models\StoreSetting;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
@@ -29,6 +30,41 @@ class DatabaseSeeder extends Seeder
 {
     public function run(): void
     {
+        // 0. Seed Full Production Catalogue if available (741 products, 11 categories, 4 banners, 1,198 images)
+        $productionDataFile = database_path('seeders/rayka_production_data.json');
+        if (file_exists($productionDataFile)) {
+            $this->command?->info('Loading full Rayka production catalogue from rayka_production_data.json...');
+            $data = json_decode(file_get_contents($productionDataFile), true);
+
+            $driver = DB::connection()->getDriverName();
+            if ($driver === 'mysql') {
+                DB::statement('SET FOREIGN_KEY_CHECKS=0;');
+            } elseif ($driver === 'sqlite') {
+                DB::statement('PRAGMA foreign_keys = OFF;');
+            }
+
+            foreach ($data as $table => $rows) {
+                if (empty($rows)) {
+                    continue;
+                }
+                DB::table($table)->delete();
+                foreach (array_chunk($rows, 100) as $chunk) {
+                    DB::table($table)->insert($chunk);
+                }
+                $this->command?->line("  ✓ Seeded `{$table}` (" . count($rows) . " rows)");
+            }
+
+            if ($driver === 'mysql') {
+                DB::statement('SET FOREIGN_KEY_CHECKS=1;');
+            } elseif ($driver === 'sqlite') {
+                DB::statement('PRAGMA foreign_keys = ON;');
+            }
+
+            $this->command?->info('Full Rayka catalogue successfully seeded into database!');
+
+            return;
+        }
+
         // 1. Users (Admin + Customers)
         $admin = User::create([
             'name' => 'Rayka Administrator',
