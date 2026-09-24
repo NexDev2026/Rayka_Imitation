@@ -244,8 +244,18 @@ Route::get('/rayka-deploy', function (\Illuminate\Http\Request $request) {
         $dbName = \Illuminate\Support\Facades\DB::connection()->getDatabaseName();
         $dbStatus = "Connected successfully to database: {$dbName}";
 
-        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
-        $migrateOutput = \Illuminate\Support\Facades\Artisan::output();
+        if ($request->query('fresh')) {
+            \Illuminate\Support\Facades\Artisan::call('migrate:fresh', ['--seed' => true, '--force' => true]);
+            $migrateOutput = "MIGRATED FRESH AND SEEDED:\n" . \Illuminate\Support\Facades\Artisan::output();
+        } else {
+            \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+            $migrateOutput = \Illuminate\Support\Facades\Artisan::output();
+            
+            if ($request->query('seed')) {
+                \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
+                $migrateOutput .= "\nSEEDED:\n" . \Illuminate\Support\Facades\Artisan::output();
+            }
+        }
     } catch (\Throwable $e) {
         $dbStatus = 'Database issue: ' . $e->getMessage();
         $migrateOutput = 'Migration skipped due to database status: ' . $e->getMessage();
