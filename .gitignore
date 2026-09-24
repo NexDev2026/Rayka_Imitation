@@ -31,11 +31,8 @@ Homestead.json
 Homestead.yaml
 Thumbs.db
 
-# Heavy Raw Photo Shoots & Archives (Exceeds GitHub 100MB limit)
+# Heavy Raw Photo Shoots (Contains 3.2GB of .mov videos with files >100MB exceeding GitHub limit)
 /Product Images/
-/New Photos RE/
-/Hero Section/
-/archive/
 
 # One-time Conversion, Import & Migration Scratch Scripts
 /*.py
