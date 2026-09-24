@@ -16,9 +16,8 @@
     # ---------------------------------------------------------------
     RewriteRule ^(app|vendor|database|storage|bootstrap)(/|$) - [F,L]
 
-    <FilesMatch "(^\.env|composer\.(json|lock)|package(-lock)?\.json|\.git|artisan|\.sql|\.log|\.bak)$">
-        Order allow,deny
-        Deny from all
+    <FilesMatch "\.(env|json|lock|git|sql|log|bak|md|txt)$|^artisan$">
+        Require all denied
     </FilesMatch>
 
     # ---------------------------------------------------------------
