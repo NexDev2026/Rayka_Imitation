@@ -26,8 +26,7 @@ return new class extends Migration
 
     private function hasIndex(string $table, string $indexName): bool
     {
-        $indexes = \Illuminate\Support\Facades\DB::select("SELECT name FROM sqlite_master WHERE type='index' AND tbl_name=? AND name=?", [$table, $indexName]);
-
-        return ! empty($indexes);
+        $indexes = Schema::getIndexes($table);
+        return collect($indexes)->contains('name', strtolower($indexName));
     }
 };
