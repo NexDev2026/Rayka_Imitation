@@ -22,10 +22,11 @@
     </FilesMatch>
 
     # ---------------------------------------------------------------
-    # 2. Rewrite uploads and assets to the public subfolder
+    # 2. Rewrite uploads, build, and assets to the public subfolder
     # ---------------------------------------------------------------
     RewriteRule ^uploads/(.+)$ public/uploads/$1 [L]
     RewriteRule ^assets/(.+)$ public/assets/$1 [L]
+    RewriteRule ^build/(.+)$ public/build/$1 [L]
     RewriteRule ^storage/(.+)$ public/storage/$1 [L]
 
     # ---------------------------------------------------------------
