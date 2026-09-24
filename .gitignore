@@ -1,0 +1,52 @@
+*.log
+.DS_Store
+.env
+.env.backup
+.env.production
+.phpactor.json
+.phpunit.result.cache
+/.codex
+/.cursor/
+/.idea
+/.nova
+/.phpunit.cache
+/.vscode
+/.zed
+/.agents/
+/.claude/
+/.mcp.json
+/boost.json
+/opencode.json
+/auth.json
+/node_modules
+# /public/build (Committed so production host doesn't require Node/NPM to run Vite)
+/public/fonts-manifest.dev.json
+/public/hot
+/public/storage
+/storage/*.key
+/storage/pail
+/vendor
+_ide_helper.php
+Homestead.json
+Homestead.yaml
+Thumbs.db
+
+# Heavy Raw Photo Shoots & Archives (Exceeds GitHub 100MB limit)
+/Product Images/
+/New Photos RE/
+/Hero Section/
+/archive/
+
+# One-time Conversion, Import & Migration Scratch Scripts
+/*.py
+/enable_wal.php
+/generate_favicons.php
+/generate_jewellery_assets.php
+/import_product_images.php
+/import_series_products.php
+/optimize_images.php
+/test_pagination.php
+/update_db_all_to_webp.php
+/Rayka-Jewellery-Website-Build-Prompt.md
+/AGENTS.md
+/CLAUDE.md

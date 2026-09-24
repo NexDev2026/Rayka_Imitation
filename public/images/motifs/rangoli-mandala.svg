@@ -1,0 +1,30 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 200 200" width="200" height="200" fill="none" stroke="#D4AF6A">
+  <circle cx="100" cy="100" r="12" stroke-width="1.5" />
+  <circle cx="100" cy="100" r="4" fill="#D4AF6A" />
+  <!-- Inner 8 petals -->
+  <g stroke-width="1.2">
+    <path d="M100 88 C94 76 106 76 100 88 Z" />
+    <path d="M100 112 C94 124 106 124 100 112 Z" />
+    <path d="M88 100 C76 94 76 106 88 100 Z" />
+    <path d="M112 100 C124 94 124 106 112 100 Z" />
+    <path d="M91.5 91.5 C83 83 91.5 74.5 91.5 91.5 Z" />
+    <path d="M108.5 91.5 C117 83 108.5 74.5 108.5 91.5 Z" />
+    <path d="M91.5 108.5 C83 117 91.5 125.5 91.5 108.5 Z" />
+    <path d="M108.5 108.5 C117 117 108.5 125.5 108.5 108.5 Z" />
+  </g>
+  <!-- Middle Ring -->
+  <circle cx="100" cy="100" r="40" stroke-width="1" stroke-dasharray="3,3" />
+  <!-- Outer Lotus Petals -->
+  <g stroke-width="1.5">
+    <path d="M100 60 C90 40 110 40 100 60" />
+    <path d="M100 140 C90 160 110 160 100 140" />
+    <path d="M60 100 C40 90 40 110 60 100" />
+    <path d="M140 100 C160 90 160 110 140 100" />
+    <path d="M71.7 71.7 C57.5 57.5 71.7 43.3 71.7 71.7" />
+    <path d="M128.3 71.7 C142.5 57.5 128.3 43.3 128.3 71.7" />
+    <path d="M71.7 128.3 C57.5 142.5 71.7 156.7 71.7 128.3" />
+    <path d="M128.3 128.3 C142.5 142.5 128.3 156.7 128.3 128.3" />
+  </g>
+  <circle cx="100" cy="100" r="75" stroke-width="0.8" />
+  <circle cx="100" cy="100" r="85" stroke-width="0.5" stroke-dasharray="4,4" />
+</svg>

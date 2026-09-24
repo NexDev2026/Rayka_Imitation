@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1600 600" width="1600" height="600">
+  <defs>
+    <radialGradient id="bannerBg" cx="75%" cy="50%" r="70%">
+      <stop offset="0%" stop-color="#3A1C0E"/>
+      <stop offset="50%" stop-color="#261007"/>
+      <stop offset="100%" stop-color="#140703"/>
+    </radialGradient>
+    <linearGradient id="goldBanner" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#FFF2D1"/>
+      <stop offset="50%" stop-color="#E7C77B"/>
+      <stop offset="100%" stop-color="#C59B42"/>
+    </linearGradient>
+  </defs>
+
+  <rect width="1600" height="600" fill="url(#bannerBg)"/>
+
+  <!-- Ornate Frame -->
+  <rect x="30" y="30" width="1540" height="540" rx="8" fill="none" stroke="#E7C77B" stroke-width="1.5" stroke-opacity="0.4"/>
+  <rect x="42" y="42" width="1516" height="516" rx="4" fill="none" stroke="#E7C77B" stroke-width="0.75" stroke-dasharray="6,4" stroke-opacity="0.3"/>
+
+  <!-- Rangoli Mandala Graphic on Right -->
+  <g transform="translate(1150, 300) scale(2.2)" opacity="0.25" stroke="#E7C77B" fill="none">
+    <circle cx="0" cy="0" r="110" stroke-width="1.5"/>
+    <circle cx="0" cy="0" r="80" stroke-width="1"/>
+    <circle cx="0" cy="0" r="50" stroke-width="1.5"/>
+    <circle cx="0" cy="0" r="20" stroke-width="1"/>
+  </g>
+
+  <!-- Large Royal Jewel Silhouette -->
+  <g transform="translate(1150, 260) scale(1.1)">
+    <circle cx="0" cy="0" r="160" fill="#2E180E" stroke="#D4AF6A" stroke-width="2"/>
+    <path d="M-60 -50 C-60 90 60 90 60 -50 Z M-20 60 L0 100 L20 60 Z" fill="url(#goldBanner)" stroke="#996E2E" stroke-width="2"/>
+    <circle cx="0" cy="100" r="10" fill="#FFF"/>
+  </g>
+
+  <!-- Text Block Left -->
+  <g transform="translate(120, 160)">
+    <!-- Badge -->
+    <rect x="0" y="0" width="280" height="34" rx="17" fill="#4A2C1D" stroke="#D4AF6A" stroke-width="1"/>
+    <text x="140" y="22" fill="#E7C77B" font-family="'Poppins', sans-serif" font-weight="600" font-size="12" letter-spacing="2" text-anchor="middle">✨ EXCLUSIVE FESTIVE LAUNCH</text>
+
+    <!-- Headline -->
+    <text x="0" y="110" fill="url(#goldBanner)" font-family="'Playfair Display', Georgia, serif" font-weight="700" font-size="56" letter-spacing="1">ROYAL HERITAGE</text>
+
+    <!-- Subtitle -->
+    <text x="0" y="165" fill="#FAF7F0" opacity="0.85" font-family="'Poppins', sans-serif" font-weight="300" font-size="20">Handcrafted Indian Kundan & 1 Gram Micro Gold Plated Jewellery</text>
+
+    <!-- CTA Button visual in SVG -->
+    <g transform="translate(0, 220)">
+      <rect width="240" height="54" rx="27" fill="url(#goldBanner)"/>
+      <text x="120" y="34" fill="#2E180E" font-family="'Poppins', sans-serif" font-weight="700" font-size="15" letter-spacing="1" text-anchor="middle">EXPLORE COLLECTION →</text>
+    </g>
+  </g>
+</svg>

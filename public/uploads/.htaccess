@@ -1,0 +1,8 @@
+# Rayka Secure Uploads Directives
+<FilesMatch "\.(php|phtml|php3|php4|php5|php7|php8|phps|cgi|pl|exe)$">
+    Require all denied
+</FilesMatch>
+<IfModule mod_expires.c>
+    ExpiresActive On
+    ExpiresDefault "access plus 1 month"
+</IfModule>

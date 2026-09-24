@@ -1,0 +1,256 @@
+@import 'tailwindcss';
+
+@source '../../vendor/laravel/framework/src/Illuminate/Pagination/resources/views/*.blade.php';
+@source '../../storage/framework/views/*.php';
+@source '../views/**/*.blade.php';
+
+:root {
+  --color-ivory: #FDFBF6;
+  --color-ivory-light: #FAF7F0;
+  --color-ivory-dark: #F3ECE1;
+  --color-brown-deep: #4A2C1D;
+  --color-brown-rich: #6B3F2A;
+  --color-brown-dark: #2E180E;
+  --color-gold-light: #E7C77B;
+  --color-gold: #D4AF6A;
+  --color-gold-deep: #B88E3E;
+  --color-gold-dark: #996E2E;
+  --color-yellow-cta: #F0B429;
+  --color-yellow-hover: #F5C542;
+}
+
+button,
+[type='button'],
+[type='reset'],
+[type='submit'],
+[role='button'],
+summary {
+  cursor: pointer;
+}
+
+button:disabled,
+[type='button']:disabled,
+[type='reset']:disabled,
+[type='submit']:disabled,
+[role='button']:disabled {
+  cursor: not-allowed;
+}
+
+body {
+  background-color: var(--color-ivory);
+  color: var(--color-brown-deep);
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing: antialiased;
+}
+
+.font-serif-royal {
+  font-family: 'Playfair Display', Georgia, serif;
+}
+
+.font-cormorant {
+  font-family: 'Cormorant Garamond', Georgia, serif;
+}
+
+.font-sans-ui {
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+}
+
+/* Gold Gradient Effects */
+.bg-gold-gradient {
+  background: linear-gradient(135deg, #F9E7BA 0%, #D4AF6A 50%, #A27933 100%);
+}
+
+.bg-gold-shimmer {
+  background: linear-gradient(90deg, #D4AF6A 0%, #FBF0D3 50%, #D4AF6A 100%);
+}
+
+.text-gold-gradient {
+  background: linear-gradient(135deg, #ECCF88 0%, #D4AF6A 50%, #996E2E 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.border-gold-hairline {
+  border-color: rgba(212, 175, 106, 0.4);
+}
+
+.border-gold-solid {
+  border-color: #D4AF6A;
+}
+
+/* Card Styling */
+.royal-card {
+  background: #FFFFFF;
+  border: 1px solid rgba(212, 175, 106, 0.35);
+  box-shadow: 0 4px 20px -2px rgba(74, 44, 29, 0.06);
+  transition: all 0.3s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.royal-card:hover {
+  border-color: rgba(212, 175, 106, 0.85);
+  box-shadow: 0 10px 30px -4px rgba(74, 44, 29, 0.12);
+  transform: translateY(-3px);
+}
+
+/* Rangoli Dividers */
+.rangoli-divider {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  margin: 1.5rem auto;
+}
+
+.rangoli-divider::before,
+.rangoli-divider::after {
+  content: '';
+  flex: 1;
+  border-bottom: 1px solid rgba(212, 175, 106, 0.4);
+}
+
+.rangoli-divider:not(:empty)::before {
+  margin-right: 1.25em;
+}
+
+.rangoli-divider:not(:empty)::after {
+  margin-left: 1.25em;
+}
+
+/* Custom Luxury Scrollbar */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: rgba(212, 175, 106, 0.45);
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #996E2E;
+}
+
+/* Zoom side panel */
+.zoom-container {
+  position: relative;
+  overflow: hidden;
+  cursor: crosshair;
+}
+
+.zoom-result-panel {
+  position: absolute;
+  top: 0;
+  left: 105%;
+  width: 480px;
+  height: 480px;
+  background-repeat: no-repeat;
+  border: 2px solid #D4AF6A;
+  box-shadow: 0 20px 40px rgba(74, 44, 29, 0.25);
+  z-index: 50;
+  background-color: #FAF7F0;
+  display: none;
+  border-radius: 8px;
+}
+
+/* Hide scrollbars for smooth luxury slider tracks and tabs */
+.no-scrollbar::-webkit-scrollbar,
+.scrollbar-hide::-webkit-scrollbar {
+  display: none !important;
+  width: 0 !important;
+  height: 0 !important;
+}
+.no-scrollbar,
+.scrollbar-hide {
+  -ms-overflow-style: none !important;
+  scrollbar-width: none !important;
+}
+
+[x-cloak] { display: none !important; }
+
+/* Dedicated Clean OTP Input Styles for Mobile & Desktop */
+.otp-input {
+  letter-spacing: 0.25em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 1.125rem;
+  font-weight: 700;
+  text-align: center;
+}
+@media (min-width: 640px) {
+  .otp-input {
+    letter-spacing: 0.35em;
+    font-size: 1.25rem;
+  }
+}
+.otp-input::placeholder {
+  letter-spacing: normal !important;
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-size: 0.8125rem !important;
+  font-weight: 400 !important;
+  color: #a8a29e !important;
+}
+
+.otp-input-dark {
+  letter-spacing: 0.25em;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 1.125rem;
+  font-weight: 700;
+  text-align: center;
+}
+@media (min-width: 640px) {
+  .otp-input-dark {
+    letter-spacing: 0.35em;
+    font-size: 1.25rem;
+  }
+}
+.otp-input-dark::placeholder {
+  letter-spacing: normal !important;
+  font-family: 'Poppins', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+  font-size: 0.8125rem !important;
+  font-weight: 400 !important;
+  color: #78716c !important;
+}
+
+
+/* Smooth Native View Transitions for Zero-Flicker Page Switching */
+@view-transition {
+  navigation: auto;
+}
+
+/* Freeze sticky navigation elements during page transitions so they never flicker */
+header {
+  view-transition-name: main-header;
+}
+
+.mobile-bottom-bar {
+  view-transition-name: mobile-bottom-bar;
+}
+
+::view-transition-old(main-header),
+::view-transition-new(main-header),
+::view-transition-old(mobile-bottom-bar),
+::view-transition-new(mobile-bottom-bar) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+/* Butter-smooth soft crossfade without dipping to total opacity 0 / dark canvas */
+::view-transition-old(root) {
+  animation: 90ms ease-out both rayka-soft-fade-out;
+}
+
+::view-transition-new(root) {
+  animation: 130ms ease-out both rayka-soft-fade-in;
+}
+
+@keyframes rayka-soft-fade-out {
+  from { opacity: 1; }
+  to { opacity: 0.25; }
+}
+
+@keyframes rayka-soft-fade-in {
+  from { opacity: 0.25; }
+  to { opacity: 1; }
+}
