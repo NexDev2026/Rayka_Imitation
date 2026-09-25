@@ -134,6 +134,15 @@ class StorefrontController extends Controller
     {
         $navGroup = NavGroup::where('slug', $slug)->where('is_active', true)->firstOrFail();
         $categories = $navGroup->categories()->where('is_active', true)->get();
+        if ($slug === 'women' && $categories->count() < 3) {
+            $categories = \App\Models\Category::whereIn('slug', [
+                'necklaces-sets', 'earrings-jhumkas', 'bangles', 'mangalsutras', 'pendants', 'rings',
+            ])->where('is_active', true)->get();
+        } elseif ($slug === 'men' && $categories->count() < 3) {
+            $categories = \App\Models\Category::whereIn('slug', [
+                'chains', 'rings', 'bracelets', '2-kaddi', 'kadas', 'pendants', 'merrige-navrati-special',
+            ])->where('is_active', true)->get();
+        }
         $categoryIds = $categories->pluck('id');
 
         $perPage = 12;

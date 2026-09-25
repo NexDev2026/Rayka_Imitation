@@ -149,6 +149,26 @@ class AppServiceProvider extends ServiceProvider
                     $q->where('categories.is_active', true)->orderBy('category_nav_group.sort_order', 'asc');
                 }])->where('is_active', true)->orderBy('sort_order', 'asc')->get();
 
+                // Bulletproof Fallback: Ensure Women and Men collections always show complete categories
+                foreach ($navGroups as $group) {
+                    /** @var \App\Models\NavGroup $group */
+                    if ($group->slug === 'women' && $group->categories->count() < 3) {
+                        $womenCats = \App\Models\Category::whereIn('slug', [
+                            'necklaces-sets', 'earrings-jhumkas', 'bangles', 'mangalsutras', 'pendants', 'rings',
+                        ])->where('is_active', true)->get();
+                        if ($womenCats->isNotEmpty()) {
+                            $group->setRelation('categories', $womenCats);
+                        }
+                    } elseif ($group->slug === 'men' && $group->categories->count() < 3) {
+                        $menCats = \App\Models\Category::whereIn('slug', [
+                            'chains', 'rings', 'bracelets', '2-kaddi', 'kadas', 'pendants', 'merrige-navrati-special',
+                        ])->where('is_active', true)->get();
+                        if ($menCats->isNotEmpty()) {
+                            $group->setRelation('categories', $menCats);
+                        }
+                    }
+                }
+
                 $view->with('globalNavGroups', $navGroups);
             } catch (\Throwable $e) {
                 $view->with('globalNavGroups', collect());
