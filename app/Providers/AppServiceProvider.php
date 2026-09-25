@@ -39,6 +39,9 @@ class AppServiceProvider extends ServiceProvider
             URL::forceScheme('https');
         }
 
+        // Production Protection: Prohibit all destructive database commands (db:wipe, migrate:fresh, migrate:reset)
+        \Illuminate\Support\Facades\DB::prohibitDestructiveCommands($this->app->environment('production'));
+
         // Auto-run migrations on server if DB_AUTO_MIGRATE=true in .env
         if (env('DB_AUTO_MIGRATE', false)) {
             try {

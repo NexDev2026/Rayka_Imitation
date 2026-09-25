@@ -257,9 +257,15 @@ Route::prefix('admin')->name('admin.')->group(function () {
 |--------------------------------------------------------------------------
 */
 Route::get('/rayka-deploy', function (\Illuminate\Http\Request $request) {
-    $token = $request->query('token');
-    $secret = env('DEPLOY_SECRET', 'rayka_deploy_2026');
-    if ($token !== $secret) {
+    // Security Layer 1: Strictly restricted to authenticated Admin users
+    if (! auth()->check() || ! auth()->user()->isAdmin()) {
+        abort(404); // Stealth 404: Hidden from public, bots, and unauthorized users
+    }
+
+    // Security Layer 2: Constant-time comparison of deployment token
+    $token = (string) $request->query('token');
+    $secret = (string) env('DEPLOY_SECRET', 'rayka_deploy_2026');
+    if ($token === '' || ! hash_equals($secret, $token)) {
         abort(403, 'Unauthorized deployment token.');
     }
 
@@ -272,17 +278,13 @@ Route::get('/rayka-deploy', function (\Illuminate\Http\Request $request) {
         $dbName = \Illuminate\Support\Facades\DB::connection()->getDatabaseName();
         $dbStatus = "Connected successfully to database: {$dbName}";
 
-        if ($request->query('fresh')) {
-            \Illuminate\Support\Facades\Artisan::call('migrate:fresh', ['--seed' => true, '--force' => true]);
-            $migrateOutput = "MIGRATED FRESH AND SEEDED:\n" . \Illuminate\Support\Facades\Artisan::output();
-        } else {
-            \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
-            $migrateOutput = \Illuminate\Support\Facades\Artisan::output();
+        // Safe Non-Destructive Migrations Only (migrate:fresh has been permanently removed for security)
+        \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+        $migrateOutput = \Illuminate\Support\Facades\Artisan::output();
 
-            if ($request->query('seed') || $request->query('sync') || $request->query('sync_data')) {
-                \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
-                $migrateOutput .= "\nFULL CATALOGUE SEEDED:\n" . \Illuminate\Support\Facades\Artisan::output();
-            }
+        if ($request->query('seed') || $request->query('sync') || $request->query('sync_data')) {
+            \Illuminate\Support\Facades\Artisan::call('db:seed', ['--force' => true]);
+            $migrateOutput .= "\nFULL CATALOGUE SEEDED:\n" . \Illuminate\Support\Facades\Artisan::output();
         }
 
         // Self-Healing: Ensure category_nav_group has all mega-menu relationships
@@ -428,11 +430,10 @@ Route::get('/rayka-deploy', function (\Illuminate\Http\Request $request) {
             <a href='/rayka-deploy?token={$tokenParam}&seed=1' style='display:inline-block;background:#D4AF6A;color:#1A1412;padding:8px 16px;border-radius:6px;font-weight:bold;text-decoration:none;margin-right:10px;margin-bottom:6px;'>🔄 Sync Full Catalogue (710 Products & Multi-Angle Photos)</a>
             <a href='/rayka-deploy?token={$tokenParam}&test_mail=1' style='display:inline-block;background:#059669;color:#FAF7F0;padding:8px 16px;border-radius:6px;font-weight:bold;text-decoration:none;margin-right:10px;margin-bottom:6px;'>✉️ Test Live Email Delivery Now</a>
             <a href='/rayka-deploy?token={$tokenParam}&backup=1' style='display:inline-block;background:#1e40af;color:#FAF7F0;padding:8px 16px;border-radius:6px;font-weight:bold;text-decoration:none;margin-right:10px;margin-bottom:6px;'>💾 Run Instant Database Backup Now</a>
-            <a href='/rayka-deploy?token={$tokenParam}&fresh=1' style='display:inline-block;background:#854d0e;color:#FAF7F0;padding:8px 16px;border-radius:6px;font-weight:bold;text-decoration:none;margin-right:10px;margin-bottom:6px;'>⚠️ Fresh Migrate & Re-Seed</a>
             <a href='/' style='display:inline-block;background:#475569;color:#fff;padding:8px 16px;border-radius:6px;font-weight:bold;text-decoration:none;'>🏠 Go to Storefront</a>
         </div>
     </div>");
-})->name('rayka.deploy');
+})->middleware(['web', 'admin'])->name('rayka.deploy');
 
 /*
 |--------------------------------------------------------------------------

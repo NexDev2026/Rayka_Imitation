@@ -25,8 +25,8 @@ class AdminDashboardController extends Controller
         $totalRevenue = Order::whereIn('status', ['Confirmed', 'Processing', 'Shipped', 'Delivered'])->sum('total_amount');
         $todayRevenue = Order::whereDate('created_at', $today)->whereIn('status', ['Confirmed', 'Processing', 'Shipped', 'Delivered'])->sum('total_amount');
 
-        // Unique Visitors & Page Views Telemetry (Strictly authentic visitors, excluding dummy loopback seed hits)
-        $realPageViews = PageView::whereNotIn('ip_address', ['127.0.0.1', '::1', 'localhost']);
+        // Unique Visitors & Page Views Telemetry (Strictly authentic visitors, excluding dummy loopback & 192.168.* seed hits)
+        $realPageViews = PageView::authentic();
 
         $todayViews = (clone $realPageViews)->whereDate('viewed_date', $today)->count();
         $todayUniqueVisitors = (clone $realPageViews)->whereDate('viewed_date', $today)->distinct('ip_address')->count('ip_address');
@@ -116,7 +116,7 @@ class AdminDashboardController extends Controller
         $orderData = [];
         $revenueData = [];
 
-        $realPageViews = PageView::whereNotIn('ip_address', ['127.0.0.1', '::1', 'localhost']);
+        $realPageViews = PageView::authentic();
 
         for ($i = $days - 1; $i >= 0; $i--) {
             $date = Carbon::now()->subDays($i);

@@ -21,11 +21,8 @@ class AdminReportController extends Controller
             ->sum('total_amount');
 
         $monthlyOrders = Order::where('created_at', '>=', $startOfMonth)->count();
-        $monthlyVisits = PageView::whereDate('viewed_date', '>=', $startOfMonth)->count();
-        $monthlyUniqueVisitors = PageView::whereDate('viewed_date', '>=', $startOfMonth)->distinct('ip_address')->count('ip_address');
-        if ($monthlyVisits > 0 && $monthlyUniqueVisitors <= 5) {
-            $monthlyUniqueVisitors = max($monthlyUniqueVisitors, (int) round($monthlyVisits * 0.38));
-        }
+        $monthlyVisits = PageView::authentic()->whereDate('viewed_date', '>=', $startOfMonth)->count();
+        $monthlyUniqueVisitors = PageView::authentic()->whereDate('viewed_date', '>=', $startOfMonth)->distinct('ip_address')->count('ip_address');
 
         // 30 Days Trend Data
         $dates = [];
@@ -38,11 +35,8 @@ class AdminReportController extends Controller
             $dStr = $d->toDateString();
             $dates[] = $d->format('d M');
 
-            $views = PageView::whereDate('viewed_date', $dStr)->count();
-            $unique = PageView::whereDate('viewed_date', $dStr)->distinct('ip_address')->count('ip_address');
-            if ($views > 0 && $unique <= 1) {
-                $unique = max(1, (int) round($views * 0.42));
-            }
+            $views = PageView::authentic()->whereDate('viewed_date', $dStr)->count();
+            $unique = PageView::authentic()->whereDate('viewed_date', $dStr)->distinct('ip_address')->count('ip_address');
 
             $viewsTrend[] = $views;
             $uniqueTrend[] = $unique;

@@ -812,19 +812,5 @@ class DatabaseSeeder extends Seeder
             'status' => 'Pending Verification',
             'admin_note' => 'Awaiting admin verification.',
         ]);
-
-        // 14. Page Views (Daily Reach for past 7 days)
-        for ($i = 6; $i >= 0; $i--) {
-            $date = Carbon::now()->subDays($i)->toDateString();
-            $count = rand(120, 380);
-            for ($j = 0; $j < $count; $j++) {
-                PageView::create([
-                    'ip_address' => '192.168.1.'.rand(10, 250),
-                    'url' => ['/', '/categories/necklaces-sets', '/categories/chains', '/trending', '/product/rajputana-royal-kundan-choker-set-with-matching-jhumkas'][rand(0, 4)],
-                    'user_agent' => 'Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7)',
-                    'viewed_date' => $date,
-                ]);
-            }
-        }
     }
 }
