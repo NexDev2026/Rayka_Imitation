@@ -256,4 +256,22 @@ class AdminOrderController extends Controller
 
         return $pdf->download("Rayka-Invoice-{$order->order_number}.pdf");
     }
+
+    public function destroy($id)
+    {
+        $order = Order::with(['items', 'payment', 'address'])->findOrFail($id);
+        $orderNum = $order->order_number;
+
+        // Clean up attached items and payment records
+        $order->items()->delete();
+        if ($order->payment) {
+            $order->payment->delete();
+        }
+        if ($order->address) {
+            $order->address->delete();
+        }
+        $order->delete();
+
+        return redirect()->route('admin.orders.index')->with('success', "Order #{$orderNum} has been permanently deleted.");
+    }
 }

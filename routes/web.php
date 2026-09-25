@@ -212,6 +212,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/orders/{id}/verify-payment', [AdminOrderController::class, 'verifyPayment'])->name('orders.verify_payment');
         Route::post('/orders/{id}/update-status', [AdminOrderController::class, 'updateStatus'])->name('orders.update_status');
         Route::get('/orders/{id}/invoice', [AdminOrderController::class, 'downloadInvoice'])->name('orders.invoice');
+        Route::delete('/orders/{id}', [AdminOrderController::class, 'destroy'])->name('orders.destroy');
 
         // Reviews Moderation
         Route::get('/reviews', [AdminReviewController::class, 'index'])->name('reviews.index');

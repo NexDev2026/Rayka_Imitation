@@ -10,13 +10,22 @@
 {
   "{{ '@context' }}": "https://schema.org",
   "{{ '@type' }}": "EmailMessage",
-  "description": "Your Rayka login code is {{ $otp }}"
+  "description": "Your Rayka login code is {{ $otp }}",
+  "potentialAction": {
+    "{{ '@type' }}": "ConfirmAction",
+    "name": "Copy code"
+  }
 }
 </script>
 @endsection
 
 @section('content')
-  <div class="greeting">Hi there,</div>
+  <!-- Gmail NLP Trigger -->
+  <div style="display:none; font-size:1px; line-height:1px; max-height:0px; max-width:0px; opacity:0; overflow:hidden;">
+    Your Rayka login code is {{ $otp }}. Enter this code to continue.
+  </div>
+
+  <div class="greeting">Hi {{ !empty($userName) ? $userName : 'there' }},</div>
   <p class="message-text">
     Enter this verification code to continue signing in to your <strong>Rayka Imitation Jewellery</strong> account:
   </p>

@@ -115,6 +115,13 @@
                         <a href="{{ route('admin.orders.show', $ord->id) }}" class="flex-1 py-2.5 bg-[#4A2C1D] text-[#E7C77B] rounded-xl font-bold text-xs text-center hover:bg-[#2E180E] transition shadow-2xs">
                             Inspect & Verify →
                         </a>
+                        <form action="{{ route('admin.orders.destroy', $ord->id) }}" method="POST" onsubmit="return confirm('Permanently delete Order #{{ $ord->order_number }}? This action cannot be undone.');" class="shrink-0">
+                            @csrf
+                            @method('DELETE')
+                            <button type="submit" class="p-2.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-xl border border-rose-200 transition cursor-pointer" title="Delete Order">
+                                <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                            </button>
+                        </form>
                     </div>
                 </div>
             @empty
@@ -192,13 +199,20 @@
                                     </span>
                                 @endif
                             </td>
-                            <td class="p-4 text-right whitespace-nowrap space-x-2">
+                            <td class="p-4 text-right whitespace-nowrap space-x-1.5">
                                 @if($ord->isConfirmed())
-                                    <a href="{{ route('admin.orders.invoice', $ord->id) }}" class="text-stone-500 hover:text-stone-800 font-medium">Invoice</a>
+                                    <a href="{{ route('admin.orders.invoice', $ord->id) }}" class="text-stone-500 hover:text-stone-800 font-medium mr-1.5">Invoice</a>
                                 @endif
-                                <a href="{{ route('admin.orders.show', $ord->id) }}" class="px-3.5 py-1.5 bg-[#4A2C1D] text-[#E7C77B] rounded-lg font-bold hover:bg-[#2E180E] transition">
+                                <a href="{{ route('admin.orders.show', $ord->id) }}" class="inline-flex items-center px-3.5 py-1.5 bg-[#4A2C1D] text-[#E7C77B] rounded-lg font-bold hover:bg-[#2E180E] transition text-xs">
                                     Inspect & Verify →
                                 </a>
+                                <form action="{{ route('admin.orders.destroy', $ord->id) }}" method="POST" onsubmit="return confirm('Permanently delete Order #{{ $ord->order_number }}? This action cannot be undone.');" class="inline-block align-middle">
+                                    @csrf
+                                    @method('DELETE')
+                                    <button type="submit" class="p-1.5 text-stone-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg border border-transparent hover:border-rose-200 transition cursor-pointer" title="Delete Order">
+                                        <svg class="w-4 h-4 inline-block" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                    </button>
+                                </form>
                             </td>
                         </tr>
                     @empty

@@ -10,13 +10,22 @@
 {
   "{{ '@context' }}": "https://schema.org",
   "{{ '@type' }}": "EmailMessage",
-  "description": "Your Rayka password reset code is {{ $otp }}"
+  "description": "Your Rayka password reset code is {{ $otp }}",
+  "potentialAction": {
+    "{{ '@type' }}": "ConfirmAction",
+    "name": "Copy code"
+  }
 }
 </script>
 @endsection
 
 @section('content')
-  <div class="greeting">Hi there,</div>
+  <!-- Gmail NLP Trigger -->
+  <div style="display:none; font-size:1px; line-height:1px; max-height:0px; max-width:0px; opacity:0; overflow:hidden;">
+    Your Rayka password reset code is {{ $otp }}. Enter this code to continue.
+  </div>
+
+  <div class="greeting">Hi {{ !empty($userName) ? $userName : 'there' }},</div>
   <p class="message-text">
     We received a request to reset your password for your <strong>Rayka Imitation Jewellery</strong> account. Enter this code to verify your identity and set a new password:
   </p>

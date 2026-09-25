@@ -13,15 +13,13 @@ class ResetPasswordOtpMail extends Mailable
 {
     use Queueable, SerializesModels;
 
-    public $otp;
-
     /**
      * Create a new message instance.
      */
-    public function __construct($otp)
-    {
-        $this->otp = $otp;
-    }
+    public function __construct(
+        public string $otp,
+        public ?string $userName = null,
+    ) {}
 
     /**
      * Get the message envelope.
@@ -40,7 +38,10 @@ class ResetPasswordOtpMail extends Mailable
     {
         return new Content(
             view: 'emails.auth.reset_password_otp',
-            with: ['otp' => $this->otp],
+            with: [
+                'otp' => $this->otp,
+                'userName' => $this->userName,
+            ],
         );
     }
 

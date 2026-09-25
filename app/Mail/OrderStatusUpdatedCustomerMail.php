@@ -54,7 +54,7 @@ class OrderStatusUpdatedCustomerMail extends Mailable
     public function envelope(): Envelope
     {
         $subject = match ($this->status) {
-            'Confirmed' => 'Payment Confirmed & Tax Invoice — Order #'.$this->order->order_number.' (Rayka)',
+            'Confirmed' => 'Payment successful for Rayka Imitation Jewellery — Order #'.$this->order->order_number,
             'Processing' => 'Creations in Crafting — Order #'.$this->order->order_number.' (Rayka)',
             'Shipped' => 'Your Ornaments Have Been Dispatched — Order #'.$this->order->order_number.' (Rayka)',
             'Delivered' => 'Order Delivered with Royal Compliments — #'.$this->order->order_number.' (Rayka)',

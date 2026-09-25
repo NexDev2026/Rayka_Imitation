@@ -40,37 +40,42 @@
 <script type="application/ld+json">
 {
   "{{ '@context' }}": "https://schema.org",
-  "{{ '@type' }}": "Order",
-  "merchant": {
+  "{{ '@type' }}": "Invoice",
+  "accountId": "{{ $order->order_number }}",
+  "name": "Rayka Imitation Jewellery bill",
+  "description": "Rayka Order #{{ $order->order_number }}",
+  "paymentDue": "{{ \Carbon\Carbon::parse($order->created_at)->toIso8601String() }}",
+  "paymentStatus": "{{ $isPaid ? 'PaymentAutomaticallyApplied' : 'PaymentDue' }}",
+  "provider": {
     "{{ '@type' }}": "Organization",
-    "name": "Rayka Imitation Jewellery"
+    "name": "Rayka Imitation Jewellery",
+    "url": "https://raykaimitation.com"
   },
-  "orderNumber": "{{ $order->order_number }}",
-  "priceCurrency": "INR",
-  "price": "{{ number_format($order->total_amount, 2, '.', '') }}",
-  "orderDate": "{{ \Carbon\Carbon::parse($order->created_at)->toIso8601String() }}",
-  "acceptedOffer": [
-    @foreach($order->items as $idx => $item)
-    {
-      "{{ '@type' }}": "Offer",
-      "itemOffered": {
-        "{{ '@type' }}": "Product",
-        "name": "{{ addslashes($item->product_name) }}"
-      },
-      "price": "{{ number_format($item->subtotal, 2, '.', '') }}",
-      "priceCurrency": "INR",
-      "eligibleQuantity": {
-        "{{ '@type' }}": "QuantitativeValue",
-        "value": "{{ $item->quantity }}"
-      }
-    }{{ $loop->last ? '' : ',' }}
-    @endforeach
-  ],
-  "orderStatus": "http://schema.org/Order{{ $isPaid ? 'Processing' : 'PaymentDue' }}",
-  "potentialAction": {
-    "{{ '@type' }}": "ViewAction",
-    "name": "Track Order",
-    "target": "{{ route('order.track', ['order_number' => $order->order_number]) }}"
+  "totalPaymentDue": {
+    "{{ '@type' }}": "PriceSpecification",
+    "price": "{{ number_format($order->total_amount, 2, '.', '') }}",
+    "priceCurrency": "INR"
+  },
+  "customer": {
+    "{{ '@type' }}": "Person",
+    "name": "{{ addslashes($order->address?->name ?? $order->user?->name ?? 'Valued Patron') }}"
+  },
+  "referencesOrder": {
+    "{{ '@type' }}": "Order",
+    "merchant": {
+      "{{ '@type' }}": "Organization",
+      "name": "Rayka Imitation Jewellery"
+    },
+    "orderNumber": "{{ $order->order_number }}",
+    "priceCurrency": "INR",
+    "price": "{{ number_format($order->total_amount, 2, '.', '') }}",
+    "orderDate": "{{ \Carbon\Carbon::parse($order->created_at)->toIso8601String() }}",
+    "orderStatus": "https://schema.org/Order{{ $isPaid ? 'Processing' : 'PaymentDue' }}",
+    "potentialAction": {
+      "{{ '@type' }}": "ViewAction",
+      "name": "Track Order",
+      "target": "{{ route('order.track', ['order_number' => $order->order_number]) }}"
+    }
   }
 }
 </script>

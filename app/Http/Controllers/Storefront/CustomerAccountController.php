@@ -85,7 +85,7 @@ class CustomerAccountController extends Controller
 
             defer(function () use ($user, $otp) {
                 try {
-                    Mail::to($user->email)->send(new LoginOtpMail($otp));
+                    Mail::to($user->email)->send(new LoginOtpMail($otp, $user->name));
                 } catch (\Throwable $e) {
                     Log::warning("Login OTP email failure for {$user->email}: ".$e->getMessage());
                 }
@@ -137,11 +137,12 @@ class CustomerAccountController extends Controller
         $email = strtolower(trim($request->email));
         $otp = (string) random_int(100000, 999999);
         
+        $name = trim((string) $request->name);
         Cache::put('register_otp_' . $email, $otp, now()->addMinutes(15));
         
-        defer(function () use ($email, $otp) {
+        defer(function () use ($email, $otp, $name) {
             try {
-                Mail::to($email)->send(new RegisterOtpMail($otp));
+                Mail::to($email)->send(new RegisterOtpMail($otp, $name));
             } catch (\Throwable $e) {
                 Log::warning("Register OTP email failure for {$email}: ".$e->getMessage());
             }
@@ -246,7 +247,7 @@ class CustomerAccountController extends Controller
 
         defer(function () use ($user, $otp) {
             try {
-                Mail::to($user->email)->send(new ResetPasswordOtpMail($otp));
+                Mail::to($user->email)->send(new ResetPasswordOtpMail($otp, $user->name));
             } catch (\Throwable $e) {
                 Log::warning("Reset password OTP email failure for {$user->email}: ".$e->getMessage());
             }
@@ -486,9 +487,9 @@ class CustomerAccountController extends Controller
             'otp' => $otp,
         ], now()->addMinutes(15));
 
-        defer(function () use ($request, $otp) {
+        defer(function () use ($request, $otp, $user) {
             try {
-                Mail::to(strtolower(trim($request->new_email)))->send(new VerifyNewEmailOtpMail($otp));
+                Mail::to(strtolower(trim($request->new_email)))->send(new VerifyNewEmailOtpMail($otp, $user->name));
             } catch (\Throwable $e) {
                 Log::warning('Verify new email OTP dispatch warning: '.$e->getMessage());
             }

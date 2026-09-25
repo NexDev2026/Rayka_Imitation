@@ -26,7 +26,7 @@ class OrderPlacedCustomerMail extends Mailable
         $isCod = str_contains($paymentMethod, 'cod') || str_contains($paymentMethod, 'cash');
 
         if ($isPaid) {
-            $subject = 'Payment Confirmed — Order #'.$this->order->order_number.' — Rayka Imitation Jewellery';
+            $subject = 'Payment successful for Rayka Imitation Jewellery — Order #'.$this->order->order_number;
         } elseif ($isCod) {
             $subject = 'Order Booked (Cash on Delivery) — Order #'.$this->order->order_number.' — Rayka';
         } else {
