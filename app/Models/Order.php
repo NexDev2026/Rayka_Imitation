@@ -238,6 +238,22 @@ class Order extends Model
             if ($item->product) {
                 $item->product->increment('stock_quantity', $qty);
                 Log::info("Inventory Restored: +{$qty} unit(s) for Product #{$item->product_id} ('{$item->product_name}') via Order #{$this->order_number} cancellation/rejection.");
+
+                ActivityLog::record(
+                    action: 'INVENTORY_RESTORED',
+                    description: "Restored +{$qty} unit(s) of '{$item->product_name}' back to available stock (Order #{$this->order_number}).",
+                    category: 'inventory',
+                    subjectType: 'Product',
+                    subjectId: (string) $item->product_id,
+                    subjectRef: $item->product_sku ?: $this->order_number,
+                    metadata: [
+                        'order_number' => $this->order_number,
+                        'product_id' => $item->product_id,
+                        'product_name' => $item->product_name,
+                        'quantity_restored' => $qty,
+                        'variant' => $item->variant_info,
+                    ]
+                );
             }
             if ($item->variant_info && $item->product_id) {
                 $variant = ProductVariant::where('product_id', $item->product_id)
@@ -259,6 +275,22 @@ class Order extends Model
             if ($item->product) {
                 $item->product->decrement('stock_quantity', $qty);
                 Log::info("Inventory Deducted: -{$qty} unit(s) for Product #{$item->product_id} ('{$item->product_name}') via Order #{$this->order_number} re-activation.");
+
+                ActivityLog::record(
+                    action: 'INVENTORY_DEDUCTED',
+                    description: "Deducted -{$qty} unit(s) of '{$item->product_name}' from available stock (Order #{$this->order_number}).",
+                    category: 'inventory',
+                    subjectType: 'Product',
+                    subjectId: (string) $item->product_id,
+                    subjectRef: $item->product_sku ?: $this->order_number,
+                    metadata: [
+                        'order_number' => $this->order_number,
+                        'product_id' => $item->product_id,
+                        'product_name' => $item->product_name,
+                        'quantity_deducted' => $qty,
+                        'variant' => $item->variant_info,
+                    ]
+                );
             }
             if ($item->variant_info && $item->product_id) {
                 $variant = ProductVariant::where('product_id', $item->product_id)

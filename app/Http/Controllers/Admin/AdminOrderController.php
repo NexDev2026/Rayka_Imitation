@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Mail\OrderCancelledByAdminCustomerMail;
 use App\Mail\OrderStatusUpdatedCustomerMail;
+use App\Models\ActivityLog;
 use App\Models\Order;
 use App\Models\StoreSetting;
 use Barryvdh\DomPDF\Facade\Pdf;
@@ -92,6 +93,21 @@ class AdminOrderController extends Controller
                 }
             });
 
+            ActivityLog::record(
+                action: 'PAYMENT_CONFIRMED',
+                description: 'Administrator '.(Auth::user()?->name ?? 'Admin')." verified UPI screenshot and confirmed payment for Order #{$order->order_number} (₹".number_format((float) $order->total_amount, 2).').',
+                category: 'orders',
+                actorType: 'admin',
+                subjectType: 'Order',
+                subjectId: (string) $order->id,
+                subjectRef: $order->order_number,
+                metadata: [
+                    'order_number' => $order->order_number,
+                    'total_amount' => (float) $order->total_amount,
+                    'admin_note' => $adminNote,
+                ]
+            );
+
             return back()->with('success', "Order #{$order->order_number} payment has been CONFIRMED. Order is now ready for processing and Tax Invoice has been emailed to the customer.");
         } elseif ($action === 'reject') {
             $reason = trim($request->input('rejection_reason', ''));
@@ -121,6 +137,20 @@ class AdminOrderController extends Controller
                     'admin_note' => "Rejected by administrator on {$timestamp}. Reason: {$rejectionReason}",
                 ]);
             }
+
+            ActivityLog::record(
+                action: 'PAYMENT_REJECTED',
+                description: 'Administrator '.(Auth::user()?->name ?? 'Admin')." rejected payment for Order #{$order->order_number}. Reason: {$rejectionReason}",
+                category: 'orders',
+                actorType: 'admin',
+                subjectType: 'Order',
+                subjectId: (string) $order->id,
+                subjectRef: $order->order_number,
+                metadata: [
+                    'order_number' => $order->order_number,
+                    'rejection_reason' => $rejectionReason,
+                ]
+            );
 
             // Dispatch customer rejection notification email in the background
             defer(function () use ($order, $rejectionReason) {
@@ -239,6 +269,22 @@ class AdminOrderController extends Controller
             }
         });
 
+        ActivityLog::record(
+            action: 'STATUS_UPDATED',
+            description: 'Administrator '.(Auth::user()?->name ?? 'Admin')." updated Order #{$order->order_number} status from '{$oldStatus}' to '{$newStatus}'." . ($reasonNote ? " Reason: {$reasonNote}" : ''),
+            category: 'orders',
+            actorType: 'admin',
+            subjectType: 'Order',
+            subjectId: (string) $order->id,
+            subjectRef: $order->order_number,
+            metadata: [
+                'order_number' => $order->order_number,
+                'old_status' => $oldStatus,
+                'new_status' => $newStatus,
+                'reason_note' => $reasonNote,
+            ]
+        );
+
         $msg = "Order #{$order->order_number} status updated to '{$order->status}'.";
         if (in_array($newStatus, ['Rejected', 'Cancelled']) && ! in_array($oldStatus, ['Rejected', 'Cancelled'])) {
             $msg .= ' All ordered units have been safely returned to available stock.';
@@ -273,6 +319,9 @@ class AdminOrderController extends Controller
         }
 
         $orderNum = $order->order_number;
+        $orderTotal = (float) $order->total_amount;
+        $orderStatus = $order->status;
+        $itemCount = $order->items->count();
 
         // Clean up attached items and payment records
         $order->items()->delete();
@@ -283,6 +332,21 @@ class AdminOrderController extends Controller
             $order->address->delete();
         }
         $order->delete();
+
+        ActivityLog::record(
+            action: 'ORDER_DELETED',
+            description: 'Administrator '.(Auth::user()?->name ?? 'Admin')." permanently deleted {$orderStatus} Order #{$orderNum} (₹".number_format($orderTotal, 2).", {$itemCount} items).",
+            category: 'system',
+            actorType: 'admin',
+            subjectType: 'Order',
+            subjectRef: $orderNum,
+            metadata: [
+                'order_number' => $orderNum,
+                'status_at_deletion' => $orderStatus,
+                'total_amount' => $orderTotal,
+                'items_count' => $itemCount,
+            ]
+        );
 
         return redirect()->route('admin.orders.index')->with('success', "Order #{$orderNum} has been permanently deleted.");
     }

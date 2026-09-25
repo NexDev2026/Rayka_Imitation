@@ -12,6 +12,7 @@ use App\Mail\RegisterOtpMail;
 use App\Mail\ResetPasswordOtpMail;
 use App\Mail\VerifyNewEmailOtpMail;
 use App\Mail\WelcomeUserMail;
+use App\Models\ActivityLog;
 use App\Models\Address;
 use App\Models\Order;
 use App\Models\Product;
@@ -582,6 +583,20 @@ class CustomerAccountController extends Controller
 
             // Restore product and variant stock
             $order->restoreInventory();
+
+            ActivityLog::record(
+                action: 'ORDER_CANCELLED',
+                description: "Customer " . (Auth::user()?->name ?? 'User') . " cancelled Order #{$order->order_number}. Reason: {$fullReason}",
+                category: 'orders',
+                actorType: 'customer',
+                subjectType: 'Order',
+                subjectId: (string) $order->id,
+                subjectRef: $order->order_number,
+                metadata: [
+                    'order_number' => $order->order_number,
+                    'reason' => $fullReason,
+                ]
+            );
         });
 
         defer(function () use ($order, $reason, $comment, $fullReason) {

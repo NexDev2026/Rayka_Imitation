@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminActivityLogController;
 use App\Http\Controllers\Admin\AdminAttributeController;
 use App\Http\Controllers\Admin\AdminAuthController;
 use App\Http\Controllers\Admin\AdminBannerController;
@@ -238,6 +239,9 @@ Route::prefix('admin')->name('admin.')->group(function () {
 
         // Reports & Analytics
         Route::get('/reports', [AdminReportController::class, 'index'])->name('reports.index');
+
+        // Activity & Audit Logs (Real-time Timeline)
+        Route::get('/activity-logs', [AdminActivityLogController::class, 'index'])->name('activity_logs.index');
 
         // Store Settings & QR
         Route::get('/settings', [AdminSettingController::class, 'index'])->name('settings.index');

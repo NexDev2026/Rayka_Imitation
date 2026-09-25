@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Storefront;
 use App\Http\Controllers\Controller;
 use App\Mail\NewOrderAdminMail;
 use App\Mail\OrderPlacedCustomerMail;
+use App\Models\ActivityLog;
 use App\Models\Address;
 use App\Models\Coupon;
 use App\Models\Order;
@@ -400,6 +401,25 @@ class CheckoutController extends Controller
                 // Clear Cart & Coupon
                 $cart->items()->delete();
                 session()->forget('applied_coupon');
+
+                ActivityLog::record(
+                    action: 'ORDER_PLACED',
+                    description: "Order #{$order->order_number} placed by " . ($address->full_name ?? 'Customer') . " for ₹" . number_format((float) $order->total_amount, 2) . " (" . $order->items->count() . " items).",
+                    category: 'orders',
+                    actorType: 'customer',
+                    actorName: $address->full_name ?? ($user?->name ?? 'Customer'),
+                    actorEmail: $address->email ?? ($user?->email ?? null),
+                    actorId: $order->user_id,
+                    subjectType: 'Order',
+                    subjectId: (string) $order->id,
+                    subjectRef: $order->order_number,
+                    metadata: [
+                        'order_number' => $order->order_number,
+                        'total_amount' => (float) $order->total_amount,
+                        'items_count' => $order->items->count(),
+                        'payment_method' => 'Static QR / UPI',
+                    ]
+                );
 
                 return $order;
             });
