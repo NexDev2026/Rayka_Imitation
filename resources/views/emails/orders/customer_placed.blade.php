@@ -132,34 +132,38 @@
       </table>
     </div>
   @else
-    <!-- Pending Verification: Royal Obsidian & Champagne Gold SaaS Status Card -->
-    <div style="background:linear-gradient(145deg, #1C120C 0%, #120A06 100%); border:1px solid rgba(212, 175, 106, 0.45); border-radius:18px; padding:22px 24px; margin-bottom:28px; box-shadow:0 12px 35px rgba(0,0,0,0.55);">
-      <table width="100%" border="0" cellpadding="0" cellspacing="0">
+    <!-- Pending Verification: Royal Champagne Gold Luxury Order Card -->
+    <div style="background:linear-gradient(180deg, #1C110A 0%, #120905 100%); border:1px solid rgba(212, 175, 106, 0.45); border-radius:18px; padding:24px 26px; margin-bottom:28px; box-shadow:0 14px 40px rgba(0,0,0,0.6), inset 0 1px 0 rgba(212, 175, 106, 0.15);">
+      <table width="100%" border="0" cellpadding="0" cellspacing="0" style="margin-bottom:12px;">
         <tr>
-          <td valign="top">
-            <div style="display:inline-block; background:rgba(212, 175, 106, 0.12); border:1px solid rgba(212, 175, 106, 0.4); color:#E7C77B; font-size:10px; font-weight:800; letter-spacing:1px; text-transform:uppercase; padding:4px 12px; border-radius:20px; margin-bottom:10px;">
+          <td valign="middle">
+            <div style="display:inline-block; background:rgba(212, 175, 106, 0.12); border:1px solid rgba(212, 175, 106, 0.45); color:#E7C77B; font-size:10px; font-weight:800; letter-spacing:1.5px; text-transform:uppercase; padding:4px 14px; border-radius:30px;">
               ● Verification in Progress
             </div>
-            <div style="font-size:12.5px; color:#A8988B; margin-bottom:6px; font-weight:500;">
-              Rayka Imitation Jewellery • Order #{{ $order->order_number }}
-            </div>
-            <div style="font-size:11px; color:#D4AF6A; text-transform:uppercase; letter-spacing:1px; margin-bottom:3px; font-weight:700;">
-              Total Order Value (Awaiting Confirmation)
-            </div>
-            <div style="font-size:36px; font-weight:900; color:#FAF7F0; font-family:ui-monospace,Menlo,Consolas,monospace; letter-spacing:-0.5px; line-height:1.1;">
-              ₹{{ number_format($order->total_amount, 2) }}
-            </div>
           </td>
-          <td align="right" valign="middle" style="width:60px;">
-            <div style="width:48px; height:48px; background:rgba(212, 175, 106, 0.1); border:1px solid rgba(212, 175, 106, 0.35); border-radius:50%; text-align:center; display:inline-block; line-height:48px;">
-              <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#E7C77B" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;display:inline-block;">
-                <circle cx="12" cy="12" r="10"></circle>
-                <polyline points="12 6 12 12 16 14"></polyline>
-              </svg>
-            </div>
+          <td align="right" valign="middle">
+            <span style="font-family:ui-monospace,Menlo,Consolas,monospace; font-size:11px; color:#A8988B; letter-spacing:0.5px;">Order #{{ $order->order_number }}</span>
           </td>
         </tr>
       </table>
+      <div style="font-size:11px; color:#D4AF6A; text-transform:uppercase; letter-spacing:1.5px; margin-bottom:4px; font-weight:700;">
+        Total Order Value
+      </div>
+      <div style="font-size:38px; font-weight:900; color:#FFFFFF; font-family:'Outfit',ui-monospace,-apple-system,sans-serif; letter-spacing:-0.5px; line-height:1.15; margin-bottom:14px;">
+        ₹{{ number_format($order->total_amount, 2) }}
+      </div>
+      <div style="padding-top:12px; border-top:1px solid rgba(212, 175, 106, 0.15); font-size:12px; color:#C4B5A5;">
+        <table width="100%" border="0" cellpadding="0" cellspacing="0">
+          <tr>
+            <td valign="middle" style="font-size:12px; color:#A8988B;">
+              Payment Method: <strong style="color:#FAF7F0;">{{ $paymentMethod }}</strong>
+            </td>
+            <td align="right" valign="middle" style="font-size:11px; color:#E7C77B; font-weight:600; letter-spacing:0.5px;">
+              Accounts Concierge Desk
+            </td>
+          </tr>
+        </table>
+      </div>
     </div>
   @endif
 
