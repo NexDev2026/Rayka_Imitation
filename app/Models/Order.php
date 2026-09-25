@@ -140,6 +140,16 @@ class Order extends Model
     }
 
     /**
+     * Professional E-Commerce SaaS Protection Guard:
+     * Active orders (Pending Verification, Confirmed, Processing, Shipped, Delivered) are protected.
+     * Only orders in 'Cancelled' or 'Rejected' status can be permanently deleted.
+     */
+    public function canBeDeleted(): bool
+    {
+        return in_array(strtolower((string) $this->status), ['cancelled', 'rejected']);
+    }
+
+    /**
      * Resolves legacy cancellation actor from notes when cancelled_by column is null.
      */
     public function getLegacyCancellationActor(): string

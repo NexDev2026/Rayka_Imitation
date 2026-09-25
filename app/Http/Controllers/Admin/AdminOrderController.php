@@ -260,6 +260,12 @@ class AdminOrderController extends Controller
     public function destroy($id)
     {
         $order = Order::with(['items', 'payment', 'address'])->findOrFail($id);
+
+        // Security Guard: Only Cancelled or Rejected orders can be permanently deleted
+        if (! $order->canBeDeleted()) {
+            return back()->with('error', "Order #{$order->order_number} is currently protected ({$order->status}). Active orders cannot be deleted. Please cancel or reject the order before deleting.");
+        }
+
         $orderNum = $order->order_number;
 
         // Clean up attached items and payment records
