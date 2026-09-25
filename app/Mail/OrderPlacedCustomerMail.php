@@ -20,8 +20,21 @@ class OrderPlacedCustomerMail extends Mailable
 
     public function envelope(): Envelope
     {
+        $paymentStatus = strtolower((string) ($this->order->payment?->status ?? 'pending'));
+        $paymentMethod = strtolower((string) ($this->order->payment?->payment_method ?? ''));
+        $isPaid = in_array($paymentStatus, ['confirmed', 'success', 'paid']);
+        $isCod = str_contains($paymentMethod, 'cod') || str_contains($paymentMethod, 'cash');
+
+        if ($isPaid) {
+            $subject = 'Payment Confirmed — Order #'.$this->order->order_number.' — Rayka Imitation Jewellery';
+        } elseif ($isCod) {
+            $subject = 'Order Booked (Cash on Delivery) — Order #'.$this->order->order_number.' — Rayka';
+        } else {
+            $subject = 'Order Received (Payment Verification in Progress) — Order #'.$this->order->order_number.' — Rayka';
+        }
+
         return new Envelope(
-            subject: 'Payment successful for Rayka Imitation Jewellery - Order #'.$this->order->order_number,
+            subject: $subject,
         );
     }
 
