@@ -8,7 +8,7 @@ class SetupStorageCommand extends Command
 {
     protected $signature = 'rayka:setup-storage';
 
-    protected $description = 'Set up external upload and backup folders, ensure permissions and create security directives for Hostinger / ServerByte hosting.';
+    protected $description = 'Set up external upload and backup folders, clean redundant nested uploads, ensure permissions and create security directives for Hostinger / ServerByte hosting.';
 
     public function handle(): int
     {
@@ -19,8 +19,10 @@ class SetupStorageCommand extends Command
             'uploads/products',
             'uploads/categories',
             'uploads/banners',
+            'uploads/payments',
             'uploads/documents',
             'uploads/settings',
+            'uploads/qr',
         ];
 
         foreach ($subDirs as $subDir) {
@@ -38,7 +40,7 @@ class SetupStorageCommand extends Command
         $storageBackupDir = storage_path('app/backups');
         if (! file_exists($storageBackupDir)) {
             @mkdir($storageBackupDir, 0755, true);
-            $this->line("  ✓ Created storage backup directory: storage/app/backups");
+            $this->line('  ✓ Created storage backup directory: storage/app/backups');
         }
 
         // 3. External root folders (Hostinger / ServerByte pattern: alongside or inside web root)
@@ -68,22 +70,22 @@ class SetupStorageCommand extends Command
             }
         }
 
-        // Sync existing files from public/uploads to external rayka_uploads
+        // Sync existing files from public/uploads directly to external rayka_uploads & remove redundant nested uploads/
         $this->syncUploadsToExternal();
 
         // 4. Security .htaccess inside uploads directory (prevent PHP execution, allow images/PDFs)
         $htaccessPath = public_path('uploads/.htaccess');
         if (! file_exists($htaccessPath)) {
             $htaccessContent = "# Rayka Secure Uploads Directives\n"
-                . "<FilesMatch \"\\.(php|phtml|php3|php4|php5|php7|php8|phps|cgi|pl|exe)$\">\n"
-                . "    Require all denied\n"
-                . "</FilesMatch>\n"
-                . "<IfModule mod_expires.c>\n"
-                . "    ExpiresActive On\n"
-                . "    ExpiresDefault \"access plus 1 month\"\n"
-                . "</IfModule>\n";
+                ."<FilesMatch \"\\.(php|phtml|php3|php4|php5|php7|php8|phps|cgi|pl|exe)$\">\n"
+                ."    Require all denied\n"
+                ."</FilesMatch>\n"
+                ."<IfModule mod_expires.c>\n"
+                ."    ExpiresActive On\n"
+                ."    ExpiresDefault \"access plus 1 month\"\n"
+                ."</IfModule>\n";
             @file_put_contents($htaccessPath, $htaccessContent);
-            $this->line("  ✓ Placed security .htaccess in public/uploads/");
+            $this->line('  ✓ Placed security .htaccess in public/uploads/');
         }
 
         // 5. Ensure storage link
@@ -100,12 +102,66 @@ class SetupStorageCommand extends Command
         return Command::SUCCESS;
     }
 
+    private function cleanupNestedUploads(): void
+    {
+        $targets = [
+            base_path('../rayka_uploads'),
+            base_path('rayka_uploads'),
+        ];
+
+        foreach ($targets as $targetDir) {
+            $nested = $targetDir.DIRECTORY_SEPARATOR.'uploads';
+            if (is_dir($nested)) {
+                try {
+                    $iterator = new \RecursiveIteratorIterator(
+                        new \RecursiveDirectoryIterator($nested, \RecursiveDirectoryIterator::SKIP_DOTS),
+                        \RecursiveIteratorIterator::SELF_FIRST
+                    );
+
+                    foreach ($iterator as $item) {
+                        $subPath = substr($item->getPathname(), strlen($nested));
+                        $destination = $targetDir.$subPath;
+
+                        if ($item->isDir()) {
+                            if (! file_exists($destination)) {
+                                @mkdir($destination, 0777, true);
+                            }
+                        } else {
+                            $parentDir = dirname($destination);
+                            if (! file_exists($parentDir)) {
+                                @mkdir($parentDir, 0777, true);
+                            }
+                            @copy($item->getPathname(), $destination);
+                            @unlink($item->getPathname());
+                        }
+                    }
+
+                    // Remove empty subdirectories inside nested uploads
+                    $dirs = array_diff(scandir($nested) ?: [], ['.', '..']);
+                    foreach ($dirs as $d) {
+                        $sub = $nested.DIRECTORY_SEPARATOR.$d;
+                        if (is_dir($sub)) {
+                            @rmdir($sub);
+                        }
+                    }
+                    @rmdir($nested);
+                    $this->line("  ✓ Flattened and removed redundant nested directory: {$nested}");
+                } catch (\Throwable $e) {
+                    // Silently ignore if cannot rmdir
+                }
+            }
+        }
+    }
+
     private function syncUploadsToExternal(): void
     {
         $uploadsDir = public_path('uploads');
         if (! is_dir($uploadsDir)) {
             return;
         }
+
+        // First clean up any accidental nested uploads folder
+        $this->cleanupNestedUploads();
 
         $targets = [
             base_path('../rayka_uploads'),
@@ -126,7 +182,7 @@ class SetupStorageCommand extends Command
                 $syncedCount = 0;
                 foreach ($iterator as $item) {
                     $subPath = substr($item->getPathname(), strlen($uploadsDir));
-                    $targetPath = $targetDir . $subPath;
+                    $targetPath = $targetDir.$subPath;
 
                     if ($item->isDir()) {
                         if (! file_exists($targetPath)) {
@@ -134,13 +190,17 @@ class SetupStorageCommand extends Command
                         }
                     } else {
                         if (! file_exists($targetPath) || filemtime($item->getPathname()) > filemtime($targetPath)) {
+                            $parent = dirname($targetPath);
+                            if (! file_exists($parent)) {
+                                @mkdir($parent, 0777, true);
+                            }
                             @copy($item->getPathname(), $targetPath);
                             $syncedCount++;
                         }
                     }
                 }
                 if ($syncedCount > 0) {
-                    $this->line("  ✓ Mirrored {$syncedCount} uploaded files to: {$targetDir}");
+                    $this->line("  ✓ Mirrored {$syncedCount} uploaded files directly to: {$targetDir}");
                 }
             } catch (\Throwable $e) {
                 // Silently skip if recursion fails

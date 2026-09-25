@@ -130,9 +130,12 @@ class ImageUploadService
      */
     public static function mirrorToExternalUploads(string $sourceFilePath, string $subFolder, string $filename): void
     {
+        // Strip any leading 'uploads/' so 'uploads/banners' becomes 'banners', directly inside rayka_uploads/banners
+        $cleanSubFolder = preg_replace('#^uploads/?#i', '', trim($subFolder, '/'));
+
         $destinations = [
-            base_path('../rayka_uploads/' . trim($subFolder, '/')),
-            base_path('rayka_uploads/' . trim($subFolder, '/')),
+            base_path('../rayka_uploads' . ($cleanSubFolder !== '' ? '/' . $cleanSubFolder : '')),
+            base_path('rayka_uploads' . ($cleanSubFolder !== '' ? '/' . $cleanSubFolder : '')),
         ];
 
         foreach ($destinations as $dir) {

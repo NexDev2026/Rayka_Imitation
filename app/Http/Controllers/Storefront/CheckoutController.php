@@ -15,6 +15,7 @@ use App\Models\ProductVariant;
 use App\Models\StoreSetting;
 use App\Models\User;
 use App\Services\GuestSessionService;
+use App\Services\ImageUploadService;
 use Illuminate\Http\Request;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Auth;
@@ -241,6 +242,9 @@ class CheckoutController extends Controller
         $filename = 'pay_'.time().'_'.Str::random(10).'.'.$rawExt;
         $screenshotFile->move($uploadDir, $filename);
         $screenshotPath = '/uploads/payments/'.$filename;
+
+        // Auto-mirror payment screenshot to external rayka_uploads/payments/
+        ImageUploadService::mirrorToExternalUploads($uploadDir . DIRECTORY_SEPARATOR . $filename, 'payments', $filename);
 
         // DB Transaction with row-level pessimistic locking (high-concurrency ACID protection)
         try {

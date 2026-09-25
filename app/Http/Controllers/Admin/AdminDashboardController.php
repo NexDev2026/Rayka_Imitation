@@ -25,18 +25,14 @@ class AdminDashboardController extends Controller
         $totalRevenue = Order::whereIn('status', ['Confirmed', 'Processing', 'Shipped', 'Delivered'])->sum('total_amount');
         $todayRevenue = Order::whereDate('created_at', $today)->whereIn('status', ['Confirmed', 'Processing', 'Shipped', 'Delivered'])->sum('total_amount');
 
-        // Unique Visitors & Page Views Telemetry
-        $todayViews = PageView::whereDate('viewed_date', $today)->count();
-        $todayUniqueVisitors = PageView::whereDate('viewed_date', $today)->distinct('ip_address')->count('ip_address');
-        if ($todayViews > 0 && $todayUniqueVisitors <= 1) {
-            $todayUniqueVisitors = max(1, (int) round($todayViews * 0.42));
-        }
+        // Unique Visitors & Page Views Telemetry (Strictly authentic visitors, excluding dummy loopback seed hits)
+        $realPageViews = PageView::whereNotIn('ip_address', ['127.0.0.1', '::1', 'localhost']);
 
-        $monthlyViews = PageView::whereDate('viewed_date', '>=', $startOfMonth)->count();
-        $monthlyUniqueVisitors = PageView::whereDate('viewed_date', '>=', $startOfMonth)->distinct('ip_address')->count('ip_address');
-        if ($monthlyViews > 0 && $monthlyUniqueVisitors <= 5) {
-            $monthlyUniqueVisitors = max($monthlyUniqueVisitors, (int) round($monthlyViews * 0.38));
-        }
+        $todayViews = (clone $realPageViews)->whereDate('viewed_date', $today)->count();
+        $todayUniqueVisitors = (clone $realPageViews)->whereDate('viewed_date', $today)->distinct('ip_address')->count('ip_address');
+
+        $monthlyViews = (clone $realPageViews)->whereDate('viewed_date', '>=', $startOfMonth)->count();
+        $monthlyUniqueVisitors = (clone $realPageViews)->whereDate('viewed_date', '>=', $startOfMonth)->distinct('ip_address')->count('ip_address');
 
         // Low stock alerts (< 10 units)
         $lowStockProducts = Product::with('category')
@@ -120,6 +116,8 @@ class AdminDashboardController extends Controller
         $orderData = [];
         $revenueData = [];
 
+        $realPageViews = PageView::whereNotIn('ip_address', ['127.0.0.1', '::1', 'localhost']);
+
         for ($i = $days - 1; $i >= 0; $i--) {
             $date = Carbon::now()->subDays($i);
             $dateString = $date->toDateString();
@@ -127,15 +125,10 @@ class AdminDashboardController extends Controller
 
             $chartLabels[] = $displayLabel;
 
-            // Real Page Views count using whereDate
-            $visits = PageView::whereDate('viewed_date', $dateString)->count();
+            // Real Page Views count
+            $visits = (clone $realPageViews)->whereDate('viewed_date', $dateString)->count();
             // Distinct Unique Visitors
-            $unique = PageView::whereDate('viewed_date', $dateString)->distinct('ip_address')->count('ip_address');
-
-            // If local tests have multiple visits under loopback, ensure representative unique visitor ratio
-            if ($visits > 0 && $unique <= 1) {
-                $unique = max(1, (int) round($visits * 0.42));
-            }
+            $unique = (clone $realPageViews)->whereDate('viewed_date', $dateString)->distinct('ip_address')->count('ip_address');
 
             $reachData[] = $visits;
             $uniqueData[] = $unique;

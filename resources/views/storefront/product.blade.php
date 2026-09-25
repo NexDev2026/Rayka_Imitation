@@ -17,6 +17,41 @@
         },
         selectedVariantPrice: {{ $product->variants->first() ? ($product->active_category_offer ? round(($product->variants->first()->price_override ?: $product->price) * (1 - $product->active_category_offer->discount_percentage / 100)) : ($product->variants->first()->price_override ?: $product->price)) : (int)$product->effective_price }},
         buyingNow: false,
+        galleryImages: {{ json_encode($product->images->count() > 0 ? $product->images->pluck('image_url')->map(fn($u) => asset($u))->values()->all() : [asset($product->effective_primary_image)]) }},
+        currentImageIndex: 0,
+        nextImage() {
+            if (this.galleryImages.length <= 1) return;
+            this.currentImageIndex = (this.currentImageIndex + 1) % this.galleryImages.length;
+            this.selectedImage = this.galleryImages[this.currentImageIndex];
+        },
+        prevImage() {
+            if (this.galleryImages.length <= 1) return;
+            this.currentImageIndex = (this.currentImageIndex - 1 + this.galleryImages.length) % this.galleryImages.length;
+            this.selectedImage = this.galleryImages[this.currentImageIndex];
+        },
+        selectImage(imgUrl, idx) {
+            this.selectedImage = imgUrl;
+            this.currentImageIndex = idx;
+        },
+        touchStartX: 0,
+        touchStartY: 0,
+        handleTouchStart(e) {
+            if (!e.touches || e.touches.length === 0) return;
+            this.touchStartX = e.touches[0].clientX;
+            this.touchStartY = e.touches[0].clientY;
+        },
+        handleTouchEnd(e) {
+            if (!e.changedTouches || e.changedTouches.length === 0) return;
+            const diffX = e.changedTouches[0].clientX - this.touchStartX;
+            const diffY = e.changedTouches[0].clientY - this.touchStartY;
+            if (Math.abs(diffX) > 35 && Math.abs(diffX) > Math.abs(diffY)) {
+                if (diffX < 0) {
+                    this.nextImage();
+                } else {
+                    this.prevImage();
+                }
+            }
+        },
         maxStock: {{ $product->stock_quantity }},
         reviewModal: false,
         videoModal: false,
@@ -70,31 +105,64 @@
             <div class="flex sm:flex-col gap-2.5 overflow-x-auto sm:overflow-y-auto sm:max-h-[520px] shrink-0 no-scrollbar scrollbar-hide">
                 @foreach($product->images as $img)
                     <button type="button" 
-                            @click="selectedImage = '{{ asset($img->image_url) }}'" 
+                            @click="selectImage('{{ asset($img->image_url) }}', {{ $loop->index }})" 
                             :class="{ 'border-[#D4AF6A] shadow-md ring-2 ring-[#D4AF6A]/40': selectedImage === '{{ asset($img->image_url) }}', 'border-stone-200': selectedImage !== '{{ asset($img->image_url) }}' }"
-                            class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border-2 bg-[#FAF7F0] shrink-0 transition p-0.5">
+                            class="w-16 h-16 sm:w-20 sm:h-20 rounded-xl overflow-hidden border-2 bg-[#FAF7F0] shrink-0 transition p-0.5 cursor-pointer">
                         <img src="{{ asset($img->image_url) }}" alt="Thumbnail" loading="lazy" decoding="async" class="w-full h-full object-contain rounded-lg">
                     </button>
                 @endforeach
             </div>
 
-            <!-- Main Stage Image Container with Zoom Trigger -->
+            <!-- Main Stage Image Container with Touch Swipe & Zoom Trigger -->
             <div class="flex-1 flex flex-col gap-3">
-                <div class="relative aspect-square bg-white rounded-2xl border border-[#D4AF6A]/40 overflow-hidden shadow-sm"
+                <div class="relative aspect-square bg-white rounded-2xl border border-[#D4AF6A]/40 overflow-hidden shadow-sm select-none"
                      @mouseenter="zoomActive = true"
                      @mouseleave="zoomActive = false"
-                     @mousemove="handleMouseMove($event)">
+                     @mousemove="handleMouseMove($event)"
+                     @touchstart="handleTouchStart($event)"
+                     @touchend="handleTouchEnd($event)">
                     
                     <img :src="selectedImage" 
                          alt="{{ $product->name }}" 
                          decoding="async"
                          class="w-full h-full object-contain cursor-crosshair">
 
-                    <!-- Subtle Reticle indicator on hover (Strictly clamped inside image container) -->
+                    <!-- Reticle indicator (Desktop only on hover - Hidden on mobile) -->
                     <div x-show="zoomActive" 
                          x-cloak
-                         class="absolute pointer-events-none border-2 border-[#D4AF6A] bg-[#D4AF6A]/20 shadow-md rounded-xl backdrop-contrast-125 transition-none"
+                         class="hidden lg:block absolute pointer-events-none border-2 border-[#D4AF6A] bg-[#D4AF6A]/20 shadow-md rounded-xl backdrop-contrast-125 transition-none"
                          :style="`width: ${lensSize}px; height: ${lensSize}px; left: ${lensLeft}px; top: ${lensTop}px;`">
+                    </div>
+
+                    <!-- Liquid Glass Navigation Arrows (Compact for Mobile) -->
+                    <template x-if="galleryImages.length > 1">
+                        <div>
+                            <!-- Prev Arrow -->
+                            <button type="button" 
+                                    @click.prevent.stop="prevImage()"
+                                    class="absolute left-2.5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/70 hover:bg-white/95 backdrop-blur-md border border-[#D4AF6A]/50 flex items-center justify-center text-[#4A2C1D] shadow-md hover:scale-105 active:scale-90 transition-all cursor-pointer select-none"
+                                    aria-label="Previous photo">
+                                <svg class="w-4 h-4 -ml-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M15 19l-7-7 7-7" />
+                                </svg>
+                            </button>
+
+                            <!-- Next Arrow -->
+                            <button type="button" 
+                                    @click.prevent.stop="nextImage()"
+                                    class="absolute right-2.5 top-1/2 -translate-y-1/2 z-20 w-8 h-8 sm:w-9 sm:h-9 rounded-full bg-white/70 hover:bg-white/95 backdrop-blur-md border border-[#D4AF6A]/50 flex items-center justify-center text-[#4A2C1D] shadow-md hover:scale-105 active:scale-90 transition-all cursor-pointer select-none"
+                                    aria-label="Next photo">
+                                <svg class="w-4 h-4 -mr-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M9 5l7 7-7 7" />
+                                </svg>
+                            </button>
+                        </div>
+                    </template>
+
+                    <!-- Mobile Image Counter Pill -->
+                    <div x-show="galleryImages.length > 1" 
+                         class="sm:hidden absolute bottom-2.5 left-1/2 -translate-x-1/2 z-10 px-2.5 py-0.5 rounded-full bg-[#1A1412]/60 backdrop-blur-md text-[#FAF7F0] text-[10px] font-semibold tracking-wider pointer-events-none"
+                         x-text="(currentImageIndex + 1) + ' / ' + galleryImages.length">
                     </div>
 
                     <!-- Wishlist Toggle Icon (Top Right) -->
