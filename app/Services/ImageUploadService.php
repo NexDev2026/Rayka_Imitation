@@ -38,6 +38,7 @@ class ImageUploadService
         if ($extension === 'svg' || str_contains($mime, 'svg')) {
             $filename = $prefix . '_' . time() . '_' . Str::random(6) . '.svg';
             $file->move($targetDir, $filename);
+            self::mirrorToExternalUploads($targetDir . DIRECTORY_SEPARATOR . $filename, $folder, $filename);
             return '/' . trim($folder, '/') . '/' . $filename;
         }
 
@@ -48,6 +49,7 @@ class ImageUploadService
             // Fallback move
             $filename = $prefix . '_' . time() . '_' . Str::random(6) . '.' . $extension;
             $file->move($targetDir, $filename);
+            self::mirrorToExternalUploads($targetDir . DIRECTORY_SEPARATOR . $filename, $folder, $filename);
             return '/' . trim($folder, '/') . '/' . $filename;
         }
 
@@ -56,6 +58,7 @@ class ImageUploadService
             // Fallback if GD string parser or imagewebp is unavailable
             $filename = $prefix . '_' . time() . '_' . Str::random(6) . '.' . $extension;
             $file->move($targetDir, $filename);
+            self::mirrorToExternalUploads($targetDir . DIRECTORY_SEPARATOR . $filename, $folder, $filename);
             return '/' . trim($folder, '/') . '/' . $filename;
         }
 
@@ -116,6 +119,33 @@ class ImageUploadService
         imagedestroy($dst);
         imagedestroy($src);
 
+        // Mirror to external uploads folder for hosting backups & cPanel file manager
+        self::mirrorToExternalUploads($destinationPath, $folder, $finalFilename);
+
         return '/' . trim($folder, '/') . '/' . $finalFilename;
+    }
+
+    /**
+     * Mirror an uploaded file to external rayka_uploads directories if configured or present.
+     */
+    public static function mirrorToExternalUploads(string $sourceFilePath, string $subFolder, string $filename): void
+    {
+        $destinations = [
+            base_path('../rayka_uploads/' . trim($subFolder, '/')),
+            base_path('rayka_uploads/' . trim($subFolder, '/')),
+        ];
+
+        foreach ($destinations as $dir) {
+            try {
+                if (!file_exists($dir)) {
+                    @mkdir($dir, 0777, true);
+                }
+                if (is_dir($dir) && file_exists($sourceFilePath)) {
+                    @copy($sourceFilePath, $dir . DIRECTORY_SEPARATOR . $filename);
+                }
+            } catch (\Throwable $e) {
+                // Silently continue if external dir cannot be written
+            }
+        }
     }
 }

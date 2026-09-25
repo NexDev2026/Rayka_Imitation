@@ -41,22 +41,35 @@ class SetupStorageCommand extends Command
             $this->line("  ✓ Created storage backup directory: storage/app/backups");
         }
 
-        // 3. External root folders (Hostinger / ServerByte pattern: outside public_html)
-        $externalUploadsDir = base_path('../rayka_uploads');
-        if (! file_exists($externalUploadsDir)) {
-            @mkdir($externalUploadsDir, 0777, true);
-            if (is_dir($externalUploadsDir)) {
-                $this->info("  ✓ Created external uploads directory: {$externalUploadsDir}");
+        // 3. External root folders (Hostinger / ServerByte pattern: alongside or inside web root)
+        $externalUploadDirs = [
+            base_path('../rayka_uploads'),
+            base_path('rayka_uploads'),
+        ];
+        foreach ($externalUploadDirs as $extDir) {
+            if (! file_exists($extDir)) {
+                @mkdir($extDir, 0777, true);
+                if (is_dir($extDir)) {
+                    $this->info("  ✓ Created external uploads directory: {$extDir}");
+                }
             }
         }
 
-        $externalBackupDir = base_path('../backups');
-        if (! file_exists($externalBackupDir)) {
-            @mkdir($externalBackupDir, 0755, true);
-            if (is_dir($externalBackupDir)) {
-                $this->info("  ✓ Created external backups directory: {$externalBackupDir}");
+        $externalBackupDirs = [
+            base_path('../backups'),
+            base_path('backups'),
+        ];
+        foreach ($externalBackupDirs as $extBkp) {
+            if (! file_exists($extBkp)) {
+                @mkdir($extBkp, 0755, true);
+                if (is_dir($extBkp)) {
+                    $this->info("  ✓ Created external backups directory: {$extBkp}");
+                }
             }
         }
+
+        // Sync existing files from public/uploads to external rayka_uploads
+        $this->syncUploadsToExternal();
 
         // 4. Security .htaccess inside uploads directory (prevent PHP execution, allow images/PDFs)
         $htaccessPath = public_path('uploads/.htaccess');
@@ -85,5 +98,53 @@ class SetupStorageCommand extends Command
         $this->info('✅ Rayka storage and backup directories are ready for Hostinger / ServerByte deployment!');
 
         return Command::SUCCESS;
+    }
+
+    private function syncUploadsToExternal(): void
+    {
+        $uploadsDir = public_path('uploads');
+        if (! is_dir($uploadsDir)) {
+            return;
+        }
+
+        $targets = [
+            base_path('../rayka_uploads'),
+            base_path('rayka_uploads'),
+        ];
+
+        foreach ($targets as $targetDir) {
+            if (! is_dir($targetDir)) {
+                continue;
+            }
+
+            try {
+                $iterator = new \RecursiveIteratorIterator(
+                    new \RecursiveDirectoryIterator($uploadsDir, \RecursiveDirectoryIterator::SKIP_DOTS),
+                    \RecursiveIteratorIterator::SELF_FIRST
+                );
+
+                $syncedCount = 0;
+                foreach ($iterator as $item) {
+                    $subPath = substr($item->getPathname(), strlen($uploadsDir));
+                    $targetPath = $targetDir . $subPath;
+
+                    if ($item->isDir()) {
+                        if (! file_exists($targetPath)) {
+                            @mkdir($targetPath, 0777, true);
+                        }
+                    } else {
+                        if (! file_exists($targetPath) || filemtime($item->getPathname()) > filemtime($targetPath)) {
+                            @copy($item->getPathname(), $targetPath);
+                            $syncedCount++;
+                        }
+                    }
+                }
+                if ($syncedCount > 0) {
+                    $this->line("  ✓ Mirrored {$syncedCount} uploaded files to: {$targetDir}");
+                }
+            } catch (\Throwable $e) {
+                // Silently skip if recursion fails
+            }
+        }
     }
 }

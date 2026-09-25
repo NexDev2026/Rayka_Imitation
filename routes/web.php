@@ -265,6 +265,8 @@ Route::get('/rayka-deploy', function (\Illuminate\Http\Request $request) {
 
     $dbStatus = '';
     $migrateOutput = '';
+    $backupOutput = '';
+
     try {
         \Illuminate\Support\Facades\DB::connection()->getPdo();
         $dbName = \Illuminate\Support\Facades\DB::connection()->getDatabaseName();
@@ -282,18 +284,51 @@ Route::get('/rayka-deploy', function (\Illuminate\Http\Request $request) {
                 $migrateOutput .= "\nFULL CATALOGUE SEEDED:\n" . \Illuminate\Support\Facades\Artisan::output();
             }
         }
+
+        // Self-Healing: Ensure category_nav_group has all mega-menu relationships
+        try {
+            $womenNavCount = \Illuminate\Support\Facades\DB::table('category_nav_group')->where('nav_group_id', 2)->count();
+            if ($womenNavCount < 4) {
+                $prodJson = database_path('seeders/rayka_production_data.json');
+                if (file_exists($prodJson)) {
+                    $prodData = json_decode(file_get_contents($prodJson), true);
+                    if (!empty($prodData['category_nav_group'])) {
+                        \Illuminate\Support\Facades\DB::table('category_nav_group')->delete();
+                        foreach (array_chunk($prodData['category_nav_group'], 50) as $chunk) {
+                            \Illuminate\Support\Facades\DB::table('category_nav_group')->insert($chunk);
+                        }
+                        $migrateOutput .= "\n✓ Mega-Menu Self-Healed: Seeded " . count($prodData['category_nav_group']) . " category-nav relations!";
+                    }
+                }
+            }
+        } catch (\Throwable $e) {
+            $migrateOutput .= "\n! Mega-menu check note: " . $e->getMessage();
+        }
+
+        // On-Demand Database Backup Snapshot
+        if ($request->query('backup')) {
+            \Illuminate\Support\Facades\Artisan::call('db:backup', ['--no-mail' => true]);
+            $backupOutput = \Illuminate\Support\Facades\Artisan::output();
+        }
+
     } catch (\Throwable $e) {
         $dbStatus = 'Database issue: ' . $e->getMessage();
         $migrateOutput = 'Migration skipped due to database status: ' . $e->getMessage();
     }
 
     $catalogueStats = '';
+    $womenCatList = '';
     try {
         $pCount = \App\Models\Product::count();
         $cCount = \App\Models\Category::count();
         $bCount = \App\Models\HomeBanner::count();
         $iCount = \App\Models\ProductImage::count();
         $catalogueStats = "Products: {$pCount} | Categories: {$cCount} | Banners: {$bCount} | Product Images: {$iCount}";
+
+        $womenGroup = \App\Models\NavGroup::with('categories')->where('slug', 'women')->first();
+        if ($womenGroup) {
+            $womenCatList = $womenGroup->categories->pluck('name')->implode(', ');
+        }
     } catch (\Throwable $e) {
         $catalogueStats = 'Catalogue note: ' . $e->getMessage();
     }
@@ -314,6 +349,23 @@ Route::get('/rayka-deploy', function (\Illuminate\Http\Request $request) {
         $cacheOutput = 'Cache note: ' . $e->getMessage();
     }
 
+    // List recent backups found on host
+    $backupFilesInfo = [];
+    $checkBackupDirs = [
+        'Storage App Backups' => storage_path('app/backups'),
+        'External Root Backups (/backups)' => base_path('../backups'),
+        'Local App Backups (/backups)' => base_path('backups'),
+    ];
+    foreach ($checkBackupDirs as $label => $bDir) {
+        if (is_dir($bDir)) {
+            $found = glob($bDir . '/*.sql*');
+            $backupFilesInfo[] = "<b>{$label}</b> (" . count($found) . " files): " . implode(', ', array_map('basename', array_slice($found, -3)));
+        } else {
+            $backupFilesInfo[] = "<b>{$label}</b>: Directory not found";
+        }
+    }
+    $backupsSummary = implode("<br>", $backupFilesInfo);
+
     $tokenParam = urlencode($secret);
 
     return response("<div style='background:#1a1412;color:#FAF7F0;padding:30px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;max-width:880px;margin:40px auto;border-radius:16px;border:1px solid #D4AF6A;box-shadow:0 10px 25px rgba(0,0,0,0.5);'>
@@ -321,19 +373,28 @@ Route::get('/rayka-deploy', function (\Illuminate\Http\Request $request) {
         
         <h4 style='color:#D4AF6A;margin-bottom:6px;'>1. Current Database & Catalogue Status:</h4>
         <div style='background:#2E180E;padding:12px;border-radius:8px;border-left:4px solid #4ade80;margin-bottom:10px;'>
-            <p style='margin:0;color:#FAF7F0;font-weight:bold;font-size:13px;'>📊 {$catalogueStats}</p>
+            <p style='margin:0 0 6px 0;color:#FAF7F0;font-weight:bold;font-size:13px;'>📊 {$catalogueStats}</p>
+            <p style='margin:0;color:#D4AF6A;font-size:12px;'>👑 <b>Women's Dropdown Categories:</b> {$womenCatList}</p>
         </div>
         <pre style='background:#2E180E;padding:12px;border-radius:8px;overflow-x:auto;color:#E7C77B;font-size:12px;'>".e($dbStatus)."\n\n".e($migrateOutput)."</pre>
         
+        " . (!empty($backupOutput) ? "<h4 style='color:#D4AF6A;margin-bottom:6px;'>💾 On-Demand Database Backup Execution:</h4><pre style='background:#2E180E;padding:12px;border-radius:8px;overflow-x:auto;color:#4ade80;font-size:12px;'>" . e($backupOutput) . "</pre>" : "") . "
+
         <h4 style='color:#D4AF6A;margin-bottom:6px;'>2. Storage & Static Media Routing:</h4>
         <pre style='background:#2E180E;padding:12px;border-radius:8px;overflow-x:auto;color:#E7C77B;font-size:12px;'>".e($storageOutput)."</pre>
+
+        <h4 style='color:#D4AF6A;margin-bottom:6px;'>3. Backup Folders Status on Server:</h4>
+        <div style='background:#2E180E;padding:12px;border-radius:8px;color:#FAF7F0;font-size:12px;line-height:1.6;'>
+            {$backupsSummary}
+        </div>
         
-        <h4 style='color:#D4AF6A;margin-bottom:6px;'>3. Application Cache Refresh:</h4>
+        <h4 style='color:#D4AF6A;margin-bottom:6px;margin-top:16px;'>4. Application Cache Refresh:</h4>
         <pre style='background:#2E180E;padding:12px;border-radius:8px;overflow-x:auto;color:#E7C77B;font-size:12px;'>".e($cacheOutput)."</pre>
         
         <div style='background:rgba(212,175,106,0.1);padding:15px;border-radius:10px;border:1px solid #D4AF6A;margin-top:20px;'>
             <p style='color:#E7C77B;font-weight:bold;margin:0 0 10px 0;'>⚡ Quick Sync Actions:</p>
-            <a href='/rayka-deploy?token={$tokenParam}&seed=1' style='display:inline-block;background:#D4AF6A;color:#1A1412;padding:8px 16px;border-radius:6px;font-weight:bold;text-decoration:none;margin-right:10px;margin-bottom:6px;'>🔄 Sync Full Catalogue (741 Products & Images)</a>
+            <a href='/rayka-deploy?token={$tokenParam}&seed=1' style='display:inline-block;background:#D4AF6A;color:#1A1412;padding:8px 16px;border-radius:6px;font-weight:bold;text-decoration:none;margin-right:10px;margin-bottom:6px;'>🔄 Sync Full Catalogue (710 Products & Multi-Angle Photos)</a>
+            <a href='/rayka-deploy?token={$tokenParam}&backup=1' style='display:inline-block;background:#1e40af;color:#FAF7F0;padding:8px 16px;border-radius:6px;font-weight:bold;text-decoration:none;margin-right:10px;margin-bottom:6px;'>💾 Run Instant Database Backup Now</a>
             <a href='/rayka-deploy?token={$tokenParam}&fresh=1' style='display:inline-block;background:#854d0e;color:#FAF7F0;padding:8px 16px;border-radius:6px;font-weight:bold;text-decoration:none;margin-right:10px;margin-bottom:6px;'>⚠️ Fresh Migrate & Re-Seed</a>
             <a href='/' style='display:inline-block;background:#16a34a;color:#fff;padding:8px 16px;border-radius:6px;font-weight:bold;text-decoration:none;'>🏠 Go to Storefront</a>
         </div>

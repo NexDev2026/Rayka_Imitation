@@ -185,12 +185,22 @@ class DatabaseBackupCommand extends Command
         $rotatedCount = $this->rotateOldBackups($backupDir, 7);
 
         // Mirror backup to external root backups folder (e.g. /home/user/backups on Hostinger / ServerByte)
-        $externalBackupDir = base_path('../backups');
-        if (is_dir($externalBackupDir) || @mkdir($externalBackupDir, 0755, true)) {
-            if (is_dir($externalBackupDir) && is_writable($externalBackupDir)) {
-                @copy($filepath, $externalBackupDir.'/'.$filename);
-                $this->rotateOldBackups($externalBackupDir, 7);
-                $this->info("Backup also saved to external folder: {$externalBackupDir}/{$filename}");
+        $externalDirs = [
+            base_path('../backups'),
+            base_path('backups'),
+        ];
+        foreach ($externalDirs as $dir) {
+            try {
+                if (! file_exists($dir)) {
+                    @mkdir($dir, 0755, true);
+                }
+                if (is_dir($dir) && is_writable($dir)) {
+                    @copy($filepath, $dir.'/'.$filename);
+                    $this->rotateOldBackups($dir, 7);
+                    $this->info("Backup also saved to: {$dir}/{$filename}");
+                }
+            } catch (\Throwable $e) {
+                // Continue to next destination
             }
         }
 

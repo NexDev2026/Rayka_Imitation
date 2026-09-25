@@ -28,7 +28,7 @@ class RegisterOtpMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Verify Your Royal Account — Rayka',
+            subject: $this->otp . ' – your Rayka registration code',
         );
     }
 

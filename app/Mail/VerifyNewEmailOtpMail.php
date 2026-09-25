@@ -30,7 +30,7 @@ class VerifyNewEmailOtpMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Verify New Email Address — Rayka',
+            subject: $this->otp . ' – your Rayka email verification code',
         );
     }
 

@@ -21,7 +21,7 @@ class OrderPlacedCustomerMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Order Confirmed: #'.$this->order->order_number.' — Rayka Imitation Jewellery',
+            subject: 'Payment successful for Rayka Imitation Jewellery - Order #'.$this->order->order_number,
         );
     }
 

@@ -29,7 +29,7 @@ class LoginOtpMail extends Mailable
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Your Royal Verification Code — Rayka',
+            subject: $this->otp . ' – your Rayka login code',
         );
     }
 
