@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Support\Facades\Log;
 
 class Order extends Model
 {
@@ -233,14 +234,19 @@ class Order extends Model
     {
         $this->loadMissing('items.product');
         foreach ($this->items as $item) {
+            $qty = max(1, (int) $item->quantity);
             if ($item->product) {
-                $item->product->increment('stock_quantity', $item->quantity);
+                $item->product->increment('stock_quantity', $qty);
+                Log::info("Inventory Restored: +{$qty} unit(s) for Product #{$item->product_id} ('{$item->product_name}') via Order #{$this->order_number} cancellation/rejection.");
             }
             if ($item->variant_info && $item->product_id) {
                 $variant = ProductVariant::where('product_id', $item->product_id)
                     ->where('value', $item->variant_info)
                     ->first();
-                $variant?->increment('stock_quantity', $item->quantity);
+                if ($variant) {
+                    $variant->increment('stock_quantity', $qty);
+                    Log::info("Variant Inventory Restored: +{$qty} unit(s) for Variant '{$item->variant_info}' on Product #{$item->product_id} via Order #{$this->order_number}.");
+                }
             }
         }
     }
@@ -249,14 +255,19 @@ class Order extends Model
     {
         $this->loadMissing('items.product');
         foreach ($this->items as $item) {
+            $qty = max(1, (int) $item->quantity);
             if ($item->product) {
-                $item->product->decrement('stock_quantity', $item->quantity);
+                $item->product->decrement('stock_quantity', $qty);
+                Log::info("Inventory Deducted: -{$qty} unit(s) for Product #{$item->product_id} ('{$item->product_name}') via Order #{$this->order_number} re-activation.");
             }
             if ($item->variant_info && $item->product_id) {
                 $variant = ProductVariant::where('product_id', $item->product_id)
                     ->where('value', $item->variant_info)
                     ->first();
-                $variant?->decrement('stock_quantity', $item->quantity);
+                if ($variant) {
+                    $variant->decrement('stock_quantity', $qty);
+                    Log::info("Variant Inventory Deducted: -{$qty} unit(s) for Variant '{$item->variant_info}' on Product #{$item->product_id} via Order #{$this->order_number}.");
+                }
             }
         }
     }

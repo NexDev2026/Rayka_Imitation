@@ -239,7 +239,13 @@ class AdminOrderController extends Controller
             }
         });
 
-        return back()->with('success', "Order #{$order->order_number} status updated to '{$order->status}'. Customer has been notified.");
+        $msg = "Order #{$order->order_number} status updated to '{$order->status}'.";
+        if (in_array($newStatus, ['Rejected', 'Cancelled']) && ! in_array($oldStatus, ['Rejected', 'Cancelled'])) {
+            $msg .= ' All ordered units have been safely returned to available stock.';
+        }
+        $msg .= ' Customer has been notified.';
+
+        return back()->with('success', $msg);
     }
 
     public function downloadInvoice($id)
