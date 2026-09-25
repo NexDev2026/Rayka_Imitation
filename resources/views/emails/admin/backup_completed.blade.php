@@ -16,27 +16,27 @@
     <table class="detail-table">
       <tr>
         <td class="lbl">Archive Filename</td>
-        <td class="val font-mono" style="font-size:12px; color:#D4AF6A;">{{ $data['filename'] }}</td>
+        <td class="val font-mono" style="font-size:12px; color:#D4AF6A;">{{ $data['filename'] ?? 'rayka_backup.sql.gz' }}</td>
       </tr>
       <tr>
         <td class="lbl">Archive Size</td>
-        <td class="val" style="color:#10B981; font-weight:800;">{{ $data['size_readable'] }}</td>
+        <td class="val" style="color:#10B981; font-weight:800;">{{ $data['size_readable'] ?? 'N/A' }}</td>
       </tr>
       <tr>
         <td class="lbl">Tables Exported</td>
-        <td class="val">{{ $data['tables'] }} tables</td>
+        <td class="val">{{ $data['tables'] ?? 0 }} tables</td>
       </tr>
       <tr>
         <td class="lbl">Rows Dumped</td>
-        <td class="val">{{ number_format($data['rows']) }} rows</td>
+        <td class="val">{{ number_format($data['rows'] ?? 0) }} rows</td>
       </tr>
       <tr>
         <td class="lbl">Execution Duration</td>
-        <td class="val">{{ $data['duration_sec'] }} seconds</td>
+        <td class="val">{{ $data['duration_sec'] ?? 0 }} seconds</td>
       </tr>
       <tr>
         <td class="lbl">7-Day Rotated Files</td>
-        <td class="val">{{ $data['rotated'] }} old files pruned</td>
+        <td class="val">{{ $data['rotated'] ?? 0 }} old files pruned</td>
       </tr>
       <tr>
         <td class="lbl">Timestamp</td>

@@ -19,10 +19,10 @@
 @section('schema_markup')
 <script type="application/ld+json">
 {
-  "@context": "http://schema.org",
-  "@type": "Order",
+  "{{ '@context' }}": "https://schema.org",
+  "{{ '@type' }}": "Order",
   "merchant": {
-    "@type": "Organization",
+    "{{ '@type' }}": "Organization",
     "name": "Rayka Imitation Jewellery"
   },
   "orderNumber": "{{ $order->order_number }}",
@@ -30,7 +30,7 @@
   "price": "{{ number_format($order->total_amount, 2, '.', '') }}",
   "orderStatus": "http://schema.org/Order{{ $status === 'Delivered' ? 'Delivered' : ($status === 'Shipped' ? 'InTransit' : 'Processing') }}",
   "potentialAction": {
-    "@type": "ViewAction",
+    "{{ '@type' }}": "ViewAction",
     "name": "Track Order",
     "target": "{{ route('order.track', ['order_number' => $order->order_number]) }}"
   }

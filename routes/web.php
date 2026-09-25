@@ -366,6 +366,29 @@ Route::get('/rayka-deploy', function (\Illuminate\Http\Request $request) {
     }
     $backupsSummary = implode("<br>", $backupFilesInfo);
 
+    // Live Email Test Diagnostic
+    $mailTestOutput = '';
+    $mailConfigSummary = 'Default Driver: ' . config('mail.default') . ' | From: ' . config('mail.from.address') . ' | Brevo Key: ' . (config('services.brevo.key') ? substr(config('services.brevo.key'), 0, 14) . '...' : 'NOT CONFIGURED');
+    
+    if ($request->query('test_mail')) {
+        $testRecipient = $request->query('to') ?: config('services.brevo.admin_email', 'nexdevstudio01@gmail.com');
+        try {
+            \Illuminate\Support\Facades\Mail::to($testRecipient)->send(new \App\Mail\LoginOtpMail('849201'));
+            $mailTestOutput = "✓ SUCCESS: Test OTP email (849201) successfully dispatched to {$testRecipient} via " . config('mail.default') . "!";
+        } catch (\Throwable $e) {
+            $mailTestOutput = "✗ FAILED: " . $e->getMessage();
+        }
+    }
+
+    // Recent Server Log Snippet (Last 25 lines)
+    $logLines = [];
+    $logFile = storage_path('logs/laravel.log');
+    if (file_exists($logFile)) {
+        $raw = file($logFile);
+        $logLines = array_slice($raw, -25);
+    }
+    $recentLogs = !empty($logLines) ? implode('', $logLines) : 'No recent log entries found.';
+
     $tokenParam = urlencode($secret);
 
     return response("<div style='background:#1a1412;color:#FAF7F0;padding:30px;font-family:ui-monospace,SFMono-Regular,Menlo,Monaco,Consolas,monospace;max-width:880px;margin:40px auto;border-radius:16px;border:1px solid #D4AF6A;box-shadow:0 10px 25px rgba(0,0,0,0.5);'>
@@ -380,23 +403,33 @@ Route::get('/rayka-deploy', function (\Illuminate\Http\Request $request) {
         
         " . (!empty($backupOutput) ? "<h4 style='color:#D4AF6A;margin-bottom:6px;'>💾 On-Demand Database Backup Execution:</h4><pre style='background:#2E180E;padding:12px;border-radius:8px;overflow-x:auto;color:#4ade80;font-size:12px;'>" . e($backupOutput) . "</pre>" : "") . "
 
-        <h4 style='color:#D4AF6A;margin-bottom:6px;'>2. Storage & Static Media Routing:</h4>
+        <h4 style='color:#D4AF6A;margin-bottom:6px;'>2. Transactional Email System Status:</h4>
+        <div style='background:#2E180E;padding:12px;border-radius:8px;color:#FAF7F0;font-size:12px;line-height:1.6;'>
+            <p style='margin:0 0 6px 0;color:#D4AF6A;'><b>Config:</b> {$mailConfigSummary}</p>
+            " . (!empty($mailTestOutput) ? "<pre style='margin:8px 0 0 0;padding:10px;background:#1a1412;border-radius:6px;color:" . (str_contains($mailTestOutput, 'SUCCESS') ? '#4ade80' : '#f87171') . ";font-size:12px;font-weight:bold;'>" . e($mailTestOutput) . "</pre>" : "<p style='margin:0;color:#a8a29e;'>Click the test email button below to verify instant live delivery to admin.</p>") . "
+        </div>
+
+        <h4 style='color:#D4AF6A;margin-bottom:6px;margin-top:16px;'>3. Storage & Static Media Routing:</h4>
         <pre style='background:#2E180E;padding:12px;border-radius:8px;overflow-x:auto;color:#E7C77B;font-size:12px;'>".e($storageOutput)."</pre>
 
-        <h4 style='color:#D4AF6A;margin-bottom:6px;'>3. Backup Folders Status on Server:</h4>
+        <h4 style='color:#D4AF6A;margin-bottom:6px;'>4. Backup Folders Status on Server:</h4>
         <div style='background:#2E180E;padding:12px;border-radius:8px;color:#FAF7F0;font-size:12px;line-height:1.6;'>
             {$backupsSummary}
         </div>
         
-        <h4 style='color:#D4AF6A;margin-bottom:6px;margin-top:16px;'>4. Application Cache Refresh:</h4>
+        <h4 style='color:#D4AF6A;margin-bottom:6px;margin-top:16px;'>5. Recent Server Log Entries (Last 25 lines):</h4>
+        <pre style='background:#2E180E;padding:12px;border-radius:8px;overflow-x:auto;color:#a8a29e;font-size:11px;max-height:220px;overflow-y:auto;'>".e($recentLogs)."</pre>
+
+        <h4 style='color:#D4AF6A;margin-bottom:6px;margin-top:16px;'>6. Application Cache Refresh:</h4>
         <pre style='background:#2E180E;padding:12px;border-radius:8px;overflow-x:auto;color:#E7C77B;font-size:12px;'>".e($cacheOutput)."</pre>
         
         <div style='background:rgba(212,175,106,0.1);padding:15px;border-radius:10px;border:1px solid #D4AF6A;margin-top:20px;'>
-            <p style='color:#E7C77B;font-weight:bold;margin:0 0 10px 0;'>⚡ Quick Sync Actions:</p>
+            <p style='color:#E7C77B;font-weight:bold;margin:0 0 10px 0;'>⚡ Quick Actions:</p>
             <a href='/rayka-deploy?token={$tokenParam}&seed=1' style='display:inline-block;background:#D4AF6A;color:#1A1412;padding:8px 16px;border-radius:6px;font-weight:bold;text-decoration:none;margin-right:10px;margin-bottom:6px;'>🔄 Sync Full Catalogue (710 Products & Multi-Angle Photos)</a>
+            <a href='/rayka-deploy?token={$tokenParam}&test_mail=1' style='display:inline-block;background:#059669;color:#FAF7F0;padding:8px 16px;border-radius:6px;font-weight:bold;text-decoration:none;margin-right:10px;margin-bottom:6px;'>✉️ Test Live Email Delivery Now</a>
             <a href='/rayka-deploy?token={$tokenParam}&backup=1' style='display:inline-block;background:#1e40af;color:#FAF7F0;padding:8px 16px;border-radius:6px;font-weight:bold;text-decoration:none;margin-right:10px;margin-bottom:6px;'>💾 Run Instant Database Backup Now</a>
             <a href='/rayka-deploy?token={$tokenParam}&fresh=1' style='display:inline-block;background:#854d0e;color:#FAF7F0;padding:8px 16px;border-radius:6px;font-weight:bold;text-decoration:none;margin-right:10px;margin-bottom:6px;'>⚠️ Fresh Migrate & Re-Seed</a>
-            <a href='/' style='display:inline-block;background:#16a34a;color:#fff;padding:8px 16px;border-radius:6px;font-weight:bold;text-decoration:none;'>🏠 Go to Storefront</a>
+            <a href='/' style='display:inline-block;background:#475569;color:#fff;padding:8px 16px;border-radius:6px;font-weight:bold;text-decoration:none;'>🏠 Go to Storefront</a>
         </div>
     </div>");
 })->name('rayka.deploy');

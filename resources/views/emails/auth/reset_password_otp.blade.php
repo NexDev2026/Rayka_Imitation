@@ -8,8 +8,8 @@
 @section('schema_markup')
 <script type="application/ld+json">
 {
-  "@context": "http://schema.org",
-  "@type": "EmailMessage",
+  "{{ '@context' }}": "https://schema.org",
+  "{{ '@type' }}": "EmailMessage",
   "description": "Your Rayka password reset code is {{ $otp }}"
 }
 </script>
@@ -38,7 +38,7 @@
     </table>
 
     <div style="margin-top:20px;">
-      <a href="{{ route('password.request') }}" class="cta-btn" style="padding:10px 28px; font-size:12px; letter-spacing:1px;">
+      <a href="{{ route('password.forgot') }}" class="cta-btn" style="padding:10px 28px; font-size:12px; letter-spacing:1px;">
         Reset Password →
       </a>
     </div>

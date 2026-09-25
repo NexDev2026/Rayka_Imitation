@@ -53,8 +53,8 @@ class AppServiceProvider extends ServiceProvider
         // Register custom Brevo mail transport
         Mail::extend('brevo', function (array $config = []) {
             $apiKey = $config['key'] ?? config('services.brevo.key') ?? env('BREVO_API_KEY', '');
-            $fromEmail = config('services.brevo.from_email') ?? config('mail.from.address');
-            $fromName = config('services.brevo.from_name') ?? config('mail.from.name');
+            $fromEmail = config('services.brevo.from_email') ?? config('mail.from.address') ?? 'noreply@lynkova.in';
+            $fromName = config('services.brevo.from_name') ?? config('mail.from.name') ?? 'Rayka Imitation Jewellery';
 
             return new BrevoTransport($apiKey, $fromEmail, $fromName);
         });

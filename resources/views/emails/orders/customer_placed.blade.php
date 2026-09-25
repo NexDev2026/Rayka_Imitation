@@ -8,10 +8,10 @@
 @section('schema_markup')
 <script type="application/ld+json">
 {
-  "@context": "http://schema.org",
-  "@type": "Order",
+  "{{ '@context' }}": "https://schema.org",
+  "{{ '@type' }}": "Order",
   "merchant": {
-    "@type": "Organization",
+    "{{ '@type' }}": "Organization",
     "name": "Rayka Imitation Jewellery"
   },
   "orderNumber": "{{ $order->order_number }}",
@@ -21,15 +21,15 @@
   "acceptedOffer": [
     @foreach($order->items as $idx => $item)
     {
-      "@type": "Offer",
+      "{{ '@type' }}": "Offer",
       "itemOffered": {
-        "@type": "Product",
+        "{{ '@type' }}": "Product",
         "name": "{{ addslashes($item->product_name) }}"
       },
       "price": "{{ number_format($item->subtotal, 2, '.', '') }}",
       "priceCurrency": "INR",
       "eligibleQuantity": {
-        "@type": "QuantitativeValue",
+        "{{ '@type' }}": "QuantitativeValue",
         "value": "{{ $item->quantity }}"
       }
     }{{ $loop->last ? '' : ',' }}
@@ -37,7 +37,7 @@
   ],
   "orderStatus": "http://schema.org/OrderProcessing",
   "potentialAction": {
-    "@type": "ViewAction",
+    "{{ '@type' }}": "ViewAction",
     "name": "Track Order",
     "target": "{{ route('order.track', ['order_number' => $order->order_number]) }}"
   }

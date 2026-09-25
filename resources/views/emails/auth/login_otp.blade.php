@@ -8,15 +8,15 @@
 @section('schema_markup')
 <script type="application/ld+json">
 {
-  "@context": "http://schema.org",
-  "@type": "EmailMessage",
+  "{{ '@context' }}": "https://schema.org",
+  "{{ '@type' }}": "EmailMessage",
   "description": "Your Rayka login code is {{ $otp }}"
 }
 </script>
 @endsection
 
 @section('content')
-  <div class="greeting">Hi {{ $user->name ?? 'there' }},</div>
+  <div class="greeting">Hi there,</div>
   <p class="message-text">
     Enter this verification code to continue signing in to your <strong>Rayka Imitation Jewellery</strong> account:
   </p>

@@ -8,8 +8,8 @@
 @section('schema_markup')
 <script type="application/ld+json">
 {
-  "@context": "http://schema.org",
-  "@type": "EmailMessage",
+  "{{ '@context' }}": "https://schema.org",
+  "{{ '@type' }}": "EmailMessage",
   "description": "Your Rayka email verification code is {{ $otp }}"
 }
 </script>
