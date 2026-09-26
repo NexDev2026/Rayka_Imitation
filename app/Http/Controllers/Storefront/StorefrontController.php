@@ -133,16 +133,7 @@ class StorefrontController extends Controller
     public function navGroupPage($slug)
     {
         $navGroup = NavGroup::where('slug', $slug)->where('is_active', true)->firstOrFail();
-        $categories = $navGroup->categories()->where('is_active', true)->get();
-        if ($slug === 'women' && $categories->count() < 3) {
-            $categories = \App\Models\Category::whereIn('slug', [
-                'necklaces-sets', 'earrings-jhumkas', 'bangles', 'mangalsutras', 'pendants', 'rings',
-            ])->where('is_active', true)->get();
-        } elseif ($slug === 'men' && $categories->count() < 3) {
-            $categories = \App\Models\Category::whereIn('slug', [
-                'chains', 'rings', 'bracelets', '2-kaddi', 'kadas', 'pendants', 'merrige-navrati-special',
-            ])->where('is_active', true)->get();
-        }
+        $categories = $navGroup->categories()->where('is_active', true)->orderBy('category_nav_group.sort_order', 'asc')->get();
         $categoryIds = $categories->pluck('id');
 
         $perPage = 12;
@@ -150,6 +141,10 @@ class StorefrontController extends Controller
 
         // Retry loop: SQLite on Windows can throw error 14 (CANTOPEN) transiently
         $products = $this->sqliteRetry(function () use ($categoryIds, $perPage, $requestedPage) {
+            if ($categoryIds->isEmpty()) {
+                return Product::whereRaw('1 = 0')->paginate($perPage);
+            }
+
             $total = Product::whereIn('category_id', $categoryIds)->where('is_active', true)->count();
             $lastPage = max(1, (int) ceil($total / $perPage));
             $safePage = min($requestedPage, $lastPage);

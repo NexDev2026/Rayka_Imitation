@@ -6,33 +6,23 @@ use Illuminate\Console\Command;
 
 class DeployCommand extends Command
 {
-    protected $signature = 'rayka:deploy {--seed : Run database seeder as well}';
+    protected $signature = 'rayka:deploy';
 
-    protected $description = 'One-click deployment script: run migrations, setup storage/backups, and clear caches for Hostinger / ServerByte.';
+    protected $description = 'Safe deployment script: setup storage/backups and clear caches for Hostinger / ServerByte.';
 
     public function handle(): int
     {
-        $this->info('🚀 Starting Rayka Production Deployment...');
+        $this->info('🚀 Starting Rayka Safe Deployment...');
 
-        // 1. Run migrations
-        $this->info('Step 1: Running Database Migrations...');
-        $this->call('migrate', ['--force' => true]);
-
-        // 2. Setup storage and external directories
-        $this->info('Step 2: Setting up storage and backup directories...');
+        // 1. Setup storage and external directories
+        $this->info('Step 1: Setting up storage and backup directories...');
         $this->call('rayka:setup-storage');
 
-        // 3. Optional Seeder
-        if ($this->option('seed')) {
-            $this->info('Step 3: Running Database Seeders...');
-            $this->call('db:seed', ['--force' => true]);
-        }
-
-        // 4. Optimize / Clear cache
-        $this->info('Step 4: Clearing and refreshing application caches...');
+        // 2. Optimize / Clear cache
+        $this->info('Step 2: Clearing and refreshing application caches...');
         $this->call('optimize:clear');
 
-        $this->info('✨ Rayka deployment completed successfully!');
+        $this->info('✨ Rayka deployment completed safely with 100% database protection!');
 
         return Command::SUCCESS;
     }

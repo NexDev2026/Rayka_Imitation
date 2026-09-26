@@ -25,6 +25,7 @@
 
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12 space-y-12">
         
+        @if($categories->isNotEmpty())
         <!-- Category Tiles Grid under this Nav Group -->
         <div>
             <h3 class="font-serif-royal text-xl font-bold text-[#4A2C1D] mb-6 text-center">
@@ -43,6 +44,7 @@
                 @endforeach
             </div>
         </div>
+        @endif
 
         <!-- Curated Products Grid -->
         <div>
