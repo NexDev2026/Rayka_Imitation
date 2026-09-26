@@ -28,12 +28,12 @@
                 <div class="space-y-3">
                     <div>
                         <label class="block font-semibold text-stone-700 mb-1">Official UPI ID (VPA) *</label>
-                        <input type="text" name="upi_id" value="{{ old('upi_id', $settings['upi_id']) }}" required class="w-full border rounded-lg p-2.5 font-mono">
+                        <input type="text" name="upi_id" value="{{ old('upi_id', $settings['upi_id']) }}" required class="w-full border rounded-lg p-2.5 font-mono" placeholder="e.g. merchant@icici or 9876543210@upi">
                     </div>
 
                     <div>
                         <label class="block font-semibold text-stone-700 mb-1">UPI Payee Display Name</label>
-                        <input type="text" name="upi_payee_name" value="{{ old('upi_payee_name', $settings['upi_payee_name']) }}" class="w-full border rounded-lg p-2.5">
+                        <input type="text" name="upi_payee_name" value="{{ old('upi_payee_name', $settings['upi_payee_name']) }}" class="w-full border rounded-lg p-2.5" placeholder="e.g. Rayka Imitation Jewellery Pvt Ltd">
                     </div>
 
                     <div>
@@ -82,59 +82,59 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label class="block font-semibold text-stone-700 mb-1">Store Name</label>
-                    <input type="text" name="store_name" value="{{ old('store_name', $settings['store_name']) }}" class="w-full border rounded-lg p-2.5">
+                    <input type="text" name="store_name" value="{{ old('store_name', $settings['store_name']) }}" class="w-full border rounded-lg p-2.5" placeholder="e.g. Rayka Imitation Jewellery">
                 </div>
 
                 <div>
                     <label class="block font-semibold text-stone-700 mb-1">Store Tagline</label>
-                    <input type="text" name="tagline" value="{{ old('tagline', $settings['tagline']) }}" class="w-full border rounded-lg p-2.5">
+                    <input type="text" name="tagline" value="{{ old('tagline', $settings['tagline']) }}" class="w-full border rounded-lg p-2.5" placeholder="e.g. Royal Heritage & 1 Gram Micro Gold Jewellery">
                 </div>
 
                 <div>
                     <label class="block font-semibold text-stone-700 mb-1">Helpline Phone</label>
-                    <input type="text" name="store_phone" value="{{ old('store_phone', $settings['store_phone']) }}" class="w-full border rounded-lg p-2.5" placeholder="+91 xxxxxxxxx">
+                    <input type="text" name="store_phone" value="{{ old('store_phone', $settings['store_phone']) }}" class="w-full border rounded-lg p-2.5" placeholder="e.g. +91 98765 43210">
                 </div>
 
                 <div>
                     <label class="block font-semibold text-stone-700 mb-1">WhatsApp Number</label>
-                    <input type="text" name="store_whatsapp" value="{{ old('store_whatsapp', $settings['store_whatsapp']) }}" class="w-full border rounded-lg p-2.5" placeholder="+91 xxxxxxxxx">
+                    <input type="text" name="store_whatsapp" value="{{ old('store_whatsapp', $settings['store_whatsapp']) }}" class="w-full border rounded-lg p-2.5" placeholder="e.g. +91 98765 43210">
                 </div>
 
                 <div>
                     <label class="block font-semibold text-stone-700 mb-1">Alternate Phone (Optional)</label>
-                    <input type="text" name="store_alt_phone" value="{{ old('store_alt_phone', $settings['store_alt_phone'] ?? '') }}" class="w-full border rounded-lg p-2.5" placeholder="+91 xxxxxxxxx">
+                    <input type="text" name="store_alt_phone" value="{{ old('store_alt_phone', $settings['store_alt_phone'] ?? '') }}" class="w-full border rounded-lg p-2.5" placeholder="e.g. +91 98765 43211">
                 </div>
 
                 <div>
                     <label class="block font-semibold text-stone-700 mb-1">Customer Support / Care Email</label>
-                    <input type="email" name="store_email" value="{{ old('store_email', $settings['store_email']) }}" class="w-full border rounded-lg p-2.5" placeholder="example@gmail.com">
+                    <input type="email" name="store_email" value="{{ old('store_email', $settings['store_email']) }}" class="w-full border rounded-lg p-2.5" placeholder="e.g. care@raykajewellery.com">
                     <p class="text-[10px] text-stone-400 mt-1">Displayed to customers in order confirmation emails, invoices, and help sections.</p>
                 </div>
 
                 <div>
                     <label class="block font-semibold text-stone-700 mb-1">Admin Alert / Notification Email</label>
-                    <input type="email" name="admin_email" value="{{ old('admin_email', $settings['admin_email'] ?? '') }}" class="w-full border rounded-lg p-2.5" placeholder="example@gmail.com">
+                    <input type="email" name="admin_email" value="{{ old('admin_email', $settings['admin_email'] ?? '') }}" class="w-full border rounded-lg p-2.5" placeholder="e.g. admin@raykajewellery.com">
                     <p class="text-[10px] text-stone-400 mt-1">Receives instant notifications for new orders, user registrations, cancellations, and backups.</p>
                 </div>
 
                 <div>
                     <label class="block font-semibold text-stone-700 mb-1">Instagram Profile URL</label>
-                    <input type="url" name="instagram_url" value="{{ old('instagram_url', $settings['instagram_url'] ?? '') }}" class="w-full border rounded-lg p-2.5" placeholder="https://www.instagram.com/rayka_imitation_amdavad/?hl=en">
+                    <input type="url" name="instagram_url" value="{{ old('instagram_url', $settings['instagram_url'] ?? '') }}" class="w-full border rounded-lg p-2.5" placeholder="e.g. https://www.instagram.com/your_boutique">
                 </div>
 
                 <div>
                     <label class="block font-semibold text-stone-700 mb-1">Instagram Display Handle</label>
-                    <input type="text" name="instagram_handle" value="{{ old('instagram_handle', $settings['instagram_handle'] ?? '') }}" class="w-full border rounded-lg p-2.5" placeholder="@rayka_imitation_amdavad">
+                    <input type="text" name="instagram_handle" value="{{ old('instagram_handle', $settings['instagram_handle'] ?? '') }}" class="w-full border rounded-lg p-2.5" placeholder="e.g. @your_boutique">
                 </div>
 
                 <div class="sm:col-span-2">
                     <label class="block font-semibold text-stone-700 mb-1">Google Maps Direction Link</label>
-                    <input type="url" name="google_map_url" value="{{ old('google_map_url', $settings['google_map_url'] ?? '') }}" class="w-full border rounded-lg p-2.5" placeholder="https://share.google/vaohJv28SH29hBV8j">
+                    <input type="url" name="google_map_url" value="{{ old('google_map_url', $settings['google_map_url'] ?? '') }}" class="w-full border rounded-lg p-2.5" placeholder="e.g. https://maps.app.goo.gl/your-location or Google Maps Link">
                 </div>
 
                 <div class="sm:col-span-2">
                     <label class="block font-semibold text-stone-700 mb-1">Boutique Physical Address</label>
-                    <textarea name="store_address" rows="2" class="w-full border rounded-lg p-2.5">{{ old('store_address', $settings['store_address']) }}</textarea>
+                    <textarea name="store_address" rows="2" class="w-full border rounded-lg p-2.5" placeholder="e.g. Shop No. 12, Complex Name, Near Landmark, Area, City - 380001, State">{{ old('store_address', $settings['store_address']) }}</textarea>
                 </div>
             </div>
         </div>
@@ -148,20 +148,20 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label class="block font-semibold text-stone-700 mb-1">Free Shipping Threshold (₹)</label>
-                    <input type="number" name="free_shipping_min" value="{{ old('free_shipping_min', $settings['free_shipping_min']) }}" class="w-full border rounded-lg p-2.5">
+                    <input type="number" name="free_shipping_min" value="{{ old('free_shipping_min', $settings['free_shipping_min']) }}" class="w-full border rounded-lg p-2.5" placeholder="e.g. 999">
                 </div>
 
                 <div>
                     <label class="block font-semibold text-stone-700 mb-1">Standard Flat Courier Fee (₹)</label>
-                    <input type="number" name="shipping_flat_fee" value="{{ old('shipping_flat_fee', $settings['shipping_flat_fee']) }}" class="w-full border rounded-lg p-2.5">
+                    <input type="number" name="shipping_flat_fee" value="{{ old('shipping_flat_fee', $settings['shipping_flat_fee']) }}" class="w-full border rounded-lg p-2.5" placeholder="e.g. 99">
                 </div>
 
                 <div class="sm:col-span-2 space-y-2">
                     <label class="block font-semibold text-stone-700">Homepage Trust Badges Text:</label>
-                    <input type="text" name="trust_badge_1" value="{{ old('trust_badge_1', $settings['trust_badge_1']) }}" class="w-full border rounded-lg p-2 mb-1" placeholder="Badge 1">
-                    <input type="text" name="trust_badge_2" value="{{ old('trust_badge_2', $settings['trust_badge_2']) }}" class="w-full border rounded-lg p-2 mb-1" placeholder="Badge 2">
-                    <input type="text" name="trust_badge_3" value="{{ old('trust_badge_3', $settings['trust_badge_3']) }}" class="w-full border rounded-lg p-2 mb-1" placeholder="Badge 3">
-                    <input type="text" name="trust_badge_4" value="{{ old('trust_badge_4', $settings['trust_badge_4']) }}" class="w-full border rounded-lg p-2" placeholder="Badge 4">
+                    <input type="text" name="trust_badge_1" value="{{ old('trust_badge_1', $settings['trust_badge_1']) }}" class="w-full border rounded-lg p-2 mb-1" placeholder="e.g. Free Express Shipping">
+                    <input type="text" name="trust_badge_2" value="{{ old('trust_badge_2', $settings['trust_badge_2']) }}" class="w-full border rounded-lg p-2 mb-1" placeholder="e.g. 100% Secure Payment">
+                    <input type="text" name="trust_badge_3" value="{{ old('trust_badge_3', $settings['trust_badge_3']) }}" class="w-full border rounded-lg p-2 mb-1" placeholder="e.g. Easy Replacement Guarantee">
+                    <input type="text" name="trust_badge_4" value="{{ old('trust_badge_4', $settings['trust_badge_4']) }}" class="w-full border rounded-lg p-2" placeholder="e.g. Heritage Quality Craftsmanship">
                 </div>
             </div>
         </div>
@@ -188,17 +188,17 @@
             <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div>
                     <label class="block font-semibold text-stone-700 mb-1">Section Heading Title</label>
-                    <input type="text" name="showcase_title" value="{{ old('showcase_title', $settings['showcase_title']) }}" class="w-full border rounded-lg p-2.5 bg-white">
+                    <input type="text" name="showcase_title" value="{{ old('showcase_title', $settings['showcase_title']) }}" class="w-full border rounded-lg p-2.5 bg-white" placeholder="e.g. Curated Royal Collections">
                 </div>
 
                 <div>
                     <label class="block font-semibold text-stone-700 mb-1">Products Count Per Tab</label>
-                    <input type="number" name="showcase_limit" min="4" max="25" value="{{ old('showcase_limit', $settings['showcase_limit']) }}" class="w-full border rounded-lg p-2.5 bg-white">
+                    <input type="number" name="showcase_limit" min="4" max="25" value="{{ old('showcase_limit', $settings['showcase_limit']) }}" class="w-full border rounded-lg p-2.5 bg-white" placeholder="e.g. 10">
                 </div>
 
                 <div class="sm:col-span-2">
                     <label class="block font-semibold text-stone-700 mb-1">Section Subtitle</label>
-                    <input type="text" name="showcase_subtitle" value="{{ old('showcase_subtitle', $settings['showcase_subtitle']) }}" class="w-full border rounded-lg p-2.5 bg-white">
+                    <input type="text" name="showcase_subtitle" value="{{ old('showcase_subtitle', $settings['showcase_subtitle']) }}" class="w-full border rounded-lg p-2.5 bg-white" placeholder="e.g. Select a collection below to discover hand-finished 1 gram micro gold masterpieces.">
                 </div>
 
                 <!-- Category Checkboxes -->
@@ -258,7 +258,7 @@
                         Instant Database Backup
                     </h4>
                     <p class="text-[11px] text-stone-500 mb-4 leading-relaxed">
-                        Creates an immediate compressed snapshot (<code class="font-mono text-[10px]">.sql.gz</code>), saves to <code class="font-mono text-[10px]">/backups</code> outside <code class="font-mono text-[10px]">public_html</code>, and emails it with attachment to <strong class="text-stone-700">{{ $settings['admin_email'] ?: 'Admin Email' }}</strong>.
+                        Creates an immediate compressed snapshot (<code class="font-mono text-[10px]">.zip</code>), saves to <code class="font-mono text-[10px]">/backups</code> outside <code class="font-mono text-[10px]">public_html</code>, and emails it with attachment to <strong class="text-stone-700">{{ $settings['admin_email'] ?: 'Admin Email' }}</strong>.
                     </p>
                 </div>
                 <form action="{{ route('admin.settings.backup') }}" method="POST">

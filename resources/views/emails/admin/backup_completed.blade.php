@@ -23,6 +23,16 @@
         <td class="val" style="color:#10B981; font-weight:800;">{{ $data['size_readable'] ?? 'N/A' }}</td>
       </tr>
       <tr>
+        <td class="lbl">Delivery Mode</td>
+        <td class="val" style="font-weight:700;">
+          @if(!empty($data['is_attached']))
+            <span style="color:#10B981;">✓ Attached directly to this email (.zip)</span>
+          @else
+            <span style="color:#D4AF6A;">Saved securely on server storage</span>
+          @endif
+        </td>
+      </tr>
+      <tr>
         <td class="lbl">Tables Exported</td>
         <td class="val">{{ $data['tables'] ?? 0 }} tables</td>
       </tr>

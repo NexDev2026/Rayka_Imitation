@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Mail\DatabaseBackupMail;
+use App\Models\StoreSetting;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -36,23 +37,18 @@ class DatabaseBackupCommand extends Command
         }
 
         $dateSlug = date('Y-m-d_His');
-        $useGzip = extension_loaded('zlib') && function_exists('gzopen');
-        $filename = 'rayka_backup_'.$dateSlug.($useGzip ? '.sql.gz' : '.sql');
-        $filepath = $backupDir.'/'.$filename;
+        $rawSqlFilename = 'rayka_backup_'.$dateSlug.'.sql';
+        $rawSqlFilepath = $backupDir.'/'.$rawSqlFilename;
 
-        $fp = $useGzip ? @gzopen($filepath, 'w9') : @fopen($filepath, 'wb');
+        $fp = @fopen($rawSqlFilepath, 'wb');
         if (! $fp) {
-            $this->error('Failed to open backup destination file: '.$filepath);
+            $this->error('Failed to open backup destination file: '.$rawSqlFilepath);
 
             return Command::FAILURE;
         }
 
-        $write = function (string $chunk) use ($fp, $useGzip) {
-            if ($useGzip) {
-                gzwrite($fp, $chunk);
-            } else {
-                fwrite($fp, $chunk);
-            }
+        $write = function (string $chunk) use ($fp) {
+            fwrite($fp, $chunk);
         };
 
         // Header
@@ -161,22 +157,58 @@ class DatabaseBackupCommand extends Command
             $this->error('Error during table dumping: '.$e->getMessage());
             Log::error('Backup dumping error: '.$e->getMessage());
         } finally {
-            if ($useGzip) {
-                gzclose($fp);
-            } else {
+            if (is_resource($fp)) {
                 fclose($fp);
             }
         }
 
-        // Verify file size > 0
-        clearstatcache(true, $filepath);
-        $fileSize = file_exists($filepath) ? filesize($filepath) : 0;
-        if ($fileSize <= 0) {
-            @unlink($filepath);
+        // Verify dump file size > 0
+        clearstatcache(true, $rawSqlFilepath);
+        $rawSqlSize = file_exists($rawSqlFilepath) ? filesize($rawSqlFilepath) : 0;
+        if ($rawSqlSize <= 0) {
+            @unlink($rawSqlFilepath);
             $this->error('Backup produced an empty 0-byte file.');
 
             return Command::FAILURE;
         }
+
+        // 1. Package into standard ZIP archive (native support on Windows/Mac/Linux and accepted by Brevo API)
+        $zipFilename = 'rayka_backup_'.$dateSlug.'.zip';
+        $zipFilepath = $backupDir.'/'.$zipFilename;
+        $zipCreated = false;
+
+        if (class_exists(\ZipArchive::class)) {
+            $zip = new \ZipArchive;
+            if ($zip->open($zipFilepath, \ZipArchive::CREATE | \ZipArchive::OVERWRITE) === true) {
+                $zip->addFile($rawSqlFilepath, $rawSqlFilename);
+                $zip->close();
+                clearstatcache(true, $zipFilepath);
+                $zipCreated = file_exists($zipFilepath) && filesize($zipFilepath) > 0;
+            }
+        }
+
+        // 2. Also create standard GZIP archive if zlib extension is available
+        $gzFilename = 'rayka_backup_'.$dateSlug.'.sql.gz';
+        $gzFilepath = $backupDir.'/'.$gzFilename;
+        if (extension_loaded('zlib') && function_exists('gzopen')) {
+            $gzFp = @gzopen($gzFilepath, 'w9');
+            $rawFp = @fopen($rawSqlFilepath, 'rb');
+            if ($gzFp && $rawFp) {
+                while (! feof($rawFp)) {
+                    gzwrite($gzFp, fread($rawFp, 1024 * 512));
+                }
+                fclose($rawFp);
+                gzclose($gzFp);
+            }
+        }
+
+        // Clean up temporary uncompressed raw SQL dump to conserve server disk space
+        @unlink($rawSqlFilepath);
+
+        // Determine primary backup artifact
+        $filename = $zipCreated ? $zipFilename : (file_exists($gzFilepath) ? $gzFilename : $rawSqlFilename);
+        $filepath = $zipCreated ? $zipFilepath : (file_exists($gzFilepath) ? $gzFilepath : $rawSqlFilepath);
+        $fileSize = file_exists($filepath) ? filesize($filepath) : 0;
 
         $readableSize = $this->formatBytes($fileSize);
         $duration = round(microtime(true) - $startTime, 2);
@@ -186,12 +218,14 @@ class DatabaseBackupCommand extends Command
 
         // Mirror backup to external root backups folder (e.g. /home/user/backups on Hostinger / ServerByte)
         $externalDirs = array_unique(array_filter([
-            dirname(base_path()) . DIRECTORY_SEPARATOR . 'backups',
-            base_path('..' . DIRECTORY_SEPARATOR . 'backups'),
+            dirname(base_path()).DIRECTORY_SEPARATOR.'backups',
+            base_path('..'.DIRECTORY_SEPARATOR.'backups'),
             base_path('backups'),
-            dirname(public_path()) . DIRECTORY_SEPARATOR . 'backups',
-            isset($_SERVER['DOCUMENT_ROOT']) ? dirname($_SERVER['DOCUMENT_ROOT']) . DIRECTORY_SEPARATOR . 'backups' : null,
+            dirname(public_path()).DIRECTORY_SEPARATOR.'backups',
+            isset($_SERVER['DOCUMENT_ROOT']) ? dirname($_SERVER['DOCUMENT_ROOT']).DIRECTORY_SEPARATOR.'backups' : null,
         ]));
+
+        $artifactsToMirror = array_filter([$zipFilepath, $gzFilepath], fn ($p) => file_exists($p));
 
         foreach ($externalDirs as $dir) {
             try {
@@ -199,16 +233,19 @@ class DatabaseBackupCommand extends Command
                     @mkdir($dir, 0755, true);
                 }
                 if (is_dir($dir)) {
-                    @copy($filepath, $dir . DIRECTORY_SEPARATOR . $filename);
-                    if (file_exists($dir . DIRECTORY_SEPARATOR . $filename)) {
-                        $this->rotateOldBackups($dir, 7);
-                        $this->info("Backup also saved to: {$dir}/{$filename}");
+                    foreach ($artifactsToMirror as $artPath) {
+                        $artName = basename($artPath);
+                        @copy($artPath, $dir.DIRECTORY_SEPARATOR.$artName);
                     }
+                    $this->rotateOldBackups($dir, 7);
+                    $this->info("Backup mirrored to: {$dir}/{$filename}");
                 }
             } catch (\Throwable $e) {
                 // Continue to next destination
             }
         }
+
+        $isAttached = ($zipCreated && $fileSize > 0 && $fileSize <= 8 * 1024 * 1024);
 
         $result = [
             'status' => 'success',
@@ -220,31 +257,43 @@ class DatabaseBackupCommand extends Command
             'rows' => $totalRows,
             'duration_sec' => $duration,
             'rotated' => $rotatedCount,
+            'is_attached' => $isAttached,
         ];
 
         $this->info("Backup complete: {$filename} ({$readableSize}, {$totalRows} rows) in {$duration}s. Rotated {$rotatedCount} old files.");
 
         // Dispatch admin notification email to all configured admin email recipients
         if (! $this->option('no-mail')) {
-            try {
-                $recipients = array_values(array_filter(array_unique([
-                    \App\Models\StoreSetting::get('admin_email'),
-                    \App\Models\StoreSetting::get('store_email'),
-                    config('services.brevo.admin_email'),
-                    env('ADMIN_EMAIL'),
-                ])));
+            $recipients = array_values(array_filter(array_unique([
+                StoreSetting::get('admin_email'),
+                StoreSetting::get('store_email'),
+                config('services.brevo.admin_email'),
+                env('ADMIN_EMAIL'),
+            ])));
 
-                if (empty($recipients)) {
-                    $recipients = ['nexdevstudio01@gmail.com'];
-                }
+            if (empty($recipients)) {
+                $recipients = ['nexdevstudio01@gmail.com'];
+            }
 
-                foreach ($recipients as $recipient) {
+            foreach ($recipients as $recipient) {
+                try {
                     Mail::to($recipient)->send(new DatabaseBackupMail($result));
                     $this->info("Admin backup notification email successfully sent to {$recipient}.");
+                } catch (\Throwable $e) {
+                    $this->warn("Dispatch with attachment failed for {$recipient}: ".$e->getMessage().'. Retrying without attachment...');
+                    Log::warning("Backup email with attachment failed for {$recipient}: ".$e->getMessage());
+
+                    try {
+                        $resultFallback = $result;
+                        $resultFallback['skip_attachment'] = true;
+                        $resultFallback['is_attached'] = false;
+                        Mail::to($recipient)->send(new DatabaseBackupMail($resultFallback));
+                        $this->info("Admin backup notification email successfully sent to {$recipient} (without attachment).");
+                    } catch (\Throwable $e2) {
+                        $this->error("Backup email fallback delivery failed for {$recipient}: ".$e2->getMessage());
+                        Log::error("Backup email fallback delivery failed for {$recipient}: ".$e2->getMessage());
+                    }
                 }
-            } catch (\Throwable $e) {
-                $this->warn('Could not dispatch backup email: '.$e->getMessage());
-                Log::warning('Backup email notification failed: '.$e->getMessage());
             }
         }
 
@@ -255,7 +304,7 @@ class DatabaseBackupCommand extends Command
     {
         $deleted = 0;
         $cutoff = time() - ($days * 86400);
-        $files = glob($dir.'/rayka_backup_*.sql*');
+        $files = glob($dir.'/rayka_backup_*.*');
         if (! $files) {
             return 0;
         }
