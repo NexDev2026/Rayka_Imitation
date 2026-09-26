@@ -44,10 +44,14 @@ class SetupStorageCommand extends Command
         }
 
         // 3. External root folders (Hostinger / ServerByte pattern: alongside or inside web root)
-        $externalUploadDirs = [
-            base_path('../rayka_uploads'),
+        $externalUploadDirs = array_unique(array_filter([
+            dirname(base_path()) . DIRECTORY_SEPARATOR . 'rayka_uploads',
+            base_path('..' . DIRECTORY_SEPARATOR . 'rayka_uploads'),
             base_path('rayka_uploads'),
-        ];
+            dirname(public_path()) . DIRECTORY_SEPARATOR . 'rayka_uploads',
+            isset($_SERVER['DOCUMENT_ROOT']) ? dirname($_SERVER['DOCUMENT_ROOT']) . DIRECTORY_SEPARATOR . 'rayka_uploads' : null,
+        ]));
+
         foreach ($externalUploadDirs as $extDir) {
             if (! file_exists($extDir)) {
                 @mkdir($extDir, 0777, true);
@@ -57,10 +61,14 @@ class SetupStorageCommand extends Command
             }
         }
 
-        $externalBackupDirs = [
-            base_path('../backups'),
+        $externalBackupDirs = array_unique(array_filter([
+            dirname(base_path()) . DIRECTORY_SEPARATOR . 'backups',
+            base_path('..' . DIRECTORY_SEPARATOR . 'backups'),
             base_path('backups'),
-        ];
+            dirname(public_path()) . DIRECTORY_SEPARATOR . 'backups',
+            isset($_SERVER['DOCUMENT_ROOT']) ? dirname($_SERVER['DOCUMENT_ROOT']) . DIRECTORY_SEPARATOR . 'backups' : null,
+        ]));
+
         foreach ($externalBackupDirs as $extBkp) {
             if (! file_exists($extBkp)) {
                 @mkdir($extBkp, 0755, true);
@@ -163,10 +171,13 @@ class SetupStorageCommand extends Command
         // First clean up any accidental nested uploads folder
         $this->cleanupNestedUploads();
 
-        $targets = [
-            base_path('../rayka_uploads'),
+        $targets = array_unique(array_filter([
+            dirname(base_path()) . DIRECTORY_SEPARATOR . 'rayka_uploads',
+            base_path('..' . DIRECTORY_SEPARATOR . 'rayka_uploads'),
             base_path('rayka_uploads'),
-        ];
+            dirname(public_path()) . DIRECTORY_SEPARATOR . 'rayka_uploads',
+            isset($_SERVER['DOCUMENT_ROOT']) ? dirname($_SERVER['DOCUMENT_ROOT']) . DIRECTORY_SEPARATOR . 'rayka_uploads' : null,
+        ]));
 
         foreach ($targets as $targetDir) {
             if (! is_dir($targetDir)) {
@@ -196,6 +207,27 @@ class SetupStorageCommand extends Command
                             }
                             @copy($item->getPathname(), $targetPath);
                             $syncedCount++;
+
+                            // If this is a category hero banner, also mirror into banners/ folder
+                            $fileName = $item->getFilename();
+                            if (str_contains($subPath, 'categories') && str_starts_with($fileName, 'hero')) {
+                                $extraBannerPath = $targetDir . DIRECTORY_SEPARATOR . 'banners' . DIRECTORY_SEPARATOR . $fileName;
+                                $bannerParent = dirname($extraBannerPath);
+                                if (! file_exists($bannerParent)) {
+                                    @mkdir($bannerParent, 0777, true);
+                                }
+                                @copy($item->getPathname(), $extraBannerPath);
+                            }
+
+                            // If this is a QR code, also mirror into settings/ folder
+                            if (str_contains($subPath, 'qr') || str_starts_with($fileName, 'upi_qr')) {
+                                $extraSettingsPath = $targetDir . DIRECTORY_SEPARATOR . 'settings' . DIRECTORY_SEPARATOR . $fileName;
+                                $settingsParent = dirname($extraSettingsPath);
+                                if (! file_exists($settingsParent)) {
+                                    @mkdir($settingsParent, 0777, true);
+                                }
+                                @copy($item->getPathname(), $extraSettingsPath);
+                            }
                         }
                     }
                 }

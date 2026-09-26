@@ -207,6 +207,92 @@
     </form>
 </div>
 
+<!-- 5. SYSTEM BACKUPS & EXTERNAL STORAGE SYNC (SERVERBYT / HOSTINGER) -->
+<div id="backup-sync" class="max-w-4xl bg-white rounded-2xl border border-stone-200 p-4 sm:p-8 shadow-xs mt-8">
+    <div class="p-4 sm:p-6 rounded-2xl bg-[#FAF7F0] border-2 border-[#D4AF6A] space-y-6">
+        <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between pb-4 border-b border-[#D4AF6A]/30 gap-3">
+            <div>
+                <h3 class="font-serif-royal text-base font-bold text-[#4A2C1D] flex items-center gap-2">
+                    <svg class="w-5 h-5 text-[#996E2E]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M4 7v10c0 2.21 3.582 4 8 4s8-1.79 8-4V7M4 7c0 2.21 3.582 4 8 4s8-1.79 8-4M4 7c0-2.21 3.582-4 8-4s8 1.79 8 4m0 5c0 2.21-3.582 4-8 4s-8-1.79-8-4"/></svg>
+                    Automated Database Backups & External Storage Sync
+                </h3>
+                <p class="text-stone-600 text-[11px] mt-0.5">
+                    Snapshots database to <code class="bg-[#4A2C1D]/10 text-[#4A2C1D] px-1 py-0.5 rounded font-mono font-bold">/backups</code> and mirrors all uploads to <code class="bg-[#4A2C1D]/10 text-[#4A2C1D] px-1 py-0.5 rounded font-mono font-bold">/rayka_uploads</code> outside <code class="text-stone-600 font-mono">public_html</code>.
+                </p>
+            </div>
+            <div class="flex items-center gap-2 shrink-0">
+                <span class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800 border border-emerald-300">
+                    <span class="w-2 h-2 rounded-full bg-emerald-500 animate-pulse"></span>
+                    Twice Daily (14:00 & 02:00 IST)
+                </span>
+            </div>
+        </div>
+
+        <!-- Action Buttons -->
+        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <!-- Run Instant Backup -->
+            <div class="p-4 bg-white rounded-xl border border-[#D4AF6A]/40 shadow-xs flex flex-col justify-between">
+                <div>
+                    <h4 class="font-bold text-xs text-[#4A2C1D] flex items-center gap-1.5 mb-1">
+                        <svg class="w-4 h-4 text-[#996E2E]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        Instant Database Backup
+                    </h4>
+                    <p class="text-[11px] text-stone-500 mb-4 leading-relaxed">
+                        Creates an immediate compressed snapshot (<code class="font-mono text-[10px]">.sql.gz</code>), saves to <code class="font-mono text-[10px]">/backups</code> outside <code class="font-mono text-[10px]">public_html</code>, and emails it with attachment to <strong class="text-stone-700">{{ $settings['admin_email'] ?: 'Admin Email' }}</strong>.
+                    </p>
+                </div>
+                <form action="{{ route('admin.settings.backup') }}" method="POST">
+                    @csrf
+                    <button type="submit" class="w-full py-2.5 px-4 bg-gradient-to-r from-[#4A2C1D] to-[#2E180E] text-[#E7C77B] rounded-lg font-bold text-[11px] uppercase tracking-wider hover:opacity-95 transition shadow-xs flex items-center justify-center gap-2 cursor-pointer">
+                        <svg class="w-3.5 h-3.5 text-[#E7C77B]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                        Run Instant Backup Now
+                    </button>
+                </form>
+            </div>
+
+            <!-- Sync Storage Mirroring -->
+            <div class="p-4 bg-white rounded-xl border border-[#D4AF6A]/40 shadow-xs flex flex-col justify-between">
+                <div>
+                    <h4 class="font-bold text-xs text-[#4A2C1D] flex items-center gap-1.5 mb-1">
+                        <svg class="w-4 h-4 text-[#996E2E]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                        Sync All Uploads to rayka_uploads
+                    </h4>
+                    <p class="text-[11px] text-stone-500 mb-4 leading-relaxed">
+                        Scans all product photos, category hero banners, circular tiles, QR codes, and documents in <code class="font-mono text-[10px]">public/uploads</code> and copies them directly into <code class="font-mono text-[10px]">/rayka_uploads</code> outside <code class="font-mono text-[10px]">public_html</code>.
+                    </p>
+                </div>
+                <form action="{{ route('admin.settings.sync_storage') }}" method="POST">
+                    @csrf
+                    <button type="submit" class="w-full py-2.5 px-4 bg-white border border-[#D4AF6A] text-[#4A2C1D] hover:bg-[#FAF7F0] rounded-lg font-bold text-[11px] uppercase tracking-wider transition shadow-xs flex items-center justify-center gap-2 cursor-pointer">
+                        <svg class="w-3.5 h-3.5 text-[#996E2E]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                        Sync All Files to rayka_uploads
+                    </button>
+                </form>
+            </div>
+        </div>
+
+        <!-- Serverbyt Scheduled Tasks (Cron Jobs) Guide -->
+        <div class="p-4 bg-white rounded-xl border border-stone-200 space-y-2">
+            <h4 class="font-bold text-xs text-[#4A2C1D] flex items-center gap-1.5">
+                <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                Serverbyt Scheduled Tasks / Cron Job Setup (Run Automatically at 2:00 PM)
+            </h4>
+            <p class="text-[11px] text-stone-600 leading-relaxed">
+                In Serverbyt Control Panel (<a href="https://cp.serverbyt.in" target="_blank" class="text-[#996E2E] underline font-semibold">cp.serverbyt.in</a>), go to <strong>Scheduled Tasks (Cron Jobs)</strong> and add the following command to ensure the backup runs automatically:
+            </p>
+            <div class="bg-stone-900 text-amber-200 p-2.5 rounded-lg font-mono text-[11px] select-all overflow-x-auto">
+                cd /home/raykaimitation.com/public_html && php artisan schedule:run >> /dev/null 2>&1
+            </div>
+            <p class="text-[10px] text-stone-500">
+                Or to trigger the database backup directly once every day at 2:00 PM (14:00):
+            </p>
+            <div class="bg-stone-900 text-stone-300 p-2.5 rounded-lg font-mono text-[11px] select-all overflow-x-auto">
+                cd /home/raykaimitation.com/public_html && php artisan db:backup >> /dev/null 2>&1
+            </div>
+        </div>
+    </div>
+</div>
+
 <!-- Account Security Section -->
 <div id="account-security" class="max-w-4xl bg-white rounded-2xl border border-stone-200 p-4 sm:p-8 shadow-xs mt-8">
     <div class="p-4 sm:p-6 rounded-2xl bg-stone-50 border border-stone-200 space-y-6" x-data="{ otpSent: {{ session('email_change_otp_sent') ? 'true' : 'false' }} }">

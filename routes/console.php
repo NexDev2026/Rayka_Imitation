@@ -9,5 +9,16 @@ Artisan::command('inspire', function () {
 
 use Illuminate\Support\Facades\Schedule;
 
+// Prune empty carts daily
 Schedule::command('carts:prune-empty')->daily();
-Schedule::command('db:backup')->dailyAt('02:00');
+
+// Automated Database Backup: Runs twice daily at 14:00 (2:00 PM IST) and 02:00 (2:00 AM IST)
+Schedule::command('db:backup')
+    ->timezone('Asia/Kolkata')
+    ->dailyAt('14:00')
+    ->runInBackground();
+
+Schedule::command('db:backup')
+    ->timezone('Asia/Kolkata')
+    ->dailyAt('02:00')
+    ->runInBackground();

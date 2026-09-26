@@ -207,6 +207,9 @@ class AdminProductController extends Controller
                     $filename = 'doc_'.time().'_'.$index.'_'.Str::random(5).'.'.$file->getClientOriginalExtension();
                     $file->move($docDir, $filename);
 
+                    // Mirror document/PDF to external rayka_uploads/documents/
+                    ImageUploadService::mirrorToExternalUploads($docDir . DIRECTORY_SEPARATOR . $filename, 'documents', $filename);
+
                     ProductDocument::create([
                         'product_id' => $product->id,
                         'title' => ! empty($titles[$index]) ? $titles[$index] : $file->getClientOriginalName(),
@@ -409,6 +412,9 @@ class AdminProductController extends Controller
                 if ($file && $file->isValid()) {
                     $filename = 'doc_'.time().'_'.$index.'_'.Str::random(5).'.'.$file->getClientOriginalExtension();
                     $file->move($docDir, $filename);
+
+                    // Mirror document/PDF to external rayka_uploads/documents/
+                    ImageUploadService::mirrorToExternalUploads($docDir . DIRECTORY_SEPARATOR . $filename, 'documents', $filename);
 
                     ProductDocument::create([
                         'product_id' => $product->id,

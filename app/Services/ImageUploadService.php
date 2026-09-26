@@ -130,24 +130,53 @@ class ImageUploadService
      */
     public static function mirrorToExternalUploads(string $sourceFilePath, string $subFolder, string $filename): void
     {
-        // Strip any leading 'uploads/' so 'uploads/banners' becomes 'banners', directly inside rayka_uploads/banners
-        $cleanSubFolder = preg_replace('#^uploads/?#i', '', trim($subFolder, '/'));
+        if (! file_exists($sourceFilePath)) {
+            return;
+        }
 
-        $destinations = [
-            base_path('../rayka_uploads' . ($cleanSubFolder !== '' ? '/' . $cleanSubFolder : '')),
-            base_path('rayka_uploads' . ($cleanSubFolder !== '' ? '/' . $cleanSubFolder : '')),
-        ];
+        // Clean subfolder name: e.g. 'uploads/categories' -> 'categories', 'uploads/banners' -> 'banners'
+        $cleanSubFolder = preg_replace('#^uploads/?#i', '', trim($subFolder, '/\\'));
 
-        foreach ($destinations as $dir) {
-            try {
-                if (!file_exists($dir)) {
-                    @mkdir($dir, 0777, true);
+        // Candidate root locations for rayka_uploads outside/alongside webroot
+        $candidateRoots = array_unique(array_filter([
+            dirname(base_path()) . DIRECTORY_SEPARATOR . 'rayka_uploads',
+            base_path('..' . DIRECTORY_SEPARATOR . 'rayka_uploads'),
+            base_path('rayka_uploads'),
+            dirname(public_path()) . DIRECTORY_SEPARATOR . 'rayka_uploads',
+            dirname(dirname(public_path())) . DIRECTORY_SEPARATOR . 'rayka_uploads',
+            isset($_SERVER['DOCUMENT_ROOT']) ? dirname($_SERVER['DOCUMENT_ROOT']) . DIRECTORY_SEPARATOR . 'rayka_uploads' : null,
+            isset($_SERVER['DOCUMENT_ROOT']) ? $_SERVER['DOCUMENT_ROOT'] . DIRECTORY_SEPARATOR . '..' . DIRECTORY_SEPARATOR . 'rayka_uploads' : null,
+        ]));
+
+        // Subfolders to copy to:
+        $targetSubFolders = [$cleanSubFolder];
+
+        // If this is a category hero banner, mirror to BOTH 'categories' and 'banners' folders
+        if ($cleanSubFolder === 'categories' && str_starts_with($filename, 'hero')) {
+            $targetSubFolders[] = 'banners';
+        }
+
+        // If this is a QR code, mirror to BOTH 'qr' and 'settings' folders
+        if ($cleanSubFolder === 'qr' || str_starts_with($filename, 'upi_qr')) {
+            $targetSubFolders[] = 'qr';
+            $targetSubFolders[] = 'settings';
+        }
+
+        $targetSubFolders = array_unique(array_filter($targetSubFolders));
+
+        foreach ($candidateRoots as $root) {
+            foreach ($targetSubFolders as $sub) {
+                $dir = $sub !== '' ? $root . DIRECTORY_SEPARATOR . $sub : $root;
+                try {
+                    if (! file_exists($dir)) {
+                        @mkdir($dir, 0777, true);
+                    }
+                    if (is_dir($dir)) {
+                        @copy($sourceFilePath, $dir . DIRECTORY_SEPARATOR . $filename);
+                    }
+                } catch (\Throwable $e) {
+                    // Silently continue to next candidate
                 }
-                if (is_dir($dir) && file_exists($sourceFilePath)) {
-                    @copy($sourceFilePath, $dir . DIRECTORY_SEPARATOR . $filename);
-                }
-            } catch (\Throwable $e) {
-                // Silently continue if external dir cannot be written
             }
         }
     }

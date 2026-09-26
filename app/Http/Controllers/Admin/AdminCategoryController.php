@@ -78,6 +78,11 @@ class AdminCategoryController extends Controller
                 maxHeight: 1600,
                 quality: 82
             );
+
+            // Double guarantee: mirror category hero banner to both categories and banners folders
+            $heroFn = basename($heroPath);
+            ImageUploadService::mirrorToExternalUploads(public_path('uploads/categories/' . $heroFn), 'categories', $heroFn);
+            ImageUploadService::mirrorToExternalUploads(public_path('uploads/categories/' . $heroFn), 'banners', $heroFn);
         }
 
         $category = Category::create([
@@ -156,6 +161,11 @@ class AdminCategoryController extends Controller
                 maxHeight: 1600,
                 quality: 82
             );
+
+            // Double guarantee: mirror category hero banner to both categories and banners folders
+            $heroFn = basename($category->hero_image);
+            ImageUploadService::mirrorToExternalUploads(public_path('uploads/categories/' . $heroFn), 'categories', $heroFn);
+            ImageUploadService::mirrorToExternalUploads(public_path('uploads/categories/' . $heroFn), 'banners', $heroFn);
         }
 
         $category->name = $request->name;

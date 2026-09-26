@@ -35,6 +35,18 @@ class DatabaseBackupMail extends Mailable
 
     public function attachments(): array
     {
+        if (! empty($this->backupData['filepath']) && file_exists($this->backupData['filepath'])) {
+            $size = @filesize($this->backupData['filepath']);
+            // Attach backup snapshot directly to email if under 15MB
+            if ($size > 0 && $size < 15 * 1024 * 1024) {
+                return [
+                    \Illuminate\Mail\Mailables\Attachment::fromPath($this->backupData['filepath'])
+                        ->as($this->backupData['filename'])
+                        ->withMime('application/gzip'),
+                ];
+            }
+        }
+
         return [];
     }
 }

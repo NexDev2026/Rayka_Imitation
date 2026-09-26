@@ -185,19 +185,25 @@ class DatabaseBackupCommand extends Command
         $rotatedCount = $this->rotateOldBackups($backupDir, 7);
 
         // Mirror backup to external root backups folder (e.g. /home/user/backups on Hostinger / ServerByte)
-        $externalDirs = [
-            base_path('../backups'),
+        $externalDirs = array_unique(array_filter([
+            dirname(base_path()) . DIRECTORY_SEPARATOR . 'backups',
+            base_path('..' . DIRECTORY_SEPARATOR . 'backups'),
             base_path('backups'),
-        ];
+            dirname(public_path()) . DIRECTORY_SEPARATOR . 'backups',
+            isset($_SERVER['DOCUMENT_ROOT']) ? dirname($_SERVER['DOCUMENT_ROOT']) . DIRECTORY_SEPARATOR . 'backups' : null,
+        ]));
+
         foreach ($externalDirs as $dir) {
             try {
                 if (! file_exists($dir)) {
                     @mkdir($dir, 0755, true);
                 }
-                if (is_dir($dir) && is_writable($dir)) {
-                    @copy($filepath, $dir.'/'.$filename);
-                    $this->rotateOldBackups($dir, 7);
-                    $this->info("Backup also saved to: {$dir}/{$filename}");
+                if (is_dir($dir)) {
+                    @copy($filepath, $dir . DIRECTORY_SEPARATOR . $filename);
+                    if (file_exists($dir . DIRECTORY_SEPARATOR . $filename)) {
+                        $this->rotateOldBackups($dir, 7);
+                        $this->info("Backup also saved to: {$dir}/{$filename}");
+                    }
                 }
             } catch (\Throwable $e) {
                 // Continue to next destination
@@ -218,12 +224,24 @@ class DatabaseBackupCommand extends Command
 
         $this->info("Backup complete: {$filename} ({$readableSize}, {$totalRows} rows) in {$duration}s. Rotated {$rotatedCount} old files.");
 
-        // Dispatch admin notification email
+        // Dispatch admin notification email to all configured admin email recipients
         if (! $this->option('no-mail')) {
             try {
-                $adminEmail = config('services.brevo.admin_email') ?? env('ADMIN_EMAIL', 'nexdevstudio01@gmail.com');
-                Mail::to($adminEmail)->send(new DatabaseBackupMail($result));
-                $this->info("Admin backup notification email successfully sent to {$adminEmail}.");
+                $recipients = array_values(array_filter(array_unique([
+                    \App\Models\StoreSetting::get('admin_email'),
+                    \App\Models\StoreSetting::get('store_email'),
+                    config('services.brevo.admin_email'),
+                    env('ADMIN_EMAIL'),
+                ])));
+
+                if (empty($recipients)) {
+                    $recipients = ['nexdevstudio01@gmail.com'];
+                }
+
+                foreach ($recipients as $recipient) {
+                    Mail::to($recipient)->send(new DatabaseBackupMail($result));
+                    $this->info("Admin backup notification email successfully sent to {$recipient}.");
+                }
             } catch (\Throwable $e) {
                 $this->warn('Could not dispatch backup email: '.$e->getMessage());
                 Log::warning('Backup email notification failed: '.$e->getMessage());

@@ -3,15 +3,17 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\VerifyNewEmailOtpMail;
 use App\Models\Category;
 use App\Models\StoreSetting;
+use App\Services\ImageUploadService;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\VerifyNewEmailOtpMail;
 
 class AdminSettingController extends Controller
 {
@@ -109,16 +111,22 @@ class AdminSettingController extends Controller
             StoreSetting::set('showcase_categories', json_encode($cats));
         }
 
-        // QR Code Image Upload (validated above)
+        // QR Code Image Upload (converted to WebP and mirrored to external rayka_uploads/qr and rayka_uploads/settings)
         if ($request->hasFile('qr_code_file')) {
-            $qrDir = public_path('uploads/qr');
-            if (! file_exists($qrDir)) {
-                mkdir($qrDir, 0777, true);
-            }
-            $f = $request->file('qr_code_file');
-            $fn = 'upi_qr_'.time().'_'.substr(md5($f->getClientOriginalName()), 0, 6).'.'.$f->getClientOriginalExtension();
-            $f->move($qrDir, $fn);
-            StoreSetting::set('qr_code_image', '/uploads/qr/'.$fn);
+            $qrPath = ImageUploadService::uploadAndConvertToWebp(
+                file: $request->file('qr_code_file'),
+                folder: 'uploads/qr',
+                prefix: 'upi_qr',
+                maxWidth: 1200,
+                maxHeight: 1200,
+                quality: 90
+            );
+            StoreSetting::set('qr_code_image', $qrPath);
+
+            // Double guarantee: mirror QR code to both 'qr' and 'settings' folders
+            $qrFn = basename($qrPath);
+            ImageUploadService::mirrorToExternalUploads(public_path('uploads/qr/' . $qrFn), 'qr', $qrFn);
+            ImageUploadService::mirrorToExternalUploads(public_path('uploads/qr/' . $qrFn), 'settings', $qrFn);
         }
 
         return back()->with('success', 'Store settings and homepage showcase updated successfully!');
@@ -176,6 +184,36 @@ class AdminSettingController extends Controller
         Cache::forget($cacheKey);
 
         return back()->with('success', 'Your email address has been updated successfully!')->withFragment('account-security');
+    }
+
+    /**
+     * Run an instant database backup from the admin interface.
+     */
+    public function runBackup()
+    {
+        try {
+            Artisan::call('db:backup');
+            $output = trim(Artisan::output());
+
+            return back()->with('success', 'Database backup completed successfully! ' . $output)->withFragment('backup-sync');
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Backup failed: ' . $e->getMessage())->withFragment('backup-sync');
+        }
+    }
+
+    /**
+     * Sync all local uploads to external rayka_uploads directory.
+     */
+    public function syncStorage()
+    {
+        try {
+            Artisan::call('rayka:setup-storage');
+            $output = trim(Artisan::output());
+
+            return back()->with('success', 'All images and documents mirrored to rayka_uploads successfully!')->withFragment('backup-sync');
+        } catch (\Throwable $e) {
+            return back()->with('error', 'Storage sync failed: ' . $e->getMessage())->withFragment('backup-sync');
+        }
     }
 }
 

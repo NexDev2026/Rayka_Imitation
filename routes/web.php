@@ -248,6 +248,8 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::post('/settings', [AdminSettingController::class, 'update'])->name('settings.update');
         Route::post('/settings/email', [AdminSettingController::class, 'updateEmail'])->name('settings.update_email');
         Route::post('/settings/email/verify', [AdminSettingController::class, 'verifyEmailOtp'])->name('settings.verify_email');
+        Route::post('/settings/backup', [AdminSettingController::class, 'runBackup'])->name('settings.backup');
+        Route::post('/settings/sync-storage', [AdminSettingController::class, 'syncStorage'])->name('settings.sync_storage');
 
         // Users / Customer Directory
         Route::get('/users', [AdminUserController::class, 'index'])->name('users.index');
