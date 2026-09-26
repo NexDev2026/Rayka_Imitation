@@ -476,14 +476,14 @@ class StorefrontController extends Controller
 
     public function contact()
     {
-        $storeAddress = StoreSetting::get('store_address', 'Shop No. 29, Shreeji Bapa Complex, Near Rita Nagar Bus Stand, Vastral Road, Amraiwadi, Ahmedabad - 380026, Gujarat');
-        $storePhone = StoreSetting::get('store_phone', '+91 81284 98531');
-        $storeAltPhone = StoreSetting::get('store_alt_phone', '+91 93164 53838');
-        $storeEmail = StoreSetting::get('store_email', 'care@raykajewellery.com');
-        $storeWhatsapp = StoreSetting::get('store_whatsapp', '+91 81284 98531');
-        $storeInstagramUrl = StoreSetting::get('instagram_url', 'https://www.instagram.com/rayka_imitation_amdavad/?hl=en');
-        $storeInstagramHandle = StoreSetting::get('instagram_handle', '@rayka_imitation_amdavad');
-        $storeGoogleMapUrl = StoreSetting::get('google_map_url', 'https://share.google/vaohJv28SH29hBV8j');
+        $storeAddress = StoreSetting::get('store_address', '');
+        $storePhone = StoreSetting::get('store_phone', '');
+        $storeAltPhone = StoreSetting::get('store_alt_phone', '');
+        $storeEmail = StoreSetting::get('store_email', '');
+        $storeWhatsapp = StoreSetting::get('store_whatsapp', '');
+        $storeInstagramUrl = StoreSetting::get('instagram_url', '');
+        $storeInstagramHandle = StoreSetting::get('instagram_handle', '');
+        $storeGoogleMapUrl = StoreSetting::get('google_map_url', '');
 
         return view('storefront.contact', compact(
             'storeAddress',

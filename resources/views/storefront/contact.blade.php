@@ -73,16 +73,17 @@
                 </div>
 
                 <!-- Helpline -->
+                @php
+                    $activePhone = $storePhone ?: ($storeSettings['store_phone'] ?? '');
+                    $activeAltPhone = $storeAltPhone ?: ($storeSettings['store_alt_phone'] ?? '');
+                @endphp
+                @if(!empty($activePhone))
                 <div class="flex items-start space-x-3">
                     <div class="w-8 h-8 rounded-lg bg-white border border-[#D4AF6A]/40 flex items-center justify-center text-[#996E2E] shrink-0 mt-0.5 shadow-2xs">
                         <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.684l1.498 4.493a1 1 0 01-.502 1.21l-2.257 1.13a11.042 11.042 0 005.516 5.516l1.13-2.257a1 1 0 011.21-.502l4.493 1.498a1 1 0 01.684.949V19a2 2 0 01-2 2h-1C9.716 21 3 14.284 3 6V5z"></path></svg>
                     </div>
                     <div>
                         <strong class="block text-[#4A2C1D] font-semibold">Telephone & Helpline:</strong>
-                        @php
-                            $activePhone = $storePhone ?: ($storeSettings['store_phone'] ?? '+91 9638868024');
-                            $activeAltPhone = $storeAltPhone ?: ($storeSettings['store_alt_phone'] ?? '');
-                        @endphp
                         <div class="space-y-0.5 mt-0.5">
                             <a href="tel:{{ preg_replace('/[^0-9]/', '', $activePhone) }}" class="text-[#996E2E] hover:underline font-medium block">{{ $activePhone }}</a>
                             @if(!empty($activeAltPhone))
@@ -92,8 +93,15 @@
                         <p class="text-[10px] text-stone-400 mt-1">Monday to Saturday (10:00 AM – 8:00 PM IST)</p>
                     </div>
                 </div>
+                @endif
 
                 <!-- WhatsApp -->
+                @php
+                    $activeWa = $storeWhatsapp ?: ($storeSettings['store_whatsapp'] ?? '');
+                    $cleanActiveWa = preg_replace('/[^0-9]/', '', (string)$activeWa);
+                    $activeWaUrl = $storeSettings['whatsapp_url'] ?? (!empty($cleanActiveWa) ? ('https://wa.me/' . $cleanActiveWa) : '');
+                @endphp
+                @if(!empty($activeWa))
                 <div class="flex items-start space-x-3">
                     <div class="w-8 h-8 rounded-lg bg-white border border-[#D4AF6A]/40 flex items-center justify-center text-emerald-600 shrink-0 mt-0.5 shadow-2xs">
                         <svg class="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
@@ -102,16 +110,13 @@
                     </div>
                     <div>
                         <strong class="block text-[#4A2C1D] font-semibold">WhatsApp Concierge & Orders:</strong>
-                        @php
-                            $activeWa = $storeWhatsapp ?: ($storeSettings['store_whatsapp'] ?? '+91 9638868024');
-                            $activeWaUrl = $storeSettings['whatsapp_url'] ?? ('https://wa.me/' . preg_replace('/[^0-9]/', '', $activeWa));
-                        @endphp
                         <a href="{{ $activeWaUrl }}" target="_blank" class="inline-flex items-center gap-1 text-emerald-700 font-semibold hover:underline mt-0.5">
                             <span>Chat on WhatsApp ({{ $activeWa }})</span>
                             <span class="flex items-center gap-1.5"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg></span>
                         </a>
                     </div>
                 </div>
+                @endif
 
                 <!-- Email -->
                 <div class="flex items-start space-x-3">

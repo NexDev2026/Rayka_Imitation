@@ -179,8 +179,8 @@
                 <div class="company-title">{{ $storeName ?? 'Rayka Imitation Jewellery' }}</div>
                 <div class="company-tagline">{{ $storeSettings['tagline'] ?? '1 Gram Micro Gold Plating & Royal Heritage Creations' }}</div>
                 <div class="company-contact">
-                    {{ $storeAddress ?: ($storeSettings['store_address'] ?? 'Shop No. 29, Shreeji Bapa Complex, Near Rita Nagar Bus Stand, Vastral Road, Amraiwadi, Ahmedabad - 380026, Gujarat') }}<br>
-                    Helpline: {{ $storePhone ?: ($storeSettings['store_phone'] ?? '+91 9638868024') }} | Email: {{ $storeEmail ?: ($storeSettings['store_email'] ?? 'raykaimitation@gmail.com') }}
+                    {{ $storeAddress ?: ($storeSettings['store_address'] ?? '') }}<br>
+                    @if(!empty($storePhone ?: ($storeSettings['store_phone'] ?? '')))Helpline: {{ $storePhone ?: ($storeSettings['store_phone'] ?? '') }} | @endif Email: {{ $storeEmail ?: ($storeSettings['store_email'] ?? '') }}
                 </div>
             </td>
             <td class="invoice-badge-wrap" style="width: 42%;">
@@ -330,7 +330,7 @@
         <p>
             This is an authentic computer-generated Tax Invoice issued by <strong>{{ $storeName ?? 'Rayka Imitation Jewellery' }}</strong> and requires no physical signature.<br>
             All creations feature Rayka's 100% Genuine 1 Gram Micro Gold Craftsmanship Assurance.<br>
-            For assistance or concierge services, contact <strong>{{ $storeEmail ?: ($storeSettings['store_email'] ?? 'raykaimitation@gmail.com') }}</strong> or call <strong>{{ $storePhone ?: ($storeSettings['store_phone'] ?? '+91 9638868024') }}</strong>.
+            For assistance or concierge services, contact <strong>{{ $storeEmail ?: ($storeSettings['store_email'] ?? '') }}</strong>@if(!empty($storePhone ?: ($storeSettings['store_phone'] ?? ''))) or call <strong>{{ $storePhone ?: ($storeSettings['store_phone'] ?? '') }}</strong>@endif.
         </p>
     </div>
 </div>

@@ -24,27 +24,27 @@ class AdminSettingController extends Controller
         $settings = [
             'store_name' => $allSettings['store_name'] ?? 'Rayka Imitation Jewellery',
             'tagline' => $allSettings['tagline'] ?? 'Royal Heritage & 1 Gram Micro Gold Imitation Jewellery',
-            'upi_id' => $allSettings['upi_id'] ?? 'raykajewellery@icici',
-            'upi_payee_name' => $allSettings['upi_payee_name'] ?? 'Rayka Imitation Jewellery Pvt Ltd',
+            'upi_id' => $allSettings['upi_id'] ?? '',
+            'upi_payee_name' => $allSettings['upi_payee_name'] ?? '',
             'qr_code_image' => $allSettings['qr_code_image'] ?? '/images/qr/sample-upi-qr.svg',
-            'store_phone' => $allSettings['store_phone'] ?? '+91 9638868024',
-            'store_whatsapp' => $allSettings['store_whatsapp'] ?? '+91 9638868024',
-            'store_alt_phone' => $allSettings['store_alt_phone'] ?? '+91 93164 53838',
-            'store_email' => $allSettings['store_email'] ?? 'raykaimitation@gmail.com',
-            'admin_email' => $allSettings['admin_email'] ?? 'nexdevstudio01@gmail.com',
-            'store_address' => $allSettings['store_address'] ?? 'Shop No. 29, Shreeji Bapa Complex, Near Rita Nagar Bus Stand, Vastral Road, Amraiwadi, Ahmedabad - 380026, Gujarat',
-            'instagram_url' => $allSettings['instagram_url'] ?? 'https://www.instagram.com/rayka_imitation_amdavad/?hl=en',
-            'instagram_handle' => $allSettings['instagram_handle'] ?? '@rayka_imitation_amdavad',
-            'google_map_url' => $allSettings['google_map_url'] ?? 'https://share.google/vaohJv28SH29hBV8j',
+            'store_phone' => $allSettings['store_phone'] ?? '',
+            'store_whatsapp' => $allSettings['store_whatsapp'] ?? '',
+            'store_alt_phone' => $allSettings['store_alt_phone'] ?? '',
+            'store_email' => $allSettings['store_email'] ?? '',
+            'admin_email' => $allSettings['admin_email'] ?? '',
+            'store_address' => $allSettings['store_address'] ?? '',
+            'instagram_url' => $allSettings['instagram_url'] ?? '',
+            'instagram_handle' => $allSettings['instagram_handle'] ?? '',
+            'google_map_url' => $allSettings['google_map_url'] ?? '',
             'free_shipping_min' => $allSettings['free_shipping_min'] ?? '999',
             'shipping_flat_fee' => $allSettings['shipping_flat_fee'] ?? '99',
-            'trust_badge_1' => $allSettings['trust_badge_1'] ?? 'Free Express Shipping',
-            'trust_badge_2' => $allSettings['trust_badge_2'] ?? '100% Verified Payment',
-            'trust_badge_3' => $allSettings['trust_badge_3'] ?? 'Easy Replacement',
-            'trust_badge_4' => $allSettings['trust_badge_4'] ?? 'Heritage Quality',
+            'trust_badge_1' => $allSettings['trust_badge_1'] ?? '',
+            'trust_badge_2' => $allSettings['trust_badge_2'] ?? '',
+            'trust_badge_3' => $allSettings['trust_badge_3'] ?? '',
+            'trust_badge_4' => $allSettings['trust_badge_4'] ?? '',
             'showcase_enabled' => $allSettings['showcase_enabled'] ?? '1',
-            'showcase_title' => $allSettings['showcase_title'] ?? 'Curated Royal Collections',
-            'showcase_subtitle' => $allSettings['showcase_subtitle'] ?? 'Select a collection below to discover hand-finished 1 gram micro gold masterpieces.',
+            'showcase_title' => $allSettings['showcase_title'] ?? '',
+            'showcase_subtitle' => $allSettings['showcase_subtitle'] ?? '',
             'showcase_limit' => $allSettings['showcase_limit'] ?? '10',
             'showcase_categories' => json_decode((string) ($allSettings['showcase_categories'] ?? '["1","2","9","3","10"]'), true) ?: [1, 2, 9, 3, 10],
         ];
@@ -113,7 +113,8 @@ class AdminSettingController extends Controller
 
         foreach ($fields as $field) {
             if ($request->has($field)) {
-                StoreSetting::set($field, $request->input($field));
+                $val = $request->input($field);
+                StoreSetting::set($field, $val !== null ? trim((string) $val) : '');
             }
         }
 

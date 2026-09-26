@@ -25,9 +25,9 @@ class StoreSetting extends Model
             $defaults = [
                 'store_name' => 'Rayka Imitation Jewellery',
                 'tagline' => 'Royal Heritage & 1 Gram Micro Gold Imitation Jewellery',
-                'store_phone' => '+91 9638868024',
-                'store_whatsapp' => '+91 9638868024',
-                'store_alt_phone' => '+91 93164 53838',
+                'store_phone' => '',
+                'store_whatsapp' => '',
+                'store_alt_phone' => '',
                 'store_email' => 'raykaimitation@gmail.com',
                 'admin_email' => 'nexdevstudio01@gmail.com',
                 'store_address' => 'Shop No. 29, Shreeji Bapa Complex, Near Rita Nagar Bus Stand, Vastral Road, Amraiwadi, Ahmedabad - 380026, Gujarat',
@@ -45,11 +45,12 @@ class StoreSetting extends Model
                 'showcase_subtitle' => 'Select a collection below to discover hand-finished 1 gram micro gold masterpieces.',
                 'showcase_limit' => '10',
                 'showcase_categories' => '["1","2","9","3","10"]',
-                'instagram_url' => 'https://www.instagram.com/rayka_imitation_amdavad/?hl=en',
-                'instagram_handle' => '@rayka_imitation_amdavad',
-                'google_map_url' => 'https://share.google/vaohJv28SH29hBV8j',
+                'instagram_url' => '',
+                'instagram_handle' => '',
+                'google_map_url' => '',
             ];
 
+            // Start with defaults, then override with any existing keys in DB (including empty strings)
             $merged = array_merge($defaults, $settings);
 
             // Compute clean phone (only digits)
@@ -67,13 +68,9 @@ class StoreSetting extends Model
                 $cleanWa = '91'.substr($cleanWa, 1);
             }
 
-            if (empty($cleanWa)) {
-                $cleanWa = '919638868024';
-            }
-
-            $merged['clean_phone'] = $cleanPhone ?: '919638868024';
+            $merged['clean_phone'] = $cleanPhone;
             $merged['clean_whatsapp'] = $cleanWa;
-            $merged['whatsapp_url'] = 'https://wa.me/'.$cleanWa;
+            $merged['whatsapp_url'] = $cleanWa ? 'https://wa.me/'.$cleanWa : '';
 
             return $merged;
         });
@@ -85,10 +82,10 @@ class StoreSetting extends Model
 
         // Handle common aliases transparently
         if ($key === 'whatsapp_number' || $key === 'whatsapp') {
-            return $all['store_whatsapp'] ?? $all['whatsapp_number'] ?? $default;
+            return array_key_exists('store_whatsapp', $all) ? (string) $all['store_whatsapp'] : ($all['whatsapp_number'] ?? $default);
         }
         if ($key === 'phone_number' || $key === 'phone') {
-            return $all['store_phone'] ?? $all['phone_number'] ?? $default;
+            return array_key_exists('store_phone', $all) ? (string) $all['store_phone'] : ($all['phone_number'] ?? $default);
         }
 
         if (array_key_exists($key, $all)) {
@@ -102,7 +99,7 @@ class StoreSetting extends Model
     {
         static::updateOrCreate(
             ['key' => $key],
-            ['value' => $value]
+            ['value' => $value !== null ? trim((string) $value) : '']
         );
 
         Cache::forget('store_settings_all');

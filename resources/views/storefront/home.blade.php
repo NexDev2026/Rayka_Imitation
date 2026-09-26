@@ -1123,7 +1123,7 @@
   },
   "contactPoint": {
     "@@type": "ContactPoint",
-    "telephone": "{{ $storeSettings['store_phone'] ?? '+91-9638868024' }}",
+    "telephone": "{{ $storeSettings['store_phone'] ?? '' }}",
     "contactType": "Customer Service"
   }
 }

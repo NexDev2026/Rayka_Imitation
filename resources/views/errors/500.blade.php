@@ -1,6 +1,6 @@
 @extends('layouts.storefront')
 
-@section('title', 'Temporary Atelier Service — Rayka Imitation Jewellery')
+@section('title', 'Temporary Atelier Service â€” Rayka Imitation Jewellery')
 
 @section('content')
 <div class="min-h-[60vh] flex items-center justify-center py-16 px-4 sm:px-6 lg:px-8 bg-[#FAF7F0]">
@@ -27,9 +27,11 @@
                class="inline-flex items-center space-x-2 bg-[#4A2C1D] text-[#E7C77B] px-6 py-3 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-[#3A1C0E] transition shadow-md hover:scale-105 active:scale-95 cursor-pointer">
                 <span>Reload Showroom</span>
             </a>
-            <a href="{{ $storeSettings['whatsapp_url'] ?? 'https://wa.me/919638868024' }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center space-x-2 bg-[#25D366] text-white px-6 py-3 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-[#20ba5a] transition shadow-md hover:scale-105 active:scale-95 cursor-pointer">
+            @if(!empty($storeSettings['whatsapp_url']) || !empty($storeSettings['clean_whatsapp']))
+            <a href="{{ $storeSettings['whatsapp_url'] ?? ('https://wa.me/'.$storeSettings['clean_whatsapp']) }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center space-x-2 bg-[#25D366] text-white px-6 py-3 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-[#20ba5a] transition shadow-md hover:scale-105 active:scale-95 cursor-pointer">
                 <span>WhatsApp Concierge</span>
             </a>
+            @endif
         </div>
     </div>
 </div>

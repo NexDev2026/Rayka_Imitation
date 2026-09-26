@@ -15,7 +15,7 @@
         <p>Because every jewellery creation is delicate and precious, we offer a dedicated <strong>7-Day Free Replacement Guarantee</strong> in the unlikely event of physical damage during transit, missing stone, or manufacturing defect.</p>
 
         <h3 class="font-serif-royal text-base font-bold text-[#4A2C1D]">2. How to Request a Replacement</h3>
-        <p>Simply message our WhatsApp concierge at <strong>{{ $storeSettings['store_whatsapp'] ?? '+91 9638868024' }}</strong> or email <strong>{{ $storeSettings['store_email'] ?? 'raykaimitation@gmail.com' }}</strong> with your Order Number and a short unboxing video or photo within 7 days of package delivery. We will arrange a replacement piece or free re-plating promptly.</p>
+        <p>Simply message our WhatsApp concierge@if(!empty($storeSettings['store_whatsapp'])) at <strong>{{ $storeSettings['store_whatsapp'] }}</strong>@endif or email <strong>{{ $storeSettings['store_email'] ?? 'care@raykajewellery.com' }}</strong> with your Order Number and a short unboxing video or photo within 7 days of package delivery. We will arrange a replacement piece or free re-plating promptly.</p>
 
         <h3 class="font-serif-royal text-base font-bold text-[#4A2C1D]">3. Hygiene & Wear Conditions</h3>
         <p>Due to hygiene and personalized craftsmanship, items that show visible prolonged personal wear, alteration, perfume damage, or missing authentic packaging cannot be returned.</p>
