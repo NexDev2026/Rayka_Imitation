@@ -24,27 +24,27 @@ class StoreSetting extends Model
 
             $defaults = [
                 'store_name' => 'Rayka Imitation Jewellery',
-                'tagline' => 'Royal Heritage & 1 Gram Micro Gold Imitation Jewellery',
+                'tagline' => '',
                 'store_phone' => '',
                 'store_whatsapp' => '',
                 'store_alt_phone' => '',
-                'store_email' => 'raykaimitation@gmail.com',
-                'admin_email' => 'nexdevstudio01@gmail.com',
-                'store_address' => 'Shop No. 29, Shreeji Bapa Complex, Near Rita Nagar Bus Stand, Vastral Road, Amraiwadi, Ahmedabad - 380026, Gujarat',
-                'upi_id' => 'raykajewellery@icici',
-                'upi_payee_name' => 'Rayka Imitation Jewellery Pvt Ltd',
-                'qr_code_image' => '/images/qr/sample-upi-qr.svg',
+                'store_email' => '',
+                'admin_email' => '',
+                'store_address' => '',
+                'upi_id' => '',
+                'upi_payee_name' => '',
+                'qr_code_image' => '',
                 'free_shipping_min' => '999',
                 'shipping_flat_fee' => '99',
-                'trust_badge_1' => 'Free Express Shipping',
-                'trust_badge_2' => '100% Verified Payment',
-                'trust_badge_3' => 'Easy Replacement',
-                'trust_badge_4' => 'Heritage Quality',
-                'showcase_enabled' => '1',
-                'showcase_title' => 'Curated Royal Collections',
-                'showcase_subtitle' => 'Select a collection below to discover hand-finished 1 gram micro gold masterpieces.',
+                'trust_badge_1' => '',
+                'trust_badge_2' => '',
+                'trust_badge_3' => '',
+                'trust_badge_4' => '',
+                'showcase_enabled' => '0',
+                'showcase_title' => '',
+                'showcase_subtitle' => '',
                 'showcase_limit' => '10',
-                'showcase_categories' => '["1","2","9","3","10"]',
+                'showcase_categories' => '[]',
                 'instagram_url' => '',
                 'instagram_handle' => '',
                 'google_map_url' => '',
@@ -52,6 +52,11 @@ class StoreSetting extends Model
 
             // Start with defaults, then override with any existing keys in DB (including empty strings)
             $merged = array_merge($defaults, $settings);
+            foreach ($merged as $k => $v) {
+                if ($v === null) {
+                    $merged[$k] = '';
+                }
+            }
 
             // Compute clean phone (only digits)
             $cleanPhone = preg_replace('/[^0-9]/', '', (string) ($merged['store_phone'] ?? ''));
