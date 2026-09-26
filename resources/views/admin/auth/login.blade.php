@@ -3,6 +3,9 @@
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+    <meta http-equiv="Pragma" content="no-cache">
+    <meta http-equiv="Expires" content="0">
     <title>Admin Portal Login — Rayka Royal Administration</title>
     <link rel="icon" type="image/png" href="{{ asset('images/rayka-logo.png') }}">
     <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:wght@600;700&family=Poppins:wght@300;400;500;600;700&display=swap" rel="stylesheet">
@@ -51,6 +54,7 @@
 
         <form action="{{ route('admin.login.submit') }}" method="POST" class="space-y-4 text-left text-xs" novalidate>
             @csrf
+            <input type="hidden" name="redirect" id="admin_redirect_input" value="{{ old('redirect', $redirect ?? request('redirect', '')) }}">
 
             <!-- Email Address Field -->
             <div>
@@ -138,6 +142,30 @@
 
     </div>
 
+    <script>
+        (function() {
+            // Restore intended URL if user came after cache clear or session timeout
+            try {
+                const redirectInput = document.getElementById('admin_redirect_input');
+                if (redirectInput && (!redirectInput.value || redirectInput.value.trim() === '')) {
+                    const savedUrl = sessionStorage.getItem('rayka_admin_last_url') || localStorage.getItem('rayka_admin_last_url');
+                    if (savedUrl && !savedUrl.includes('/admin/login') && !savedUrl.includes('/admin/logout')) {
+                        const parsed = new URL(savedUrl, window.location.origin);
+                        if (parsed.origin === window.location.origin && parsed.pathname.startsWith('/admin')) {
+                            redirectInput.value = savedUrl;
+                        }
+                    }
+                }
+            } catch(e) {}
+
+            // BFCache Buster: When clicking browser back button after logging in, force page reload so server auth check kicks in
+            window.addEventListener('pageshow', function(event) {
+                if (event.persisted || (window.performance && (window.performance.navigation && window.performance.navigation.type === 2) || (window.performance.getEntriesByType && window.performance.getEntriesByType('navigation')[0] && window.performance.getEntriesByType('navigation')[0].type === 'back_forward'))) {
+                    window.location.reload();
+                }
+            });
+        })();
+    </script>
 </body>
 </html>
 

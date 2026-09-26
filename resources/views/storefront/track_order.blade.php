@@ -132,7 +132,7 @@
                                 </div>
                             </div>
                             @php
-                                $waNumber = preg_replace('/[^0-9]/', '', \App\Models\StoreSetting::get('whatsapp_number', '919876543210'));
+                                $waNumber = $storeSettings['clean_whatsapp'] ?? '919638868024';
                             @endphp
                             <a href="https://wa.me/{{ $waNumber }}?text={{ urlencode("Hello Rayka Support, my order #{$order->order_number} is showing Rejected. Please help verify:") }}" target="_blank" class="shrink-0 px-5 py-2.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-xs rounded-xl shadow-xs transition flex items-center gap-2">
                                 <svg class="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">
@@ -378,7 +378,7 @@
                         <p class="text-xs text-stone-300">Our Royal Customer Care team is standing by to help with any delivery inquiries.</p>
                     </div>
                     <div class="flex flex-wrap items-center gap-3">
-                        <a href="https://wa.me/{{ preg_replace('/\D/', '', \App\Models\StoreSetting::get('store_whatsapp', '919876543210')) }}?text=Hello%20Rayka%20Jewellery,%20I%20need%20assistance%20regarding%20my%20Order%20%23{{ $order->order_number }}" 
+                        <a href="https://wa.me/{{ $storeSettings['clean_whatsapp'] ?? '919638868024' }}?text=Hello%20Rayka%20Jewellery,%20I%20need%20assistance%20regarding%20my%20Order%20%23{{ $order->order_number }}" 
                            target="_blank" rel="noopener noreferrer"
                            class="inline-flex items-center space-x-2 px-5 py-2.5 bg-emerald-600 hover:bg-emerald-700 text-white rounded-full font-bold text-xs shadow-md transition">
                             <svg class="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24">

@@ -44,9 +44,12 @@
                     </div>
                     <div>
                         <strong class="block text-[#4A2C1D] font-semibold">Boutique Address:</strong>
-                        <p class="text-stone-600 leading-relaxed mt-0.5">{{ $storeAddress }}</p>
-                        @if(!empty($storeGoogleMapUrl))
-                            <a href="{{ $storeGoogleMapUrl }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 mt-2 px-3 py-1 bg-white border border-[#D4AF6A] text-[#996E2E] rounded-md font-semibold text-[11px] hover:bg-[#FAF7F0] transition shadow-xs">
+                        <p class="text-stone-600 leading-relaxed mt-0.5">{{ $storeAddress ?: ($storeSettings['store_address'] ?? 'Shop No. 29, Shreeji Bapa Complex, Near Rita Nagar Bus Stand, Vastral Road, Amraiwadi, Ahmedabad - 380026, Gujarat') }}</p>
+                        @php
+                            $mapUrl = $storeGoogleMapUrl ?: ($storeSettings['google_map_url'] ?? 'https://share.google/vaohJv28SH29hBV8j');
+                        @endphp
+                        @if(!empty($mapUrl))
+                            <a href="{{ $mapUrl }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center gap-1.5 mt-2 px-3 py-1 bg-white border border-[#D4AF6A] text-[#996E2E] rounded-md font-semibold text-[11px] hover:bg-[#FAF7F0] transition shadow-xs">
                                 <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 20l-5.447-2.724A1 1 0 013 16.382V5.618a1 1 0 011.447-.894L9 7m0 13l6-3m-6 3V7m6 10l4.553 2.276A1 1 0 0021 18.382V7.618a1 1 0 00-.553-.894L15 4m0 13V4m0 0L9 7"></path></svg>
                                 <span>Get Directions</span>
                                 <span class="flex items-center gap-1.5"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg></span>
@@ -62,8 +65,8 @@
                     </div>
                     <div>
                         <strong class="block text-[#4A2C1D] font-semibold">Instagram Profile:</strong>
-                        <a href="{{ $storeInstagramUrl ?: 'https://www.instagram.com/rayka_imitation_amdavad/?hl=en' }}" target="_blank" rel="noopener noreferrer" class="text-[#D4AF6A] font-semibold hover:underline flex items-center gap-1 mt-0.5">
-                            <span class="text-pink-600 font-bold">@rayka_imitation_amdavad</span>
+                        <a href="{{ $storeInstagramUrl ?: ($storeSettings['instagram_url'] ?? 'https://www.instagram.com/rayka_imitation_amdavad/?hl=en') }}" target="_blank" rel="noopener noreferrer" class="text-[#D4AF6A] font-semibold hover:underline flex items-center gap-1 mt-0.5">
+                            <span class="text-pink-600 font-bold">{{ $storeInstagramHandle ?: ($storeSettings['instagram_handle'] ?? '@rayka_imitation_amdavad') }}</span>
                             <span class="text-[10px] text-stone-500">(Latest designs & reels)</span>
                         </a>
                     </div>
@@ -76,10 +79,14 @@
                     </div>
                     <div>
                         <strong class="block text-[#4A2C1D] font-semibold">Telephone & Helpline:</strong>
+                        @php
+                            $activePhone = $storePhone ?: ($storeSettings['store_phone'] ?? '+91 9638868024');
+                            $activeAltPhone = $storeAltPhone ?: ($storeSettings['store_alt_phone'] ?? '');
+                        @endphp
                         <div class="space-y-0.5 mt-0.5">
-                            <a href="tel:{{ $storePhone }}" class="text-[#996E2E] hover:underline font-medium block">{{ $storePhone }}</a>
-                            @if(!empty($storeAltPhone))
-                                <a href="tel:{{ $storeAltPhone }}" class="text-stone-600 hover:text-[#996E2E] hover:underline block text-[11px]">Alt: {{ $storeAltPhone }}</a>
+                            <a href="tel:{{ preg_replace('/[^0-9]/', '', $activePhone) }}" class="text-[#996E2E] hover:underline font-medium block">{{ $activePhone }}</a>
+                            @if(!empty($activeAltPhone))
+                                <a href="tel:{{ preg_replace('/[^0-9]/', '', $activeAltPhone) }}" class="text-stone-600 hover:text-[#996E2E] hover:underline block text-[11px]">Alt: {{ $activeAltPhone }}</a>
                             @endif
                         </div>
                         <p class="text-[10px] text-stone-400 mt-1">Monday to Saturday (10:00 AM – 8:00 PM IST)</p>
@@ -95,8 +102,12 @@
                     </div>
                     <div>
                         <strong class="block text-[#4A2C1D] font-semibold">WhatsApp Concierge & Orders:</strong>
-                        <a href="https://wa.me/{{ preg_replace('/[^0-9]/', '', $storeWhatsapp ?: '918128498531') }}" target="_blank" class="inline-flex items-center gap-1 text-emerald-700 font-semibold hover:underline mt-0.5">
-                            <span>Chat on WhatsApp ({{ $storeWhatsapp }})</span>
+                        @php
+                            $activeWa = $storeWhatsapp ?: ($storeSettings['store_whatsapp'] ?? '+91 9638868024');
+                            $activeWaUrl = $storeSettings['whatsapp_url'] ?? ('https://wa.me/' . preg_replace('/[^0-9]/', '', $activeWa));
+                        @endphp
+                        <a href="{{ $activeWaUrl }}" target="_blank" class="inline-flex items-center gap-1 text-emerald-700 font-semibold hover:underline mt-0.5">
+                            <span>Chat on WhatsApp ({{ $activeWa }})</span>
                             <span class="flex items-center gap-1.5"><svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg></span>
                         </a>
                     </div>
@@ -109,7 +120,10 @@
                     </div>
                     <div>
                         <strong class="block text-[#4A2C1D] font-semibold">Customer Support Email:</strong>
-                        <a href="mailto:{{ $storeEmail }}" class="text-[#996E2E] hover:underline block mt-0.5">{{ $storeEmail ?: 'care@raykajewellery.com' }}</a>
+                        @php
+                            $activeEmail = $storeEmail ?: ($storeSettings['store_email'] ?? 'raykaimitation@gmail.com');
+                        @endphp
+                        <a href="mailto:{{ $activeEmail }}" class="text-[#996E2E] hover:underline block mt-0.5">{{ $activeEmail }}</a>
                     </div>
                 </div>
             </div>

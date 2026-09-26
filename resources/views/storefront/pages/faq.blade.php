@@ -46,7 +46,7 @@
       "name": "What is your 7-Day Replacement Guarantee?",
       "acceptedAnswer": {
         "@@type": "Answer",
-        "text": "If your order arrives damaged, defective, or incorrect, you are covered by our 7-Day Replacement Guarantee. Simply record a brief unboxing video upon delivery and share it with our WhatsApp concierge (+91 81284 98531) within 7 days. We will dispatch a brand-new replacement at zero additional shipping cost."
+        "text": "If your order arrives damaged, defective, or incorrect, you are covered by our 7-Day Replacement Guarantee. Simply record a brief unboxing video upon delivery and share it with our WhatsApp concierge ({{ $storeSettings['store_whatsapp'] ?? '+91 9638868024' }}) within 7 days. We will dispatch a brand-new replacement at zero additional shipping cost."
       }
     },
     {
@@ -236,7 +236,7 @@
                         We offer a comprehensive <strong>7-Day Replacement Guarantee</strong> for any transit breakage, stone displacement, or manufacturing defect.
                     </p>
                     <p>
-                        To claim a replacement, simply record a 30-second continuous parcel unboxing video when your package arrives and share it with our WhatsApp concierge (+91 81284 98531). Once validated, a brand new replacement unit will be dispatched to your doorstep free of charge. For complete details, see our <a href="{{ route('policy', 'return-replacement-policy') }}" class="text-[#996E2E] font-bold underline">Replacement Policy</a>.
+                        To claim a replacement, simply record a 30-second continuous parcel unboxing video when your package arrives and share it with our WhatsApp concierge ({{ $storeSettings['store_whatsapp'] ?? '+91 9638868024' }}). Once validated, a brand new replacement unit will be dispatched to your doorstep free of charge. For complete details, see our <a href="{{ route('policy', 'return-replacement-policy') }}" class="text-[#996E2E] font-bold underline">Replacement Policy</a>.
                     </p>
                 </div>
             </div>
@@ -281,7 +281,7 @@
                     Our dedicated royal jewellery concierge is available on WhatsApp for custom sizing, bridal curations, and real-time order inquiries.
                 </p>
                 <div class="pt-2 flex flex-wrap items-center justify-center gap-3">
-                    <a href="https://wa.me/918128498531?text=Hello%20Rayka%20Jewellery%2C%20I%20have%20a%20question%20regarding%20my%20order." 
+                    <a href="{{ $storeSettings['whatsapp_url'] ?? 'https://wa.me/919638868024' }}?text=Hello%20Rayka%20Jewellery%2C%20I%20have%20a%20question%20regarding%20my%20order." 
                        target="_blank" rel="noopener noreferrer" 
                        class="inline-flex items-center space-x-2 bg-[#25D366] hover:bg-[#20ba5a] text-white px-6 py-3 rounded-full text-xs font-bold uppercase tracking-wider transition shadow-md hover:scale-105 active:scale-95 cursor-pointer">
                         <svg class="w-4 h-4 fill-current" viewBox="0 0 24 24">

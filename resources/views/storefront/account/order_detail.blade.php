@@ -73,7 +73,7 @@
                         $isRejected = $order->status === 'Rejected';
                         $isCancelled = $order->status === 'Cancelled';
                         $cancelDetails = $order->getCancellationDetails();
-                        $waNumber = preg_replace('/[^0-9]/', '', \App\Models\StoreSetting::get('whatsapp_number', '919876543210'));
+                        $waNumber = $storeSettings['clean_whatsapp'] ?? '919638868024';
 
                         // Determine step completion logic for active orders
                         $step1 = true; // Always verified at least pending

@@ -92,24 +92,44 @@
 
                 <div>
                     <label class="block font-semibold text-stone-700 mb-1">Helpline Phone</label>
-                    <input type="text" name="store_phone" value="{{ old('store_phone', $settings['store_phone']) }}" class="w-full border rounded-lg p-2.5">
+                    <input type="text" name="store_phone" value="{{ old('store_phone', $settings['store_phone']) }}" class="w-full border rounded-lg p-2.5" placeholder="+91 xxxxxxxxx">
                 </div>
 
                 <div>
                     <label class="block font-semibold text-stone-700 mb-1">WhatsApp Number</label>
-                    <input type="text" name="store_whatsapp" value="{{ old('store_whatsapp', $settings['store_whatsapp']) }}" class="w-full border rounded-lg p-2.5">
+                    <input type="text" name="store_whatsapp" value="{{ old('store_whatsapp', $settings['store_whatsapp']) }}" class="w-full border rounded-lg p-2.5" placeholder="+91 xxxxxxxxx">
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-stone-700 mb-1">Alternate Phone (Optional)</label>
+                    <input type="text" name="store_alt_phone" value="{{ old('store_alt_phone', $settings['store_alt_phone'] ?? '') }}" class="w-full border rounded-lg p-2.5" placeholder="+91 xxxxxxxxx">
                 </div>
 
                 <div>
                     <label class="block font-semibold text-stone-700 mb-1">Customer Support / Care Email</label>
-                    <input type="email" name="store_email" value="{{ old('store_email', $settings['store_email']) }}" class="w-full border rounded-lg p-2.5" placeholder="care@raykajewellery.com">
+                    <input type="email" name="store_email" value="{{ old('store_email', $settings['store_email']) }}" class="w-full border rounded-lg p-2.5" placeholder="example@gmail.com">
                     <p class="text-[10px] text-stone-400 mt-1">Displayed to customers in order confirmation emails, invoices, and help sections.</p>
                 </div>
 
                 <div>
                     <label class="block font-semibold text-stone-700 mb-1">Admin Alert / Notification Email</label>
-                    <input type="email" name="admin_email" value="{{ old('admin_email', $settings['admin_email'] ?? '') }}" class="w-full border rounded-lg p-2.5" placeholder="admin@raykajewellery.com">
+                    <input type="email" name="admin_email" value="{{ old('admin_email', $settings['admin_email'] ?? '') }}" class="w-full border rounded-lg p-2.5" placeholder="example@gmail.com">
                     <p class="text-[10px] text-stone-400 mt-1">Receives instant notifications for new orders, user registrations, cancellations, and backups.</p>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-stone-700 mb-1">Instagram Profile URL</label>
+                    <input type="url" name="instagram_url" value="{{ old('instagram_url', $settings['instagram_url'] ?? '') }}" class="w-full border rounded-lg p-2.5" placeholder="https://www.instagram.com/rayka_imitation_amdavad/?hl=en">
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-stone-700 mb-1">Instagram Display Handle</label>
+                    <input type="text" name="instagram_handle" value="{{ old('instagram_handle', $settings['instagram_handle'] ?? '') }}" class="w-full border rounded-lg p-2.5" placeholder="@rayka_imitation_amdavad">
+                </div>
+
+                <div class="sm:col-span-2">
+                    <label class="block font-semibold text-stone-700 mb-1">Google Maps Direction Link</label>
+                    <input type="url" name="google_map_url" value="{{ old('google_map_url', $settings['google_map_url'] ?? '') }}" class="w-full border rounded-lg p-2.5" placeholder="https://share.google/vaohJv28SH29hBV8j">
                 </div>
 
                 <div class="sm:col-span-2">

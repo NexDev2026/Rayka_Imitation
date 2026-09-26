@@ -57,6 +57,7 @@
         <!-- Direct Email + Password Login Form -->
         <form action="{{ route('login.submit') }}" method="POST" class="space-y-4 text-left text-xs">
             @csrf
+            <input type="hidden" name="redirect" id="customer_redirect_input" value="{{ old('redirect', $redirect ?? request('redirect', '')) }}">
 
             <!-- Email Address Field -->
             <div>
@@ -84,7 +85,7 @@
                 <div class="relative">
                     <input :type="showPassword ? 'text' : 'password'" 
                            name="password" 
-                           required
+                           required 
                            autocomplete="new-password"
                            placeholder="••••••••" 
                            class="w-full border border-[#D4AF6A]/50 rounded-lg p-2.5 pr-9 focus:border-[#D4AF6A] focus:outline-hidden">
@@ -119,12 +120,38 @@
 
         <div class="pt-2 text-xs text-stone-500 border-t border-[#D4AF6A]/20 flex items-center justify-center gap-1">
             <span>New to Rayka Jewellery?</span>
-            <a href="{{ route('register') }}" class="font-bold text-[#996E2E] hover:underline">Create an Account</a>
+            <a href="{{ route('register', array_filter(['redirect' => old('redirect', $redirect ?? request('redirect', ''))])) }}" class="font-bold text-[#996E2E] hover:underline">Create an Account</a>
         </div>
 
     </div>
 
 </div>
+
+@push('scripts')
+<script>
+    (function() {
+        try {
+            const redirectInput = document.getElementById('customer_redirect_input');
+            if (redirectInput && (!redirectInput.value || redirectInput.value.trim() === '')) {
+                const savedUrl = sessionStorage.getItem('rayka_customer_last_url');
+                if (savedUrl && !savedUrl.includes('/login') && !savedUrl.includes('/register') && !savedUrl.includes('/logout')) {
+                    const parsed = new URL(savedUrl, window.location.origin);
+                    if (parsed.origin === window.location.origin) {
+                        redirectInput.value = savedUrl;
+                    }
+                }
+            }
+        } catch(e) {}
+
+        // BFCache Buster: When clicking browser back button after logging in, force page reload so server auth check redirects back to account/intended page
+        window.addEventListener('pageshow', function(event) {
+            if (event.persisted || (window.performance && (window.performance.navigation && window.performance.navigation.type === 2) || (window.performance.getEntriesByType && window.performance.getEntriesByType('navigation')[0] && window.performance.getEntriesByType('navigation')[0].type === 'back_forward'))) {
+                window.location.reload();
+            }
+        });
+    })();
+</script>
+@endpush
 @endsection
 
 

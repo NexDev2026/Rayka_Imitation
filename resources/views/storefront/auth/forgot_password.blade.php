@@ -364,4 +364,14 @@ function forgotPasswordPage() {
     };
 }
 </script>
+
+@push('scripts')
+<script>
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted || (window.performance && (window.performance.navigation && window.performance.navigation.type === 2) || (window.performance.getEntriesByType && window.performance.getEntriesByType('navigation')[0] && window.performance.getEntriesByType('navigation')[0].type === 'back_forward'))) {
+            window.location.reload();
+        }
+    });
+</script>
+@endpush
 @endsection

@@ -246,7 +246,17 @@
         <main class="flex-1 p-3 sm:p-6 lg:p-8">
             @yield('content')
         </main>
-    </div>
+    <!-- Admin URL & Section State Recorder for seamless redirect restoration -->
+    <script>
+        (function() {
+            try {
+                if (window.location.pathname.startsWith('/admin') && !window.location.pathname.includes('/login') && !window.location.pathname.includes('/logout')) {
+                    sessionStorage.setItem('rayka_admin_last_url', window.location.href);
+                    localStorage.setItem('rayka_admin_last_url', window.location.href);
+                }
+            } catch(e) {}
+        })();
+    </script>
 
     @stack('scripts')
 </body>

@@ -184,7 +184,7 @@
 
         <div class="pt-2 text-xs text-stone-500 border-t border-[#D4AF6A]/20 flex items-center justify-center gap-1">
             <span>Already have an account?</span>
-            <a href="{{ route('login') }}" class="font-bold text-[#996E2E] hover:underline">Sign In Here</a>
+            <a href="{{ route('login', array_filter(['redirect' => $redirect ?? request('redirect', '')])) }}" class="font-bold text-[#996E2E] hover:underline">Sign In Here</a>
         </div>
 
     </div>
@@ -350,6 +350,8 @@ function registerPage() {
             var self = this;
             this.loading = true;
             var token = document.querySelector('meta[name="csrf-token"]') ? document.querySelector('meta[name="csrf-token"]').getAttribute('content') : '';
+            var urlParams = new URLSearchParams(window.location.search);
+            var redirectVal = urlParams.get('redirect') || '{{ $redirect ?? "" }}';
 
             fetch('{{ route("register.submit") }}', {
                 method: 'POST',
@@ -363,7 +365,8 @@ function registerPage() {
                     email: self.email.trim(),
                     password: self.password,
                     password_confirmation: self.confirmPassword,
-                    otp: self.otp.trim()
+                    otp: self.otp.trim(),
+                    redirect: redirectVal
                 })
             })
             .then(function(res) {
@@ -389,4 +392,14 @@ function registerPage() {
     };
 }
 </script>
+
+@push('scripts')
+<script>
+    window.addEventListener('pageshow', function(event) {
+        if (event.persisted || (window.performance && (window.performance.navigation && window.performance.navigation.type === 2) || (window.performance.getEntriesByType && window.performance.getEntriesByType('navigation')[0] && window.performance.getEntriesByType('navigation')[0].type === 'back_forward'))) {
+            window.location.reload();
+        }
+    });
+</script>
+@endpush
 @endsection

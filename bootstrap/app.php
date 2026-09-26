@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Middleware\AdminMiddleware;
+use App\Http\Middleware\StripEmptyFileUploads;
 use App\Http\Middleware\TrackPageViews;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
@@ -15,11 +16,19 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withMiddleware(function (Middleware $middleware): void {
         $middleware->trustProxies(at: '*');
+        $middleware->redirectGuestsTo(function (Request $request) {
+            $targetUrl = $request->fullUrl();
+            if ($request->is('admin*')) {
+                return route('admin.login', ['redirect' => $targetUrl]);
+            }
+
+            return route('login', ['redirect' => $targetUrl]);
+        });
         $middleware->validateCsrfTokens(except: [
             'rayka-webhook',
         ]);
         $middleware->web(append: [
-            \App\Http\Middleware\StripEmptyFileUploads::class,
+            StripEmptyFileUploads::class,
             TrackPageViews::class,
         ]);
         $middleware->alias([
@@ -31,4 +40,3 @@ return Application::configure(basePath: dirname(__DIR__))
             fn (Request $request) => $request->is('api/*') || $request->expectsJson(),
         );
     })->create();
-

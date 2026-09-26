@@ -12,7 +12,8 @@ class AdminMiddleware
     public function handle(Request $request, Closure $next): Response
     {
         if (! Auth::check() || ! Auth::user()->isAdmin()) {
-            return redirect()->route('admin.login')->with('error', 'Please log in with admin privileges.');
+            return redirect()->guest(route('admin.login', ['redirect' => $request->fullUrl()]))
+                ->with('error', 'Please log in with admin privileges.');
         }
 
         return $next($request);

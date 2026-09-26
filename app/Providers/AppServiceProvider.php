@@ -4,11 +4,15 @@ namespace App\Providers;
 
 use App\Mail\Transport\BrevoTransport;
 use App\Models\NavGroup;
+use App\Models\StoreSetting;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\Paginator;
+use Illuminate\Support\Facades\Artisan;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Support\Str;
@@ -40,13 +44,13 @@ class AppServiceProvider extends ServiceProvider
         }
 
         // Production Protection: Prohibit all destructive database commands (db:wipe, migrate:fresh, migrate:reset)
-        \Illuminate\Support\Facades\DB::prohibitDestructiveCommands($this->app->environment('production'));
+        DB::prohibitDestructiveCommands($this->app->environment('production'));
 
         // Auto-run migrations on server if DB_AUTO_MIGRATE=true in .env
         if (env('DB_AUTO_MIGRATE', false)) {
             try {
-                if (! \Illuminate\Support\Facades\Schema::hasTable('migrations')) {
-                    \Illuminate\Support\Facades\Artisan::call('migrate', ['--force' => true]);
+                if (! Schema::hasTable('migrations')) {
+                    Artisan::call('migrate', ['--force' => true]);
                 }
             } catch (\Throwable $e) {
                 // Silently ignore if DB connection is not initialized yet
@@ -155,6 +159,15 @@ class AppServiceProvider extends ServiceProvider
                 $view->with('globalNavGroups', $navGroups);
             } catch (\Throwable $e) {
                 $view->with('globalNavGroups', collect());
+            }
+        });
+
+        // Globally share dynamic store settings with all storefront, admin, and PDF views
+        view()->composer(['layouts.storefront', 'layouts.admin', 'storefront.*', 'admin.*', 'pdf.*', 'errors.*'], function ($view) {
+            try {
+                $view->with('storeSettings', StoreSetting::getAll());
+            } catch (\Throwable $e) {
+                $view->with('storeSettings', []);
             }
         });
 

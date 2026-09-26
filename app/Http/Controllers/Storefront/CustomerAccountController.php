@@ -31,13 +31,27 @@ use Illuminate\Support\Facades\Mail;
 
 class CustomerAccountController extends Controller
 {
-    public function showLogin()
+    public function showLogin(Request $request)
     {
+        $redirect = $request->get('redirect') ?: session()->get('url.intended');
+
         if (Auth::check()) {
+            if (! empty($redirect) && ! str_contains($redirect, '/login') && ! str_contains($redirect, '/logout') && ! str_contains($redirect, '/register')) {
+                return redirect()->to($redirect);
+            }
+
             return redirect()->route('account.orders');
         }
 
-        return view('storefront.auth.login');
+        if ($redirect && ! str_contains($redirect, '/login') && ! str_contains($redirect, '/logout') && ! str_contains($redirect, '/register')) {
+            session(['url.intended' => $redirect]);
+        }
+
+        return response()
+            ->view('storefront.auth.login', ['redirect' => $redirect])
+            ->header('Cache-Control', 'no-cache, no-store, max-age=0, must-revalidate')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', 'Sat, 01 Jan 1990 00:00:00 GMT');
     }
 
     public function login(Request $request)
@@ -55,11 +69,19 @@ class CustomerAccountController extends Controller
         $user = User::where('email', $email)->first();
 
         if (! $user) {
-            return back()->withInput($request->only('email'))->with('error', 'No royal account found with this email address. Please register a new account.');
+            return back()->withInput($request->only('email', 'redirect'))->with('error', 'No royal account found with this email address. Please register a new account.');
         }
 
         if (! Hash::check($request->password, $user->password)) {
-            return back()->withInput($request->only('email'))->with('error', 'Incorrect password entered. Please try again or reset your password.');
+            return back()->withInput($request->only('email', 'redirect'))->with('error', 'Incorrect password entered. Please try again or reset your password.');
+        }
+
+        // Preserve intended destination from query / hidden input
+        $targetUrl = $request->input('redirect');
+        if (! empty($targetUrl) && ! str_contains($targetUrl, '/login') && ! str_contains($targetUrl, '/logout') && ! str_contains($targetUrl, '/register')) {
+            if (str_starts_with($targetUrl, '/') || parse_url($targetUrl, PHP_URL_HOST) === $request->getHost()) {
+                session(['url.intended' => $targetUrl]);
+            }
         }
 
         Auth::login($user, (bool) $request->filled('remember'));
@@ -118,13 +140,27 @@ class CustomerAccountController extends Controller
         return response()->json(['success' => false, 'message' => 'Invalid or expired OTP.'], 400);
     }
 
-    public function showRegister()
+    public function showRegister(Request $request)
     {
+        $redirect = $request->get('redirect') ?: session()->get('url.intended');
+
         if (Auth::check()) {
+            if (! empty($redirect) && ! str_contains($redirect, '/login') && ! str_contains($redirect, '/logout') && ! str_contains($redirect, '/register')) {
+                return redirect()->to($redirect);
+            }
+
             return redirect()->route('account.orders');
         }
 
-        return view('storefront.auth.register');
+        if ($redirect && ! str_contains($redirect, '/login') && ! str_contains($redirect, '/logout') && ! str_contains($redirect, '/register')) {
+            session(['url.intended' => $redirect]);
+        }
+
+        return response()
+            ->view('storefront.auth.register', ['redirect' => $redirect])
+            ->header('Cache-Control', 'no-cache, no-store, max-age=0, must-revalidate')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', 'Sat, 01 Jan 1990 00:00:00 GMT');
     }
 
     public function sendRegisterOtp(Request $request)
@@ -137,10 +173,10 @@ class CustomerAccountController extends Controller
 
         $email = strtolower(trim($request->email));
         $otp = (string) random_int(100000, 999999);
-        
+
         $name = trim((string) $request->name);
-        Cache::put('register_otp_' . $email, $otp, now()->addMinutes(15));
-        
+        Cache::put('register_otp_'.$email, $otp, now()->addMinutes(15));
+
         defer(function () use ($email, $otp, $name) {
             try {
                 Mail::to($email)->send(new RegisterOtpMail($otp, $name));
@@ -151,7 +187,7 @@ class CustomerAccountController extends Controller
 
         return response()->json([
             'success' => true,
-            'message' => 'Verification code sent to ' . $email
+            'message' => 'Verification code sent to '.$email,
         ]);
     }
 
@@ -165,7 +201,7 @@ class CustomerAccountController extends Controller
         ]);
 
         $email = strtolower(trim($request->email));
-        $cachedOtp = Cache::get('register_otp_' . $email);
+        $cachedOtp = Cache::get('register_otp_'.$email);
 
         if (! $cachedOtp || $cachedOtp !== $request->otp) {
             if ($request->expectsJson()) {
@@ -174,9 +210,10 @@ class CustomerAccountController extends Controller
                     'message' => 'Invalid or expired verification code. Please check the code or request a new one.',
                 ], 422);
             }
+
             return back()->withInput($request->except('password', 'password_confirmation', 'otp'))
-                         ->with('error', 'Invalid or expired verification code.')
-                         ->with('otp_step', true);
+                ->with('error', 'Invalid or expired verification code.')
+                ->with('otp_step', true);
         }
 
         $user = User::create([
@@ -187,7 +224,7 @@ class CustomerAccountController extends Controller
             'email_verified_at' => now(),
         ]);
 
-        Cache::forget('register_otp_' . $email);
+        Cache::forget('register_otp_'.$email);
 
         Auth::login($user);
         GuestSessionService::mergeGuestDataToUser($user);
@@ -204,15 +241,25 @@ class CustomerAccountController extends Controller
             }
         });
 
+        // Resolve intended destination
+        $targetUrl = $request->input('redirect');
+        if (! empty($targetUrl) && ! str_contains($targetUrl, '/login') && ! str_contains($targetUrl, '/logout') && ! str_contains($targetUrl, '/register')) {
+            if (str_starts_with($targetUrl, '/') || parse_url($targetUrl, PHP_URL_HOST) === $request->getHost()) {
+                session(['url.intended' => $targetUrl]);
+            }
+        }
+
+        $destination = session()->pull('url.intended', route('account.orders'));
+
         if ($request->expectsJson()) {
             return response()->json([
                 'success' => true,
-                'redirect' => route('account.orders'),
+                'redirect' => $destination,
                 'message' => 'Your royal account has been created successfully!',
             ]);
         }
 
-        return redirect()->route('account.orders')->with('success', 'Your royal account has been created successfully!');
+        return redirect()->to($destination)->with('success', 'Your royal account has been created successfully!');
     }
 
     public function showForgotPassword()
@@ -221,7 +268,11 @@ class CustomerAccountController extends Controller
             return redirect()->route('account.orders');
         }
 
-        return view('storefront.auth.forgot_password');
+        return response()
+            ->view('storefront.auth.forgot_password')
+            ->header('Cache-Control', 'no-cache, no-store, max-age=0, must-revalidate')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', 'Sat, 01 Jan 1990 00:00:00 GMT');
     }
 
     public function sendResetOtp(Request $request)
@@ -278,6 +329,7 @@ class CustomerAccountController extends Controller
                     'message' => 'Invalid or expired verification code. Please request a new OTP.',
                 ], 422);
             }
+
             return back()->withInput()->with('error', 'Invalid or expired verification code. Please request a new OTP.')->with('otp_step', true);
         }
 
@@ -358,9 +410,9 @@ class CustomerAccountController extends Controller
 
         $addressLine = trim($validated['address_line']);
         if (! empty($validated['address_type'])) {
-            $tag = '(' . ucfirst(trim($validated['address_type'])) . ')';
+            $tag = '('.ucfirst(trim($validated['address_type'])).')';
             if (! str_contains($addressLine, $tag)) {
-                $addressLine .= ' ' . $tag;
+                $addressLine .= ' '.$tag;
             }
         }
 
@@ -441,7 +493,7 @@ class CustomerAccountController extends Controller
         }
 
         if ($wasDefault) {
-            /** @var \App\Models\Address|null $next */
+            /** @var Address|null $next */
             $next = Auth::user()->addresses()->latest()->first();
             if ($next) {
                 $next->update(['is_default' => true]);
@@ -482,8 +534,8 @@ class CustomerAccountController extends Controller
         }
 
         $otp = (string) random_int(100000, 999999);
-        
-        Cache::put('email_change_' . $user->id, [
+
+        Cache::put('email_change_'.$user->id, [
             'new_email' => strtolower(trim($request->new_email)),
             'otp' => $otp,
         ], now()->addMinutes(15));
@@ -506,7 +558,7 @@ class CustomerAccountController extends Controller
         ]);
 
         $user = Auth::user();
-        $cacheKey = 'email_change_' . $user->id;
+        $cacheKey = 'email_change_'.$user->id;
         $cachedData = Cache::get($cacheKey);
 
         if (! $cachedData || $cachedData['otp'] !== $request->otp) {
@@ -544,7 +596,7 @@ class CustomerAccountController extends Controller
 
     public function cancelOrder(Request $request, $orderNumber)
     {
-        /** @var \App\Models\Order $order */
+        /** @var Order $order */
         $order = Auth::user()->orders()
             ->where('order_number', $orderNumber)
             ->firstOrFail();
@@ -561,7 +613,7 @@ class CustomerAccountController extends Controller
 
         $reason = trim($validated['cancellation_reason']);
         $comment = trim($validated['cancellation_comment'] ?? '');
-        $fullReason = $reason . ($comment !== '' ? " — Details: {$comment}" : '');
+        $fullReason = $reason.($comment !== '' ? " — Details: {$comment}" : '');
 
         // Use a transaction to safely cancel order and restore stock
         DB::transaction(function () use ($order, $fullReason) {
@@ -571,7 +623,7 @@ class CustomerAccountController extends Controller
                 'cancelled_by' => 'customer',
                 'cancellation_reason' => $fullReason,
                 'cancelled_at' => now(),
-                'notes' => trim(($order->notes ?? '') . "\n\nCancelled by user on {$timestamp}. Reason: {$fullReason}"),
+                'notes' => trim(($order->notes ?? '')."\n\nCancelled by user on {$timestamp}. Reason: {$fullReason}"),
             ]);
 
             if ($order->payment) {
@@ -586,7 +638,7 @@ class CustomerAccountController extends Controller
 
             ActivityLog::record(
                 action: 'ORDER_CANCELLED',
-                description: "Customer " . (Auth::user()?->name ?? 'User') . " cancelled Order #{$order->order_number}. Reason: {$fullReason}",
+                description: 'Customer '.(Auth::user()?->name ?? 'User')." cancelled Order #{$order->order_number}. Reason: {$fullReason}",
                 category: 'orders',
                 actorType: 'customer',
                 subjectType: 'Order',
@@ -680,4 +732,3 @@ class CustomerAccountController extends Controller
         return back()->with('success', 'Thank you! Your royal review has been submitted and is awaiting brief moderation.');
     }
 }
-

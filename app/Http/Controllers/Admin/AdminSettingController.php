@@ -19,28 +19,34 @@ class AdminSettingController extends Controller
 {
     public function index()
     {
+        $allSettings = StoreSetting::getAll();
+
         $settings = [
-            'store_name' => StoreSetting::get('store_name', 'Rayka Imitation Jewellery'),
-            'tagline' => StoreSetting::get('tagline', 'Royal Heritage & 1 Gram Micro Gold Imitation Jewellery'),
-            'upi_id' => StoreSetting::get('upi_id', 'raykajewellery@icici'),
-            'upi_payee_name' => StoreSetting::get('upi_payee_name', 'Rayka Imitation Jewellery Pvt Ltd'),
-            'qr_code_image' => StoreSetting::get('qr_code_image', '/images/qr/sample-upi-qr.svg'),
-            'store_phone' => StoreSetting::get('store_phone', '+91 98765 43210'),
-            'store_whatsapp' => StoreSetting::get('store_whatsapp', '+91 98765 43210'),
-            'store_email' => StoreSetting::get('store_email', 'care@raykajewellery.com'),
-            'admin_email' => StoreSetting::get('admin_email', config('services.brevo.admin_email', 'admin@raykajewellery.com')),
-            'store_address' => StoreSetting::get('store_address', 'Rayka Heritage Complex, Johari Bazaar, Jaipur, Rajasthan 302003'),
-            'free_shipping_min' => StoreSetting::get('free_shipping_min', '999'),
-            'shipping_flat_fee' => StoreSetting::get('shipping_flat_fee', '99'),
-            'trust_badge_1' => StoreSetting::get('trust_badge_1'),
-            'trust_badge_2' => StoreSetting::get('trust_badge_2'),
-            'trust_badge_3' => StoreSetting::get('trust_badge_3'),
-            'trust_badge_4' => StoreSetting::get('trust_badge_4'),
-            'showcase_enabled' => StoreSetting::get('showcase_enabled', '1'),
-            'showcase_title' => StoreSetting::get('showcase_title', 'Curated Royal Collections'),
-            'showcase_subtitle' => StoreSetting::get('showcase_subtitle', 'Select a collection below to discover hand-finished 1 gram micro gold masterpieces.'),
-            'showcase_limit' => StoreSetting::get('showcase_limit', '10'),
-            'showcase_categories' => json_decode(StoreSetting::get('showcase_categories', '["1","2","9","3","10"]'), true) ?: [1, 2, 9, 3, 10],
+            'store_name' => $allSettings['store_name'] ?? 'Rayka Imitation Jewellery',
+            'tagline' => $allSettings['tagline'] ?? 'Royal Heritage & 1 Gram Micro Gold Imitation Jewellery',
+            'upi_id' => $allSettings['upi_id'] ?? 'raykajewellery@icici',
+            'upi_payee_name' => $allSettings['upi_payee_name'] ?? 'Rayka Imitation Jewellery Pvt Ltd',
+            'qr_code_image' => $allSettings['qr_code_image'] ?? '/images/qr/sample-upi-qr.svg',
+            'store_phone' => $allSettings['store_phone'] ?? '+91 9638868024',
+            'store_whatsapp' => $allSettings['store_whatsapp'] ?? '+91 9638868024',
+            'store_alt_phone' => $allSettings['store_alt_phone'] ?? '+91 93164 53838',
+            'store_email' => $allSettings['store_email'] ?? 'raykaimitation@gmail.com',
+            'admin_email' => $allSettings['admin_email'] ?? 'nexdevstudio01@gmail.com',
+            'store_address' => $allSettings['store_address'] ?? 'Shop No. 29, Shreeji Bapa Complex, Near Rita Nagar Bus Stand, Vastral Road, Amraiwadi, Ahmedabad - 380026, Gujarat',
+            'instagram_url' => $allSettings['instagram_url'] ?? 'https://www.instagram.com/rayka_imitation_amdavad/?hl=en',
+            'instagram_handle' => $allSettings['instagram_handle'] ?? '@rayka_imitation_amdavad',
+            'google_map_url' => $allSettings['google_map_url'] ?? 'https://share.google/vaohJv28SH29hBV8j',
+            'free_shipping_min' => $allSettings['free_shipping_min'] ?? '999',
+            'shipping_flat_fee' => $allSettings['shipping_flat_fee'] ?? '99',
+            'trust_badge_1' => $allSettings['trust_badge_1'] ?? 'Free Express Shipping',
+            'trust_badge_2' => $allSettings['trust_badge_2'] ?? '100% Verified Payment',
+            'trust_badge_3' => $allSettings['trust_badge_3'] ?? 'Easy Replacement',
+            'trust_badge_4' => $allSettings['trust_badge_4'] ?? 'Heritage Quality',
+            'showcase_enabled' => $allSettings['showcase_enabled'] ?? '1',
+            'showcase_title' => $allSettings['showcase_title'] ?? 'Curated Royal Collections',
+            'showcase_subtitle' => $allSettings['showcase_subtitle'] ?? 'Select a collection below to discover hand-finished 1 gram micro gold masterpieces.',
+            'showcase_limit' => $allSettings['showcase_limit'] ?? '10',
+            'showcase_categories' => json_decode((string) ($allSettings['showcase_categories'] ?? '["1","2","9","3","10"]'), true) ?: [1, 2, 9, 3, 10],
         ];
 
         $allCategories = Category::where('is_active', true)->orderBy('sort_order')->get();
@@ -55,11 +61,15 @@ class AdminSettingController extends Controller
             'tagline' => 'nullable|string|max:500',
             'upi_id' => 'nullable|string|max:100',
             'upi_payee_name' => 'nullable|string|max:255',
-            'store_phone' => 'nullable|string|max:20',
-            'store_whatsapp' => 'nullable|string|max:20',
+            'store_phone' => 'nullable|string|max:25',
+            'store_whatsapp' => 'nullable|string|max:25',
+            'store_alt_phone' => 'nullable|string|max:25',
             'store_email' => 'nullable|email:rfc,filter|max:255',
             'admin_email' => 'nullable|email:rfc,filter|max:255',
             'store_address' => 'nullable|string|max:500',
+            'instagram_url' => 'nullable|string|max:500',
+            'instagram_handle' => 'nullable|string|max:100',
+            'google_map_url' => 'nullable|string|max:500',
             'free_shipping_min' => 'nullable|numeric|min:0',
             'shipping_flat_fee' => 'nullable|numeric|min:0',
             'trust_badge_1' => 'nullable|string|max:100',
@@ -83,9 +93,13 @@ class AdminSettingController extends Controller
             'upi_payee_name',
             'store_phone',
             'store_whatsapp',
+            'store_alt_phone',
             'store_email',
             'admin_email',
             'store_address',
+            'instagram_url',
+            'instagram_handle',
+            'google_map_url',
             'free_shipping_min',
             'shipping_flat_fee',
             'trust_badge_1',
@@ -125,11 +139,19 @@ class AdminSettingController extends Controller
 
             // Double guarantee: mirror QR code to both 'qr' and 'settings' folders
             $qrFn = basename($qrPath);
-            ImageUploadService::mirrorToExternalUploads(public_path('uploads/qr/' . $qrFn), 'qr', $qrFn);
-            ImageUploadService::mirrorToExternalUploads(public_path('uploads/qr/' . $qrFn), 'settings', $qrFn);
+            ImageUploadService::mirrorToExternalUploads(public_path('uploads/qr/'.$qrFn), 'qr', $qrFn);
+            ImageUploadService::mirrorToExternalUploads(public_path('uploads/qr/'.$qrFn), 'settings', $qrFn);
         }
 
-        return back()->with('success', 'Store settings and homepage showcase updated successfully!');
+        StoreSetting::clearCache();
+
+        try {
+            Artisan::call('view:clear');
+        } catch (\Throwable $e) {
+            // Silently ignore if Artisan view:clear not permitted in specific runtime
+        }
+
+        return back()->with('success', 'Store settings and boutique contact details updated successfully and live across the site!');
     }
 
     public function updateEmail(Request $request)
@@ -146,8 +168,8 @@ class AdminSettingController extends Controller
         }
 
         $otp = (string) random_int(100000, 999999);
-        
-        Cache::put('email_change_' . $user->id, [
+
+        Cache::put('email_change_'.$user->id, [
             'new_email' => strtolower(trim($request->new_email)),
             'otp' => $otp,
         ], now()->addMinutes(15));
@@ -170,7 +192,7 @@ class AdminSettingController extends Controller
         ]);
 
         $user = Auth::user();
-        $cacheKey = 'email_change_' . $user->id;
+        $cacheKey = 'email_change_'.$user->id;
         $cachedData = Cache::get($cacheKey);
 
         if (! $cachedData || $cachedData['otp'] !== $request->otp) {
@@ -195,9 +217,9 @@ class AdminSettingController extends Controller
             Artisan::call('db:backup');
             $output = trim(Artisan::output());
 
-            return back()->with('success', 'Database backup completed successfully! ' . $output)->withFragment('backup-sync');
+            return back()->with('success', 'Database backup completed successfully! '.$output)->withFragment('backup-sync');
         } catch (\Throwable $e) {
-            return back()->with('error', 'Backup failed: ' . $e->getMessage())->withFragment('backup-sync');
+            return back()->with('error', 'Backup failed: '.$e->getMessage())->withFragment('backup-sync');
         }
     }
 
@@ -212,8 +234,7 @@ class AdminSettingController extends Controller
 
             return back()->with('success', 'All images and documents mirrored to rayka_uploads successfully!')->withFragment('backup-sync');
         } catch (\Throwable $e) {
-            return back()->with('error', 'Storage sync failed: ' . $e->getMessage())->withFragment('backup-sync');
+            return back()->with('error', 'Storage sync failed: '.$e->getMessage())->withFragment('backup-sync');
         }
     }
 }
-

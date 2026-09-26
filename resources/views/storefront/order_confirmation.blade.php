@@ -142,7 +142,7 @@
         <div class="pt-3 flex flex-col sm:flex-row items-center justify-center gap-3 w-full">
             @if($isRejected)
                 @php
-                    $waNumber = preg_replace('/[^0-9]/', '', \App\Models\StoreSetting::get('whatsapp_number', '919876543210'));
+                    $waNumber = $storeSettings['clean_whatsapp'] ?? '919638868024';
                 @endphp
                 <a href="https://wa.me/{{ $waNumber }}?text={{ urlencode("Hello Rayka Concierge, my payment proof for order #{$order->order_number} needs verification. Here is my transaction detail:") }}" target="_blank" class="w-full sm:w-auto inline-flex items-center justify-center gap-2.5 bg-emerald-700 hover:bg-emerald-800 text-white px-6 py-3.5 rounded-full font-bold text-xs uppercase tracking-wider transition shadow-md cursor-pointer">
                     <svg class="w-5 h-5 fill-current shrink-0" viewBox="0 0 24 24">

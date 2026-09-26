@@ -27,8 +27,7 @@
                class="inline-flex items-center space-x-2 bg-[#4A2C1D] text-[#E7C77B] px-6 py-3 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-[#3A1C0E] transition shadow-md hover:scale-105 active:scale-95 cursor-pointer">
                 <span>Reload Showroom</span>
             </a>
-            <a href="https://wa.me/918128498531" target="_blank" rel="noopener noreferrer" 
-               class="inline-flex items-center space-x-2 bg-[#25D366] text-white px-6 py-3 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-[#20ba5a] transition shadow-md hover:scale-105 active:scale-95 cursor-pointer">
+            <a href="{{ $storeSettings['whatsapp_url'] ?? 'https://wa.me/919638868024' }}" target="_blank" rel="noopener noreferrer" class="inline-flex items-center space-x-2 bg-[#25D366] text-white px-6 py-3 rounded-full text-xs font-bold uppercase tracking-wider hover:bg-[#20ba5a] transition shadow-md hover:scale-105 active:scale-95 cursor-pointer">
                 <span>WhatsApp Concierge</span>
             </a>
         </div>

@@ -3,23 +3,37 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Mail\ResetPasswordOtpMail;
 use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\ResetPasswordOtpMail;
 
 class AdminAuthController extends Controller
 {
-    public function showLogin()
+    public function showLogin(Request $request)
     {
+        $redirect = $request->get('redirect') ?: session()->get('url.intended');
+
         if (Auth::check() && Auth::user()->isAdmin()) {
+            if (! empty($redirect) && ! str_contains($redirect, '/login') && ! str_contains($redirect, '/logout')) {
+                return redirect()->to($redirect);
+            }
+
             return redirect()->route('admin.dashboard');
         }
 
-        return view('admin.auth.login');
+        if ($redirect && ! str_contains($redirect, '/login') && ! str_contains($redirect, '/logout')) {
+            session(['url.intended' => $redirect]);
+        }
+
+        return response()
+            ->view('admin.auth.login', ['redirect' => $redirect])
+            ->header('Cache-Control', 'no-cache, no-store, max-age=0, must-revalidate')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', 'Sat, 01 Jan 1990 00:00:00 GMT');
     }
 
     public function login(Request $request)
@@ -36,14 +50,22 @@ class AdminAuthController extends Controller
         $user = User::where('email', $request->email)->first();
 
         if (! $user || ! Hash::check($request->password, $user->password) || ! $user->isAdmin()) {
-            return back()->withInput($request->only('email'))->with('error', 'Invalid admin credentials or unauthorized account.');
+            return back()->withInput($request->only('email', 'redirect'))->with('error', 'Invalid admin credentials or unauthorized account.');
+        }
+
+        // Preserve and sanitize intended redirect target if supplied
+        $targetUrl = $request->input('redirect');
+        if (! empty($targetUrl) && ! str_contains($targetUrl, '/login') && ! str_contains($targetUrl, '/logout')) {
+            if (str_starts_with($targetUrl, '/') || parse_url($targetUrl, PHP_URL_HOST) === $request->getHost()) {
+                session(['url.intended' => $targetUrl]);
+            }
         }
 
         $remember = $request->boolean('remember', false);
         Auth::login($user, $remember);
         $request->session()->regenerate();
 
-        return redirect()->intended(route('admin.dashboard'))->with('success', 'Welcome back, ' . $user->name . '!');
+        return redirect()->intended(route('admin.dashboard'))->with('success', 'Welcome back, '.$user->name.'!');
     }
 
     public function logout(Request $request)
@@ -61,7 +83,11 @@ class AdminAuthController extends Controller
             return redirect()->route('admin.dashboard');
         }
 
-        return view('admin.auth.forgot_password');
+        return response()
+            ->view('admin.auth.forgot_password')
+            ->header('Cache-Control', 'no-cache, no-store, max-age=0, must-revalidate')
+            ->header('Pragma', 'no-cache')
+            ->header('Expires', 'Sat, 01 Jan 1990 00:00:00 GMT');
     }
 
     public function sendResetOtp(Request $request)
@@ -118,6 +144,7 @@ class AdminAuthController extends Controller
                     'message' => 'Invalid or expired verification code. Please request a new OTP.',
                 ], 422);
             }
+
             return back()->withInput()->with('error', 'Invalid or expired verification code. Please request a new OTP.')->with('otp_step', true);
         }
 
@@ -138,4 +165,3 @@ class AdminAuthController extends Controller
         return redirect()->route('admin.login')->with('success', 'Your admin password has been reset successfully! Please sign in.');
     }
 }
-
