@@ -28,11 +28,11 @@ summary {
   cursor: pointer;
 }
 
-button:disabled,
-[type='button']:disabled,
-[type='reset']:disabled,
-[type='submit']:disabled,
-[role='button']:disabled {
+button:disabled:not(.cursor-pointer),
+[type='button']:disabled:not(.cursor-pointer),
+[type='reset']:disabled:not(.cursor-pointer),
+[type='submit']:disabled:not(.cursor-pointer),
+[role='button']:disabled:not(.cursor-pointer) {
   cursor: not-allowed;
 }
 

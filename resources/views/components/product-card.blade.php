@@ -118,14 +118,17 @@
                     <span class="w-full h-8 sm:h-9 rounded-lg bg-stone-100 text-stone-400 border border-stone-200 text-[10px] sm:text-xs font-bold flex items-center justify-center uppercase tracking-wider">
                         Sold Out
                     </span>
-                @else
-                    <!-- Initial "+ Add" Button -->
+                                  <!-- Initial "+ Add" Button -->
                     <div x-show="$store.rayka.getCartQty({{ $product->id }}) <= 0">
                         <button type="button" 
-                                @click.prevent.stop="$store.rayka.addToCart({{ $product->id }}, 1)" 
+                                @click.prevent.stop="if($store.rayka.isLoading({{ $product->id }})) return; $store.rayka.addToCart({{ $product->id }}, 1)" 
                                 class="w-full h-8 sm:h-9 rounded-lg bg-[#FAF7F0] hover:bg-[#4A2C1D] text-[#4A2C1D] hover:text-[#E7C77B] border border-[#D4AF6A] text-[10px] sm:text-xs font-bold transition-all duration-200 flex items-center justify-center gap-1 sm:gap-1.5 uppercase tracking-normal sm:tracking-wider shadow-2xs hover:shadow-md active:scale-98 cursor-pointer px-1 sm:px-2">
-                            <svg class="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#D4AF6A] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
-                            <span class="whitespace-nowrap">Add To Bag</span>
+                            <svg x-show="!$store.rayka.isLoading({{ $product->id }})" class="w-3 h-3 sm:w-3.5 sm:h-3.5 text-[#D4AF6A] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"></path></svg>
+                            <span x-show="!$store.rayka.isLoading({{ $product->id }})" class="whitespace-nowrap">Add To Bag</span>
+                            <span x-show="$store.rayka.isLoading({{ $product->id }})" class="flex items-center gap-1" x-cloak>
+                                <svg class="w-3 h-3 sm:w-3.5 sm:h-3.5 animate-spin text-[#D4AF6A]" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                                <span class="whitespace-nowrap">Adding..</span>
+                            </span>
                         </button>
                     </div>
 
@@ -134,18 +137,21 @@
                          class="w-full h-8 sm:h-9 flex items-center justify-between rounded-lg bg-[#4A2C1D] border border-[#D4AF6A] text-[#E7C77B] overflow-hidden shadow-xs text-xs font-bold"
                          @click.prevent.stop>
                         <button type="button" 
-                                @click.prevent.stop="$store.rayka.changeQty({{ $product->id }}, -1)"
-                                :disabled="$store.rayka.loadingItems && $store.rayka.loadingItems[{{ $product->id }}]"
-                                class="h-full px-2.5 sm:px-4 hover:bg-[#2E180E] text-[#E7C77B] transition text-sm font-bold active:scale-90 flex items-center justify-center cursor-pointer"
+                                @click.prevent.stop="if($store.rayka.isLoading({{ $product->id }})) return; $store.rayka.changeQty({{ $product->id }}, -1)"
+                                class="h-full px-2.5 sm:px-4 hover:bg-[#2E180E] text-[#E7C77B] transition text-sm font-bold active:scale-90 flex items-center justify-center cursor-pointer select-none"
                                 title="Decrease quantity">
                             −
                         </button>
-                        <span class="h-full px-1 py-1 text-xs font-bold text-white min-w-[1.5rem] flex items-center justify-center"
-                              x-text="$store.rayka.getCartQty({{ $product->id }})"></span>
+                        <span class="h-full px-1 py-1 text-xs font-bold text-white min-w-[1.5rem] flex items-center justify-center font-mono relative">
+                            <span x-show="!$store.rayka.isLoading({{ $product->id }})" x-text="$store.rayka.getCartQty({{ $product->id }})"></span>
+                            <span x-show="$store.rayka.isLoading({{ $product->id }})" class="absolute">
+                                <svg class="w-3.5 h-3.5 animate-spin text-[#E7C77B]" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                            </span>
+                        </span>
                         <button type="button" 
-                                @click.prevent.stop="$store.rayka.changeQty({{ $product->id }}, 1)"
-                                :disabled="($store.rayka.loadingItems && $store.rayka.loadingItems[{{ $product->id }}]) || $store.rayka.getCartQty({{ $product->id }}) >= {{ (int) $product->stock_quantity }}"
-                                class="h-full px-2.5 sm:px-4 hover:bg-[#2E180E] text-[#E7C77B] transition text-sm font-bold active:scale-90 flex items-center justify-center cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed"
+                                @click.prevent.stop="if($store.rayka.isLoading({{ $product->id }}) || $store.rayka.getCartQty({{ $product->id }}) >= {{ (int) $product->stock_quantity }}) return; $store.rayka.changeQty({{ $product->id }}, 1)"
+                                :class="{'opacity-40': $store.rayka.getCartQty({{ $product->id }}) >= {{ (int) $product->stock_quantity }}}"
+                                class="h-full px-2.5 sm:px-4 hover:bg-[#2E180E] text-[#E7C77B] transition text-sm font-bold active:scale-90 flex items-center justify-center cursor-pointer select-none"
                                 title="Increase quantity">
                             +
                         </button>

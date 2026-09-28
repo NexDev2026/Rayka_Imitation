@@ -41,6 +41,11 @@ Alpine.store('rayka', {
         return this.cartItems[pid] || 0;
     },
 
+    isLoading(productId) {
+        if (!this.loadingItems) return false;
+        return Boolean(this.loadingItems[parseInt(productId)]);
+    },
+
     isInWishlist(productId) {
         return Array.isArray(this.wishlistItems) && this.wishlistItems.includes(parseInt(productId));
     },
@@ -108,7 +113,6 @@ Alpine.store('rayka', {
     },
 
     async addToCart(productId, quantity = 1, variantId = null) {
-        console.log('addToCart called!', { productId, quantity, variantId });
         const pid = parseInt(productId);
         const qty = parseInt(quantity) || 1;
         const prevQty = this.cartItems[pid] || 0;
@@ -121,13 +125,20 @@ Alpine.store('rayka', {
         this.cartCount = this.cartCount + qty;
         this.loadingItems = { ...this.loadingItems, [pid]: true };
 
+        // 3-second fail-safe timeout so loading state never gets stuck even if network or server stalls
+        const failSafeTimer = setTimeout(() => {
+            if (this.loadingItems && this.loadingItems[pid]) {
+                this.loadingItems = { ...this.loadingItems, [pid]: false };
+            }
+        }, 3000);
+
         try {
             const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
             const res = await fetch('/cart/add', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': token,
+                    'X-CSRF-TOKEN': token || '',
                     'Accept': 'application/json'
                 },
                 body: JSON.stringify({
@@ -171,6 +182,7 @@ Alpine.store('rayka', {
             this.showToast('Failed to add item to bag', 'error');
             return false;
         } finally {
+            clearTimeout(failSafeTimer);
             this.loadingItems = { ...this.loadingItems, [pid]: false };
         }
     },
@@ -192,13 +204,20 @@ Alpine.store('rayka', {
         this.cartCount = Math.max(0, this.cartCount + chg);
         this.loadingItems = { ...this.loadingItems, [pid]: true };
 
+        // 3-second fail-safe timeout so loading state never gets stuck
+        const failSafeTimer = setTimeout(() => {
+            if (this.loadingItems && this.loadingItems[pid]) {
+                this.loadingItems = { ...this.loadingItems, [pid]: false };
+            }
+        }, 3000);
+
         try {
             const token = document.querySelector('meta[name="csrf-token"]')?.getAttribute('content');
             const res = await fetch('/cart/product-quantity', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'X-CSRF-TOKEN': token,
+                    'X-CSRF-TOKEN': token || '',
                     'Accept': 'application/json'
                 },
                 body: JSON.stringify({
@@ -249,6 +268,7 @@ Alpine.store('rayka', {
             this.showToast('Network error updating quantity', 'error');
             return false;
         } finally {
+            clearTimeout(failSafeTimer);
             this.loadingItems = { ...this.loadingItems, [pid]: false };
         }
     }
