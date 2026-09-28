@@ -1,7 +1,7 @@
 @extends('layouts.storefront')
 
 @section('title', 'Frequently Asked Questions (FAQ) — Rayka Imitation Jewellery')
-@section('meta_description', 'Find answers to common questions about Rayka Imitation Jewellery: 1 Gram Micro Gold plating, care, express shipping across India, payments, and our 7-day replacement guarantee.')
+@section('meta_description', 'Find answers to common questions about Rayka Imitation Jewellery: 1 Gram Micro Gold plating, care, express 7-day shipping across India, UPI payments, and our authentic quality warranty.')
 
 @push('schema')
 <script type="application/ld+json">
@@ -43,10 +43,10 @@
     },
     {
       "@@type": "Question",
-      "name": "What is your 7-Day Replacement Guarantee?",
+      "name": "What is your 7-Day Delivery & Authentic Warranty Policy?",
       "acceptedAnswer": {
         "@@type": "Answer",
-        "text": "If your order arrives damaged, defective, or incorrect, you are covered by our 7-Day Replacement Guarantee. Simply record a brief unboxing video upon delivery and share it with our WhatsApp concierge{{ !empty($storeSettings['store_whatsapp']) ? ' (' . $storeSettings['store_whatsapp'] . ')' : '' }} within 7 days. We will dispatch a brand-new replacement at zero additional shipping cost."
+        "text": "Every Rayka creation is dispatched via premier express couriers with guaranteed 7-Day Delivery across India. In addition, each item is protected by our Authentic Quality Warranty against transit damage or defects with priority concierge assistance."
       }
     },
     {
@@ -74,7 +74,7 @@
             </h1>
             <div class="h-1 w-24 bg-gradient-to-r from-[#D4AF6A] to-[#996E2E] mx-auto rounded-full mb-6"></div>
             <p class="text-stone-600 text-xs sm:text-sm max-w-2xl mx-auto leading-relaxed">
-                Everything you need to know about our royal 1-gram gold collections, plating durability, express dispatch, safe UPI payments, and replacement guarantees.
+                Everything you need to know about our royal 1-gram gold collections, plating durability, express 7-day dispatch, safe UPI payments, and authentic warranty guarantees.
             </p>
 
             <!-- Category Filter Tabs -->
@@ -102,7 +102,7 @@
                 <button type="button" @click="activeTab = 'returns'" 
                         :class="activeTab === 'returns' ? 'bg-[#4A2C1D] text-[#E7C77B] shadow-md border-[#4A2C1D]' : 'bg-white text-stone-600 hover:text-[#4A2C1D] border-stone-200'"
                         class="px-4 py-2 rounded-full text-xs font-semibold border transition cursor-pointer">
-                    Replacements & Refunds
+                    Delivery & Warranty
                 </button>
             </div>
         </div>
@@ -219,24 +219,24 @@
                 </div>
             </div>
 
-            <!-- 6. 7-Day Replacement Guarantee -->
+            <!-- 6. 7-Day Delivery Guarantee & Authentic Warranty -->
             <div x-show="activeTab === 'all' || activeTab === 'returns'" 
                  class="bg-white rounded-2xl border border-[#D4AF6A]/30 overflow-hidden shadow-xs transition-all duration-200">
                 <button type="button" 
                         @click="activeAccordion = activeAccordion === 6 ? null : 6" 
                         class="w-full px-6 py-5 text-left flex items-center justify-between gap-4 cursor-pointer hover:bg-stone-50/80 transition">
                     <span class="font-serif-royal text-base sm:text-lg font-bold text-[#4A2C1D]">
-                        What is your 7-Day Replacement Guarantee?
+                        What is your 7-Day Delivery Guarantee & Authentic Warranty?
                     </span>
                     <span class="w-8 h-8 rounded-full bg-[#FAF7F0] border border-[#D4AF6A]/50 flex items-center justify-center shrink-0 text-[#996E2E] font-bold text-sm"
                           x-text="activeAccordion === 6 ? '−' : '+'"></span>
                 </button>
                 <div x-show="activeAccordion === 6" x-collapse class="px-6 pb-6 pt-1 text-xs sm:text-sm text-stone-600 leading-relaxed border-t border-stone-100">
                     <p class="mb-2">
-                        We offer a comprehensive <strong>7-Day Replacement Guarantee</strong> for any transit breakage, stone displacement, or manufacturing defect.
+                        We assure prompt <strong>7-Day Express Delivery</strong> across India through premier express courier networks. Every single package is tracked end-to-end and insured with an unboxing guarantee.
                     </p>
                     <p>
-                        To claim a replacement, simply record a 30-second continuous parcel unboxing video when your package arrives and share it with our WhatsApp concierge{{ !empty($storeSettings['store_whatsapp']) ? ' (' . $storeSettings['store_whatsapp'] . ')' : '' }}. Once validated, a brand new replacement unit will be dispatched to your doorstep free of charge. For complete details, see our <a href="{{ route('policy', 'return-replacement-policy') }}" class="text-[#996E2E] font-bold underline">Replacement Policy</a>.
+                        Furthermore, every piece is protected by our <strong>Authentic Quality Warranty</strong>. In the rare event of transit damage, simply record a 30-second continuous unboxing video and share it with our WhatsApp concierge{{ !empty($storeSettings['store_whatsapp']) ? ' (' . $storeSettings['store_whatsapp'] . ')' : '' }} within 7 days for priority resolution. For complete details, see our <a href="{{ route('policy', 'return-replacement-policy') }}" class="text-[#996E2E] font-bold underline">Delivery & Warranty Policy</a>.
                     </p>
                 </div>
             </div>

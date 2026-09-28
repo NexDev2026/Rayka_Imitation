@@ -19,6 +19,7 @@ Alpine.store('rayka', {
     cartDiscount: 0,
     cartTotal: 0,
     cartShipping: 0,
+    lastFetchedAt: Date.now(),
 
     init() {
         if (window.__INITIAL_RAYKA__) {
@@ -29,8 +30,9 @@ Alpine.store('rayka', {
             const parsed = {};
             Object.keys(raw).forEach(k => { parsed[parseInt(k)] = parseInt(raw[k]); });
             this.cartItems = parsed;
+        } else {
+            this.fetchCounts();
         }
-        this.fetchCounts();
     },
 
     getCartQty(productId) {
@@ -53,6 +55,7 @@ Alpine.store('rayka', {
     },
 
     async fetchCounts() {
+        this.lastFetchedAt = Date.now();
         try {
             const res = await fetch('/api/store-counts');
             if (res.ok) {
@@ -255,15 +258,21 @@ Alpine.start();
 
 // Instant BFCache & Tab Focus Synchronization
 // Reset loadingItems first to clear any stuck loading states from BF cache restore
-window.addEventListener('pageshow', () => {
+window.addEventListener('pageshow', (e) => {
     if (window.Alpine && Alpine.store('rayka')) {
         Alpine.store('rayka').loadingItems = {};
-        Alpine.store('rayka').fetchCounts();
+        if (e.persisted) {
+            Alpine.store('rayka').fetchCounts();
+        }
     }
 });
 window.addEventListener('focus', () => {
     if (window.Alpine && Alpine.store('rayka')) {
-        Alpine.store('rayka').fetchCounts();
+        const store = Alpine.store('rayka');
+        // Only re-verify if tab was inactive for over 90 seconds
+        if (Date.now() - (store.lastFetchedAt || 0) > 90000) {
+            store.fetchCounts();
+        }
     }
 });
 

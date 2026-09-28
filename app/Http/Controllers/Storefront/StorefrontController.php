@@ -51,7 +51,7 @@ class StorefrontController extends Controller
         $trustBadges = [
             ['title' => 'Free Express Shipping', 'desc' => StoreSetting::get('trust_badge_1', 'On all orders above ₹999 across India'), 'icon' => 'truck'],
             ['title' => '100% Verified Payment', 'desc' => StoreSetting::get('trust_badge_2', 'Safe UPI QR code payment with manual verification'), 'icon' => 'shield-check'],
-            ['title' => 'Easy Replacement', 'desc' => StoreSetting::get('trust_badge_3', '7-day hassle-free replacement for transit damage'), 'icon' => 'refresh'],
+            ['title' => 'Safe Express Delivery', 'desc' => StoreSetting::get('trust_badge_3', 'Fast 7 days insured pan-India delivery'), 'icon' => 'truck'],
             ['title' => 'Heritage Quality', 'desc' => StoreSetting::get('trust_badge_4', '1 Gram Micro Gold Plating with Anti-Tarnish seal'), 'icon' => 'sparkles'],
         ];
 
@@ -66,6 +66,7 @@ class StorefrontController extends Controller
         if ($showcaseEnabled && ! empty($showcaseCategoryIds)) {
             $showcaseCategories = Category::whereIn('id', $showcaseCategoryIds)
                 ->where('is_active', true)
+                ->withCount(['products' => fn ($q) => $q->where('is_active', true)])
                 ->with(['products' => function ($query) use ($showcaseLimit) {
                     $query->where('is_active', true)
                         ->with(['images', 'category'])
@@ -440,7 +441,7 @@ class StorefrontController extends Controller
         $product = $query->firstOrFail();
 
         // Related products in the same category ("More from Category")
-        $relatedProducts = Product::with('images')
+        $relatedProducts = Product::with(['images', 'category'])
             ->where('category_id', $product->category_id)
             ->where('id', '!=', $product->id)
             ->where('is_active', true)

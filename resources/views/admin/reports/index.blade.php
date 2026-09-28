@@ -114,7 +114,11 @@
 
 @push('scripts')
 <script>
-document.addEventListener('DOMContentLoaded', function() {
+function initReportsChart() {
+    if (typeof Chart === 'undefined') {
+        setTimeout(initReportsChart, 100);
+        return;
+    }
     const dates = @json($dates);
     const views = @json($viewsTrend);
     const unique = @json($uniqueTrend);
@@ -171,7 +175,12 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         });
     }
-});
+}
+if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initReportsChart);
+} else {
+    initReportsChart();
+}
 </script>
 @endpush
 

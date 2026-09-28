@@ -65,9 +65,15 @@
                         </div>
                         <div class="text-right">
                             <span class="text-stone-400 text-[10px] block">Inventory:</span>
-                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold inline-block {{ $p->stock_quantity <= 10 ? 'bg-rose-100 text-rose-800' : 'bg-emerald-100 text-emerald-800' }}">
-                                {{ $p->stock_quantity }} in stock
-                            </span>
+                            @if($p->variants->isNotEmpty())
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold inline-block bg-[#FAF7F0] text-[#996E2E] border border-[#D4AF6A]/50">
+                                    {{ $p->variants->count() }} Variants ({{ $p->variants->sum('stock_quantity') }} pcs)
+                                </span>
+                            @else
+                                <span class="px-2 py-0.5 rounded-full text-[10px] font-bold inline-block {{ $p->stock_quantity <= 10 ? 'bg-rose-100 text-rose-800' : 'bg-emerald-100 text-emerald-800' }}">
+                                    {{ $p->stock_quantity }} in stock
+                                </span>
+                            @endif
                         </div>
                     </div>
 
@@ -137,10 +143,33 @@
                                 <strong class="text-stone-900">₹{{ number_format($p->price) }}</strong>
                                 <span class="text-stone-400 line-through block text-[10px]">₹{{ number_format($p->mrp) }}</span>
                             </td>
-                            <td class="p-4 whitespace-nowrap">
-                                <span class="px-2 py-0.5 rounded-full text-[11px] font-bold {{ $p->stock_quantity <= 10 ? 'bg-rose-100 text-rose-800' : 'bg-emerald-100 text-emerald-800' }}">
-                                    {{ $p->stock_quantity }} units
-                                </span>
+                            <td class="p-4">
+                                @if($p->variants->isNotEmpty())
+                                    @php
+                                        $totalVarStock = $p->variants->sum('stock_quantity');
+                                    @endphp
+                                    <div class="space-y-1">
+                                        <div class="flex items-center gap-1.5 flex-wrap">
+                                            <span class="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#FAF7F0] text-[#996E2E] border border-[#D4AF6A]/50">
+                                                🏷️ {{ $p->variants->count() }} Variants ({{ $totalVarStock }} pcs)
+                                            </span>
+                                        </div>
+                                        <div class="text-[9.5px] text-stone-500 flex flex-wrap gap-1">
+                                            @foreach($p->variants->take(3) as $v)
+                                                <span class="bg-stone-50 border border-stone-200 px-1.5 py-0.5 rounded text-stone-700">
+                                                    {{ Str::limit($v->value ?: $v->name, 10) }}: <strong class="{{ $v->stock_quantity <= 0 ? 'text-rose-600' : ($v->stock_quantity <= 5 ? 'text-amber-700' : 'text-emerald-700') }}">{{ $v->stock_quantity }}</strong>
+                                                </span>
+                                            @endforeach
+                                            @if($p->variants->count() > 3)
+                                                <span class="text-stone-400 self-center">+{{ $p->variants->count() - 3 }} more</span>
+                                            @endif
+                                        </div>
+                                    </div>
+                                @else
+                                    <span class="px-2 py-0.5 rounded-full text-[11px] font-bold {{ $p->stock_quantity <= 5 ? 'bg-rose-100 text-rose-800' : ($p->stock_quantity <= 10 ? 'bg-amber-100 text-amber-800' : 'bg-emerald-100 text-emerald-800') }}">
+                                        {{ $p->stock_quantity }} units
+                                    </span>
+                                @endif
                             </td>
                             <td class="p-4 space-x-1 whitespace-nowrap">
                                 @if($p->is_featured)

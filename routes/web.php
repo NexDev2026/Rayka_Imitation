@@ -45,28 +45,59 @@ Route::get('/policy/{page}', [StorefrontController::class, 'policy'])->name('pol
 
 /*
 |--------------------------------------------------------------------------
-| Storage & Media Direct Fallback Delivery (Zero-Error Safety Net)
+| Storage & Media Direct Fallback Delivery (Session-Free, 0ms Parallel Stream)
 |--------------------------------------------------------------------------
 */
 Route::get('/storage/{path}', function (string $path) {
     $filePath = storage_path('app/public/' . $path);
     if (! file_exists($filePath)) {
+        $filePath = public_path('storage/' . $path);
+    }
+    if (! file_exists($filePath)) {
         abort(404);
     }
+
+    $lastModified = filemtime($filePath);
+    $etag = '"' . md5($lastModified . filesize($filePath)) . '"';
+
+    if (request()->header('If-None-Match') === $etag || request()->header('If-Modified-Since') === gmdate('D, d M Y H:i:s', $lastModified) . ' GMT') {
+        return response('', 304, [
+            'Cache-Control' => 'public, max-age=31536000, immutable',
+            'ETag' => $etag,
+            'Last-Modified' => gmdate('D, d M Y H:i:s', $lastModified) . ' GMT',
+        ]);
+    }
+
     return response()->file($filePath, [
-        'Cache-Control' => 'public, max-age=31536000',
+        'Cache-Control' => 'public, max-age=31536000, immutable',
+        'ETag' => $etag,
+        'Last-Modified' => gmdate('D, d M Y H:i:s', $lastModified) . ' GMT',
     ]);
-})->where('path', '.*')->name('media.storage');
+})->where('path', '.*')->withoutMiddleware([\Illuminate\Session\Middleware\StartSession::class, \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class, \Illuminate\View\Middleware\ShareErrorsFromSession::class, \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class])->name('media.storage');
 
 Route::get('/images/{path}', function (string $path) {
     $filePath = public_path('images/' . $path);
     if (! file_exists($filePath)) {
         abort(404);
     }
+
+    $lastModified = filemtime($filePath);
+    $etag = '"' . md5($lastModified . filesize($filePath)) . '"';
+
+    if (request()->header('If-None-Match') === $etag || request()->header('If-Modified-Since') === gmdate('D, d M Y H:i:s', $lastModified) . ' GMT') {
+        return response('', 304, [
+            'Cache-Control' => 'public, max-age=31536000, immutable',
+            'ETag' => $etag,
+            'Last-Modified' => gmdate('D, d M Y H:i:s', $lastModified) . ' GMT',
+        ]);
+    }
+
     return response()->file($filePath, [
-        'Cache-Control' => 'public, max-age=31536000',
+        'Cache-Control' => 'public, max-age=31536000, immutable',
+        'ETag' => $etag,
+        'Last-Modified' => gmdate('D, d M Y H:i:s', $lastModified) . ' GMT',
     ]);
-})->where('path', '.*')->name('media.images');
+})->where('path', '.*')->withoutMiddleware([\Illuminate\Session\Middleware\StartSession::class, \Illuminate\Cookie\Middleware\AddQueuedCookiesToResponse::class, \Illuminate\View\Middleware\ShareErrorsFromSession::class, \Illuminate\Foundation\Http\Middleware\VerifyCsrfToken::class])->name('media.images');
 
 
 /*

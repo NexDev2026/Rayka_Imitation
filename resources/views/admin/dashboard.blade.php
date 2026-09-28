@@ -294,6 +294,10 @@ function dashboardTelemetry() {
             if (this.pollTimer) clearInterval(this.pollTimer);
         },
         initCharts() {
+            if (typeof Chart === 'undefined') {
+                setTimeout(() => this.initCharts(), 100);
+                return;
+            }
             const initialLabels = @json($chartLabels);
             const initialReach = @json($reachData);
             const initialUnique = @json($uniqueData);

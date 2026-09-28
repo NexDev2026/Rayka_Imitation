@@ -134,7 +134,7 @@
                                         ✕ Sold Out (Purchased by another customer)
                                     </span>
                                 @elseif($availableStock <= 5)
-                                    <p class="text-[10px] text-amber-700 font-medium">Only {{ $availableStock }} left in stock</p>
+                                    <p class="text-[10px] text-amber-700 font-medium">Limited stock remaining</p>
                                 @endif
                             </div>
                         </div>

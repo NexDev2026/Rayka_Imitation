@@ -1,6 +1,6 @@
 @props(['product'])
 
-<div class="royal-card rounded-xl overflow-hidden group flex flex-col h-full relative bg-white border border-[#D4AF6A]/30 hover:border-[#D4AF6A] transition-all duration-300 shadow-xs hover:shadow-lg" x-data>
+<div class="royal-card rounded-xl overflow-hidden group flex flex-col h-full relative bg-white border border-[#D4AF6A]/30 hover:border-[#D4AF6A] transition-all duration-300 shadow-xs hover:shadow-lg">
     
     <!-- Discount & Offer Badge -->
     @if($product->has_active_offer)
@@ -55,7 +55,7 @@
         <!-- Stock Indicator Overlay if Low -->
         @if($product->stock_quantity <= 5 && $product->stock_quantity > 0)
             <div class="absolute bottom-2 left-2 z-10 bg-amber-900/85 text-amber-200 text-[9px] sm:text-[10px] px-1.5 sm:px-2 py-0.5 rounded-sm font-medium">
-                Only {{ $product->stock_quantity }} Left
+                Limited Stock
             </div>
         @elseif($product->stock_quantity <= 0)
             <div class="absolute inset-0 bg-white/70 backdrop-blur-[1px] flex items-center justify-center z-10">

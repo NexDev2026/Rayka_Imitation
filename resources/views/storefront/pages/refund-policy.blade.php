@@ -40,7 +40,7 @@
                     <ul class="list-disc pl-5 space-y-2 text-stone-600">
                         <li>The order was successfully cancelled before dispatch.</li>
                         <li>A prepaid order was refused at the time of delivery and returned to origin safely.</li>
-                        <li>An approved return request for a damaged or defective item where replacement is not possible or out of stock.</li>
+                        <li>An approved warranty claim for a damaged or transit-affected item where fulfillment or re-delivery is not possible or item is out of stock.</li>
                     </ul>
                     <p><strong>Processing Time:</strong> Once your cancellation or return is approved, we will initiate the refund within <strong>2 to 4 business days</strong>.</p>
                     <p><strong>Crediting Time:</strong> Depending on your bank, UPI provider, or credit card issuer, it may take an additional <strong>3 to 7 business days</strong> for the credited amount to reflect in your original payment source.</p>

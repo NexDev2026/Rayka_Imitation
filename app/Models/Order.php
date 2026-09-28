@@ -256,8 +256,14 @@ class Order extends Model
                 );
             }
             if ($item->variant_info && $item->product_id) {
+                $varInfo = trim($item->variant_info);
                 $variant = ProductVariant::where('product_id', $item->product_id)
-                    ->where('value', $item->variant_info)
+                    ->where(function ($q) use ($varInfo) {
+                        $q->where('value', $varInfo)
+                            ->orWhere('name', $varInfo)
+                            ->orWhereRaw('LOWER(TRIM(value)) = ?', [strtolower($varInfo)])
+                            ->orWhereRaw('LOWER(TRIM(name)) = ?', [strtolower($varInfo)]);
+                    })
                     ->first();
                 if ($variant) {
                     $variant->increment('stock_quantity', $qty);
@@ -293,8 +299,14 @@ class Order extends Model
                 );
             }
             if ($item->variant_info && $item->product_id) {
+                $varInfo = trim($item->variant_info);
                 $variant = ProductVariant::where('product_id', $item->product_id)
-                    ->where('value', $item->variant_info)
+                    ->where(function ($q) use ($varInfo) {
+                        $q->where('value', $varInfo)
+                            ->orWhere('name', $varInfo)
+                            ->orWhereRaw('LOWER(TRIM(value)) = ?', [strtolower($varInfo)])
+                            ->orWhereRaw('LOWER(TRIM(name)) = ?', [strtolower($varInfo)]);
+                    })
                     ->first();
                 if ($variant) {
                     $variant->decrement('stock_quantity', $qty);

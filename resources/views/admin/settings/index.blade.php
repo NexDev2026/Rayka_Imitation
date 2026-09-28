@@ -160,8 +160,112 @@
                     <label class="block font-semibold text-stone-700">Homepage Trust Badges Text:</label>
                     <input type="text" name="trust_badge_1" value="{{ old('trust_badge_1', $settings['trust_badge_1']) }}" class="w-full border rounded-lg p-2 mb-1" placeholder="e.g. Free Express Shipping">
                     <input type="text" name="trust_badge_2" value="{{ old('trust_badge_2', $settings['trust_badge_2']) }}" class="w-full border rounded-lg p-2 mb-1" placeholder="e.g. 100% Secure Payment">
-                    <input type="text" name="trust_badge_3" value="{{ old('trust_badge_3', $settings['trust_badge_3']) }}" class="w-full border rounded-lg p-2 mb-1" placeholder="e.g. Easy Replacement Guarantee">
+                    <input type="text" name="trust_badge_3" value="{{ old('trust_badge_3', $settings['trust_badge_3']) }}" class="w-full border rounded-lg p-2 mb-1" placeholder="e.g. Fast 7 Days Insured Delivery">
                     <input type="text" name="trust_badge_4" value="{{ old('trust_badge_4', $settings['trust_badge_4']) }}" class="w-full border rounded-lg p-2" placeholder="e.g. Heritage Quality Craftsmanship">
+                </div>
+            </div>
+        </div>
+
+        <!-- 3.5. PRODUCT PAGE TRUST BADGES & DELIVERY HIGHLIGHTS -->
+        <div class="p-6 rounded-2xl bg-[#FAF7F0] border border-[#D4AF6A]/60 space-y-5">
+            <div class="flex items-center justify-between pb-3 border-b border-[#D4AF6A]/30">
+                <div>
+                    <h3 class="font-serif-royal text-base font-bold text-[#4A2C1D] flex items-center space-x-2">
+                        <svg class="w-5 h-5 text-[#996E2E] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                        <span>Product Page Delivery Badges & Guarantees</span>
+                    </h3>
+                    <p class="text-stone-600 text-xs mt-0.5">
+                        Customize the 3 trust & delivery guarantee cards displayed directly below the Add to Bag & Buy Now buttons on every product page.
+                    </p>
+                </div>
+                <span class="text-[10px] font-semibold text-[#996E2E] bg-white px-2.5 py-1 rounded-full border border-[#D4AF6A]/40 shadow-2xs">
+                    Live On Product Pages
+                </span>
+            </div>
+
+            <!-- 3 Badges Configuration Grid -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-4" x-data="{
+                b1_title: '{{ addslashes(old('product_badge_1_title', $settings['product_badge_1_title'] ?? 'Premium Quality')) }}',
+                b1_sub: '{{ addslashes(old('product_badge_1_subtitle', $settings['product_badge_1_subtitle'] ?? '1 Gram Micro Plated')) }}',
+                b2_title: '{{ addslashes(old('product_badge_2_title', $settings['product_badge_2_title'] ?? 'Authentic Warranty')) }}',
+                b2_sub: '{{ addslashes(old('product_badge_2_subtitle', $settings['product_badge_2_subtitle'] ?? '7 Days Delivery')) }}',
+                b3_title: '{{ addslashes(old('product_badge_3_title', $settings['product_badge_3_title'] ?? 'Fast Delivery')) }}',
+                b3_sub: '{{ addslashes(old('product_badge_3_subtitle', $settings['product_badge_3_subtitle'] ?? 'Express Courier')) }}'
+            }">
+                <!-- Badge 1: Quality -->
+                <div class="p-4 bg-white rounded-xl border border-stone-200 shadow-2xs space-y-3">
+                    <div class="flex items-center space-x-2 text-[#996E2E] font-bold text-xs">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                        <span>Card 1 (Quality Guarantee)</span>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-stone-600 mb-1">Header Title</label>
+                        <input type="text" name="product_badge_1_title" x-model="b1_title" class="w-full border rounded-lg p-2 text-xs font-bold text-[#4A2C1D]" placeholder="Premium Quality">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-stone-600 mb-1">Subtitle / Note</label>
+                        <input type="text" name="product_badge_1_subtitle" x-model="b1_sub" class="w-full border rounded-lg p-2 text-xs text-stone-700" placeholder="1 Gram Micro Plated">
+                    </div>
+                </div>
+
+                <!-- Badge 2: Delivery & Warranty (Replaces 7-day replacement with 7-day delivery) -->
+                <div class="p-4 bg-white rounded-xl border-2 border-[#D4AF6A] shadow-2xs space-y-3">
+                    <div class="flex items-center space-x-2 text-[#996E2E] font-bold text-xs">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                        <span>Card 2 (Authentic & 7-Day Delivery)</span>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-stone-600 mb-1">Header Title</label>
+                        <input type="text" name="product_badge_2_title" x-model="b2_title" class="w-full border rounded-lg p-2 text-xs font-bold text-[#4A2C1D]" placeholder="Authentic Warranty">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-stone-600 mb-1">Subtitle / Note</label>
+                        <input type="text" name="product_badge_2_subtitle" x-model="b2_sub" class="w-full border rounded-lg p-2 text-xs text-stone-700" placeholder="7 Days Delivery">
+                    </div>
+                </div>
+
+                <!-- Badge 3: Fast Courier -->
+                <div class="p-4 bg-white rounded-xl border border-stone-200 shadow-2xs space-y-3">
+                    <div class="flex items-center space-x-2 text-[#996E2E] font-bold text-xs">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        <span>Card 3 (Courier & Shipping)</span>
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-stone-600 mb-1">Header Title</label>
+                        <input type="text" name="product_badge_3_title" x-model="b3_title" class="w-full border rounded-lg p-2 text-xs font-bold text-[#4A2C1D]" placeholder="Fast Delivery">
+                    </div>
+                    <div>
+                        <label class="block text-[11px] font-semibold text-stone-600 mb-1">Subtitle / Note</label>
+                        <input type="text" name="product_badge_3_subtitle" x-model="b3_sub" class="w-full border rounded-lg p-2 text-xs text-stone-700" placeholder="Express Courier">
+                    </div>
+                </div>
+
+                <!-- Live Frontend Preview Box (Fully Responsive for 320px Mobile to Large Desktops) -->
+                <div class="md:col-span-3 pt-2">
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-stone-500 block mb-2">Live Customer Preview on Product Page:</span>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 p-3 sm:p-4 bg-white rounded-xl border border-[#D4AF6A]/40 text-center max-w-xl mx-auto shadow-2xs">
+                        <div class="p-3 sm:p-2.5 rounded-lg bg-[#FAF7F0] border border-[#D4AF6A]/30 flex flex-row sm:flex-col items-center justify-center gap-2.5 sm:gap-1">
+                            <svg class="w-5 h-5 sm:w-4 sm:h-4 text-[#996E2E] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>
+                            <div class="text-left sm:text-center min-w-0">
+                                <p class="text-xs sm:text-[11px] font-bold text-[#4A2C1D] leading-tight break-words" x-text="b1_title || 'Premium Quality'"></p>
+                                <p class="text-[10px] sm:text-[9px] text-stone-500 leading-tight mt-0.5 break-words" x-text="b1_sub || '1 Gram Micro Plated'"></p>
+                            </div>
+                        </div>
+                        <div class="p-3 sm:p-2.5 rounded-lg bg-[#FAF7F0] border border-[#D4AF6A]/30 flex flex-row sm:flex-col items-center justify-center gap-2.5 sm:gap-1">
+                            <svg class="w-5 h-5 sm:w-4 sm:h-4 text-[#996E2E] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z"/></svg>
+                            <div class="text-left sm:text-center min-w-0">
+                                <p class="text-xs sm:text-[11px] font-bold text-[#4A2C1D] leading-tight break-words" x-text="b2_title || 'Authentic Warranty'"></p>
+                                <p class="text-[10px] sm:text-[9px] text-stone-500 leading-tight mt-0.5 break-words" x-text="b2_sub || '7 Days Delivery'"></p>
+                            </div>
+                        </div>
+                        <div class="p-3 sm:p-2.5 rounded-lg bg-[#FAF7F0] border border-[#D4AF6A]/30 flex flex-row sm:flex-col items-center justify-center gap-2.5 sm:gap-1">
+                            <svg class="w-5 h-5 sm:w-4 sm:h-4 text-[#996E2E] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                            <div class="text-left sm:text-center min-w-0">
+                                <p class="text-xs sm:text-[11px] font-bold text-[#4A2C1D] leading-tight break-words" x-text="b3_title || 'Fast Delivery'"></p>
+                                <p class="text-[10px] sm:text-[9px] text-stone-500 leading-tight mt-0.5 break-words" x-text="b3_sub || 'Express Courier'"></p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -258,7 +362,7 @@
                         Instant Database Backup
                     </h4>
                     <p class="text-[11px] text-stone-500 mb-4 leading-relaxed">
-                        Creates an immediate compressed snapshot (<code class="font-mono text-[10px]">.zip</code>), saves to <code class="font-mono text-[10px]">/backups</code> outside <code class="font-mono text-[10px]">public_html</code>, and emails it with attachment to <strong class="text-stone-700">{{ $settings['admin_email'] ?: 'Admin Email' }}</strong>.
+                        Creates an immediate compressed snapshot (<code class="font-mono text-[10px]">.zip</code>), saves to <code class="font-mono text-[10px]">/backups</code> outside <code class="font-mono text-[10px]">public_html</code>, and emails it with attachment to <strong class="text-stone-700">{{ $settings['admin_email'] ?? 'Admin Email' }}</strong>.
                     </p>
                 </div>
                 <form action="{{ route('admin.settings.backup') }}" method="POST">

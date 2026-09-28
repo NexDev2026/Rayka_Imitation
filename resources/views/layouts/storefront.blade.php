@@ -447,7 +447,7 @@
     </div>
 
     <!-- 4. Main Page Content -->
-    <main class="flex-1 pb-16 lg:pb-0">
+    <main class="flex-1 pb-28 lg:pb-0">
         <!-- Session Flash Alerts channeled through Global Toast (skipped on auth routes to avoid duplicate card errors) -->
         @if(session('success'))
             <div x-data x-init="$nextTick(() => { if (window.Alpine && Alpine.store('rayka')) { Alpine.store('rayka').showToast('{{ addslashes(session('success')) }}', 'success'); } })"></div>
@@ -582,7 +582,7 @@
                         <li>
                             <a href="{{ route('policy', 'return-replacement-policy') }}" class="hover:text-[#E7C77B] hover:translate-x-1 inline-flex items-center space-x-1.5 transition duration-200">
                                 <span class="text-[#D4AF6A] text-[10px]">›</span>
-                                <span>7-Day Replacement Guarantee</span>
+                                <span>7-Day Delivery & Warranty Policy</span>
                             </a>
                         </li>
                         <li>
@@ -708,45 +708,82 @@
         </div>
     </footer>
 
-    <!-- 6. Mobile Sticky Bottom Bar (Home / Categories / Wishlist / Account) -->
-    <div class="mobile-bottom-bar lg:hidden fixed bottom-0 left-0 right-0 bg-[#FAF7F0] border-t border-[#D4AF6A]/50 py-2 px-6 flex items-center justify-around z-40 shadow-2xl">
-        <a href="{{ route('home') }}" class="flex flex-col items-center text-[10px] {{ request()->routeIs('home') ? 'text-[#996E2E] font-bold' : 'text-[#4A2C1D]' }}">
-            <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+    <!-- 6. Mobile Floating Liquid-Glass Navigation Dock (Luxury SaaS Pill Dock) -->
+    @if(!request()->routeIs('checkout*') && !request()->routeIs('product.show'))
+    <nav aria-label="Mobile Navigation"
+         class="mobile-bottom-bar lg:hidden fixed bottom-3 inset-x-3 sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 sm:w-full sm:max-w-md z-40 bg-[#FAF7F0]/85 backdrop-blur-xl backdrop-saturate-150 border border-[#D4AF6A]/55 rounded-full shadow-[0_12px_36px_rgba(74,44,29,0.22),0_2px_10px_rgba(212,175,106,0.25)] ring-1 ring-white/80 py-1 px-2 flex items-center justify-between gap-1 select-none transition-all duration-300">
+        
+        <!-- Home -->
+        <a href="{{ route('home') }}" 
+           class="relative flex-1 flex flex-col items-center justify-center py-1 px-1 rounded-full transition-all duration-200 active:scale-92 group {{ request()->routeIs('home') ? 'bg-[#D4AF6A]/20 text-[#8C6226] font-bold border border-[#D4AF6A]/40 shadow-2xs' : 'text-[#4A2C1D] hover:text-[#996E2E] hover:bg-black/5' }}">
+            <svg class="w-5 h-5 mb-0.5 transition-transform duration-200 group-hover:scale-105" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
             </svg>
-            <span>Home</span>
+            <span class="text-[10px] tracking-tight leading-none">Home</span>
+            @if(request()->routeIs('home'))
+                <span class="w-1 h-1 rounded-full bg-[#996E2E] mt-0.5"></span>
+            @endif
         </a>
 
-        <button type="button" @click="mobileMenuOpen = true" class="flex flex-col items-center text-[10px] text-[#4A2C1D]">
-            <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <!-- Categories -->
+        <button type="button" 
+                @click="mobileMenuOpen = true" 
+                class="relative flex-1 flex flex-col items-center justify-center py-1 px-1 rounded-full transition-all duration-200 active:scale-92 group text-[#4A2C1D] hover:text-[#996E2E] hover:bg-black/5 cursor-pointer">
+            <svg class="w-5 h-5 mb-0.5 transition-transform duration-200 group-hover:scale-105" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
             </svg>
-            <span>Categories</span>
+            <span class="text-[10px] tracking-tight leading-none">Categories</span>
         </button>
 
-        <a href="{{ route('wishlist') }}" class="flex flex-col items-center text-[10px] relative {{ request()->routeIs('wishlist') ? 'text-[#996E2E] font-bold' : 'text-[#4A2C1D]' }}">
-            <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-            </svg>
-            <span>Wishlist</span>
-            <span x-text="$store.rayka.wishlistCount" x-show="$store.rayka.wishlistCount > 0" class="absolute -top-1 right-2 bg-[#D4AF6A] text-[#2E180E] font-bold text-[9px] w-3.5 h-3.5 rounded-full flex items-center justify-center">0</span>
+        <!-- Wishlist -->
+        <a href="{{ route('wishlist') }}" 
+           class="relative flex-1 flex flex-col items-center justify-center py-1 px-1 rounded-full transition-all duration-200 active:scale-92 group {{ request()->routeIs('wishlist') ? 'bg-[#D4AF6A]/20 text-[#8C6226] font-bold border border-[#D4AF6A]/40 shadow-2xs' : 'text-[#4A2C1D] hover:text-[#996E2E] hover:bg-black/5' }}">
+            <div class="relative inline-flex items-center justify-center">
+                <svg class="w-5 h-5 mb-0.5 transition-transform duration-200 group-hover:scale-105" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                </svg>
+                <span x-text="$store.rayka.wishlistCount" 
+                      x-show="$store.rayka.wishlistCount > 0" 
+                      x-cloak
+                      class="absolute -top-1.5 -right-2.5 bg-gradient-to-r from-[#D4AF6A] to-[#B38738] text-[#2E180E] font-bold text-[9px] min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center shadow-xs border border-white">0</span>
+            </div>
+            <span class="text-[10px] tracking-tight leading-none">Wishlist</span>
+            @if(request()->routeIs('wishlist'))
+                <span class="w-1 h-1 rounded-full bg-[#996E2E] mt-0.5"></span>
+            @endif
         </a>
 
-        <a href="{{ route('cart') }}" class="flex flex-col items-center text-[10px] relative {{ request()->routeIs('cart') ? 'text-[#996E2E] font-bold' : 'text-[#4A2C1D]' }}">
-            <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
-            </svg>
-            <span>Bag</span>
-            <span x-text="$store.rayka.cartCount" x-show="$store.rayka.cartCount > 0" class="absolute -top-1 right-1 bg-[#4A2C1D] text-[#E7C77B] font-bold text-[9px] w-3.5 h-3.5 rounded-full flex items-center justify-center">0</span>
+        <!-- Bag -->
+        <a href="{{ route('cart') }}" 
+           class="relative flex-1 flex flex-col items-center justify-center py-1 px-1 rounded-full transition-all duration-200 active:scale-92 group {{ request()->routeIs('cart') ? 'bg-[#D4AF6A]/20 text-[#8C6226] font-bold border border-[#D4AF6A]/40 shadow-2xs' : 'text-[#4A2C1D] hover:text-[#996E2E] hover:bg-black/5' }}">
+            <div class="relative inline-flex items-center justify-center">
+                <svg class="w-5 h-5 mb-0.5 transition-transform duration-200 group-hover:scale-105" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                </svg>
+                <span x-text="$store.rayka.cartCount" 
+                      x-show="$store.rayka.cartCount > 0" 
+                      x-cloak
+                      class="absolute -top-1.5 -right-2.5 bg-gradient-to-r from-[#4A2C1D] to-[#2E180E] text-[#E7C77B] font-bold text-[9px] min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center shadow-xs border border-[#D4AF6A]/60">0</span>
+            </div>
+            <span class="text-[10px] tracking-tight leading-none">Bag</span>
+            @if(request()->routeIs('cart'))
+                <span class="w-1 h-1 rounded-full bg-[#996E2E] mt-0.5"></span>
+            @endif
         </a>
 
-        <a href="{{ route('account.orders') }}" class="flex flex-col items-center text-[10px] {{ request()->routeIs('account*') ? 'text-[#996E2E] font-bold' : 'text-[#4A2C1D]' }}">
-            <svg class="w-5 h-5 mb-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <!-- Account -->
+        <a href="{{ route('account.orders') }}" 
+           class="relative flex-1 flex flex-col items-center justify-center py-1 px-1 rounded-full transition-all duration-200 active:scale-92 group {{ request()->routeIs('account*') ? 'bg-[#D4AF6A]/20 text-[#8C6226] font-bold border border-[#D4AF6A]/40 shadow-2xs' : 'text-[#4A2C1D] hover:text-[#996E2E] hover:bg-black/5' }}">
+            <svg class="w-5 h-5 mb-0.5 transition-transform duration-200 group-hover:scale-105" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
             </svg>
-            <span>Account</span>
+            <span class="text-[10px] tracking-tight leading-none">Account</span>
+            @if(request()->routeIs('account*'))
+                <span class="w-1 h-1 rounded-full bg-[#996E2E] mt-0.5"></span>
+            @endif
         </a>
-    </div>
+    </nav>
+    @endif
 
     <!-- 7. Global Luxury Toast Notification Component (Professional SaaS Bottom Side Position) -->
     <div x-cloak 
@@ -808,13 +845,20 @@
         </div>
     </div>
 
-    <!-- Instant SaaS 0ms Page & Tab Transitions (Instant Hover & Touch Prefetcher) -->
+    <!-- Performance & Network Friendly Page Prefetcher (Safe, Debounced, Desktop Only) -->
     <script>
         (function() {
+            // Never prefetch on mobile/touch screens or when user requested Data Saver
+            if (window.matchMedia('(pointer: coarse)').matches) return;
+            if (navigator.connection && (navigator.connection.saveData || navigator.connection.effectiveType === '2g' || navigator.connection.effectiveType === 'slow-2g')) return;
+
             const prefetched = new Set();
+            let hoverTimeout = null;
+            const MAX_PREFETCH = 8;
+
             function prefetch(url) {
-                if (!url || prefetched.has(url)) return;
-                if (url.includes('/logout') || url.includes('/cart/') || url.includes('/checkout') || url.includes('#')) return;
+                if (!url || prefetched.size >= MAX_PREFETCH || prefetched.has(url)) return;
+                if (url.includes('/logout') || url.includes('/cart') || url.includes('/checkout') || url.includes('/admin') || url.includes('/api/') || url.includes('#')) return;
                 try {
                     const u = new URL(url, window.location.origin);
                     if (u.origin !== window.location.origin) return;
@@ -825,13 +869,20 @@
                     document.head.appendChild(link);
                 } catch(e) {}
             }
+
+            // Only prefetch if mouse rests on a link for at least 250ms (deliberate user interest)
             document.addEventListener('mouseover', function(e) {
                 const a = e.target.closest('a');
-                if (a && a.href) prefetch(a.href);
+                if (a && a.href) {
+                    clearTimeout(hoverTimeout);
+                    hoverTimeout = setTimeout(function() {
+                        prefetch(a.href);
+                    }, 250);
+                }
             }, { passive: true });
-            document.addEventListener('touchstart', function(e) {
-                const a = e.target.closest('a');
-                if (a && a.href) prefetch(a.href);
+
+            document.addEventListener('mouseout', function() {
+                clearTimeout(hoverTimeout);
             }, { passive: true });
         })();
     </script>

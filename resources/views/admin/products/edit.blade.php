@@ -4,7 +4,7 @@
 @section('page_title', 'Edit Jewellery: ' . $product->name)
 
 @section('content')
-<div class="w-full max-w-5xl mx-auto bg-white rounded-2xl border border-stone-200 p-6 sm:p-8 shadow-xs">
+<div class="w-full max-w-5xl mx-auto bg-white rounded-xl sm:rounded-2xl border border-stone-200 p-3 sm:p-8 shadow-xs">
 
     <form id="product-form" action="{{ route('admin.products.update', $product->id) }}" method="POST" enctype="multipart/form-data" class="space-y-6 text-xs">
         @csrf
@@ -48,7 +48,10 @@
 
                 <div>
                     <label class="block font-semibold text-stone-700 mb-1">Live Stock Quantity *</label>
-                    <input type="number" name="stock_quantity" value="{{ old('stock_quantity', $product->stock_quantity) }}" required class="w-full border rounded-lg p-2.5">
+                    <input type="number" id="stock_quantity" name="stock_quantity" value="{{ old('stock_quantity', $product->stock_quantity) }}" required class="w-full border rounded-lg p-2.5">
+                    <p class="text-[11px] text-stone-500 mt-1">
+                        Base catalogue stock. If variants (sizes/lengths) are enabled in Section 3.5, each option maintains its own dedicated live inventory.
+                    </p>
                 </div>
 
                 <div class="flex flex-wrap items-center gap-6 pt-6">
@@ -501,6 +504,315 @@
                                   class="w-full border border-stone-300 rounded-xl p-3 text-xs text-stone-700 font-sans focus:border-[#996E2E] focus:ring-1 focus:ring-[#996E2E] leading-relaxed bg-white"></textarea>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- 3.5. Product Variants & Sizing (SaaS Dynamic Options) -->
+        @php
+            $existingVariants = $product->variants->map(function($v) use ($product) {
+                return [
+                    'id' => $v->id,
+                    'name' => ($v->name && $v->name !== 'Option / Size' && $v->name !== 'Size / Option') ? $v->name : 'Size',
+                    'value' => $v->value,
+                    'stock_quantity' => (int) $v->stock_quantity,
+                    'price_override' => $v->price_override !== null ? (float) $v->price_override : '',
+                ];
+            })->values()->all();
+        @endphp
+        <div class="space-y-3 sm:space-y-4 bg-[#FAF7F0]/70 p-2.5 sm:p-6 rounded-xl sm:rounded-2xl border border-[#D4AF6A]/50 shadow-2xs"
+             x-data="{
+                hasVariants: {{ count($existingVariants) > 0 ? 'true' : 'false' }},
+                variants: {{ json_encode($existingVariants) }},
+                basePrice: '{{ (float) $product->price }}',
+                baseStock: '{{ (int) $product->stock_quantity }}',
+                totalVariantStock() {
+                    return this.variants.reduce((sum, v) => sum + (parseInt(v.stock_quantity) || 0), 0);
+                },
+                syncBaseStockWithVariants() {
+                    const total = this.totalVariantStock();
+                    const baseInput = document.getElementById('stock_quantity') || document.querySelector('input[name=\'stock_quantity\']');
+                    if (baseInput) {
+                        baseInput.value = total;
+                        this.baseStock = total;
+                        baseInput.dispatchEvent(new Event('input', { bubbles: true }));
+                    }
+                },
+                addVariant(name = 'Size', value = '', stock = null, price = '') {
+                    const baseStk = parseInt(this.baseStock) || 10;
+                    if (this.variants.length === 1 && (!this.variants[0].value || this.variants[0].value.trim() === '')) {
+                        this.variants[0] = {
+                            id: null,
+                            name: name,
+                            value: value,
+                            stock_quantity: stock !== null ? stock : baseStk,
+                            price_override: price
+                        };
+                        return;
+                    }
+                    this.variants.push({
+                        id: null,
+                        name: name,
+                        value: value,
+                        stock_quantity: stock !== null ? stock : baseStk,
+                        price_override: price
+                    });
+                },
+                removeVariant(index) {
+                    this.variants.splice(index, 1);
+                    if (this.variants.length === 0) {
+                        this.hasVariants = false;
+                    }
+                },
+                applyPreset(type) {
+                    this.hasVariants = true;
+                    const baseStk = parseInt(this.baseStock) || 10;
+                    let items = [];
+                    if (type === 'bangles') {
+                        items = [
+                            { name: 'Size', value: '2.4 Size (2-4/16 inch)', price: '' },
+                            { name: 'Size', value: '2.6 Size (2-6/16 inch)', price: '' },
+                            { name: 'Size', value: '2.8 Size (2-8/16 inch)', price: '' }
+                        ];
+                    } else if (type === 'chains') {
+                        items = [
+                            { name: 'Length', value: '20 Inch Length', price: '' },
+                            { name: 'Length', value: '22 Inch Length', price: '' },
+                            { name: 'Length', value: '24 Inch Length', price: '' }
+                        ];
+                    } else if (type === 'tones') {
+                        items = [
+                            { name: 'Tone', value: 'Yellow Gold Tone', price: '' },
+                            { name: 'Tone', value: 'Rose Gold Tone', price: '' },
+                            { name: 'Tone', value: 'Antique Matte Gold', price: '' }
+                        ];
+                    } else if (type === 'sets') {
+                        items = [
+                            { name: 'Option', value: 'Standard Set', price: '' },
+                            { name: 'Option', value: 'With Maang Tikka', price: '' }
+                        ];
+                    }
+
+                    if (this.variants.length === 1 && (!this.variants[0].value || this.variants[0].value.trim() === '')) {
+                        this.variants = [];
+                    }
+
+                    items.forEach(it => {
+                        if (!this.variants.some(v => v.value.toLowerCase() === it.value.toLowerCase())) {
+                            this.variants.push({
+                                id: null,
+                                name: it.name,
+                                value: it.value,
+                                stock_quantity: baseStk,
+                                price_override: it.price
+                            });
+                        }
+                    });
+                }
+             }">
+
+            <input type="hidden" name="variants_present" value="1">
+
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-[#D4AF6A]/30 gap-2">
+                <div class="flex items-center space-x-2.5">
+                    <div class="w-8 h-8 rounded-lg bg-white border border-[#D4AF6A] flex items-center justify-center text-[#996E2E] shadow-2xs">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/></svg>
+                    </div>
+                    <div>
+                        <h4 class="font-serif-royal font-bold text-sm text-[#4A2C1D]">
+                            3.5 Product Variants &amp; Sizing (SaaS Dynamic Options)
+                        </h4>
+                        <p class="text-[11px] text-stone-500">
+                            Configure multiple sizes, lengths, or finish options. Customers can dynamically select their variant on the product page.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="flex items-center space-x-2">
+                    <label class="inline-flex items-center space-x-2 cursor-pointer bg-white px-3 py-1.5 rounded-lg border border-[#D4AF6A]/60 shadow-2xs hover:border-[#D4AF6A] transition">
+                        <input type="checkbox" x-model="hasVariants" @change="if(hasVariants && variants.length === 0) addVariant('Size', '2.4 Size (2-4/16 inch)', parseInt(baseStock) || 10, '');" class="rounded text-[#996E2E] focus:ring-[#996E2E]">
+                        <span class="text-xs font-semibold text-[#4A2C1D]">Enable Variants</span>
+                    </label>
+                </div>
+            </div>
+
+            <!-- Presets & Variant Manager -->
+            <div x-show="hasVariants" class="space-y-3 pt-1">
+                <!-- 1-Click Common Jewellery Presets -->
+                <div>
+                    <span class="text-[10px] font-bold uppercase tracking-wider text-stone-500 block mb-1.5">1-Click Fast Jewellery Presets:</span>
+                    <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
+                        <button type="button" @click="applyPreset('bangles')" class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-[#FAF7F0] border border-[#D4AF6A]/60 text-stone-700 hover:text-[#4A2C1D] text-xs font-medium transition shadow-2xs cursor-pointer active:scale-95">
+                            <svg class="w-3.5 h-3.5 text-[#996E2E]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            <span>Bangle Sizes (2.4, 2.6, 2.8)</span>
+                        </button>
+                        <button type="button" @click="applyPreset('chains')" class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-[#FAF7F0] border border-[#D4AF6A]/60 text-stone-700 hover:text-[#4A2C1D] text-xs font-medium transition shadow-2xs cursor-pointer active:scale-95">
+                            <svg class="w-3.5 h-3.5 text-[#996E2E]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            <span>Chain Lengths (20&quot;, 22&quot;, 24&quot;)</span>
+                        </button>
+                        <button type="button" @click="applyPreset('tones')" class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-[#FAF7F0] border border-[#D4AF6A]/60 text-stone-700 hover:text-[#4A2C1D] text-xs font-medium transition shadow-2xs cursor-pointer active:scale-95">
+                            <svg class="w-3.5 h-3.5 text-[#996E2E]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            <span>Plating Tones</span>
+                        </button>
+                        <button type="button" @click="applyPreset('sets')" class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-white hover:bg-[#FAF7F0] border border-[#D4AF6A]/60 text-stone-700 hover:text-[#4A2C1D] text-xs font-medium transition shadow-2xs cursor-pointer active:scale-95">
+                            <svg class="w-3.5 h-3.5 text-[#996E2E]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"/></svg>
+                            <span>Bridal Set Options</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Variants Table / Rows -->
+                <div class="space-y-2 pt-2">
+                    <!-- Desktop Table Column Header (Hidden on Mobile) -->
+                    <div class="hidden sm:grid sm:grid-cols-12 sm:gap-2.5 sm:items-center px-3 py-2 text-[10.5px] font-bold text-stone-600 uppercase tracking-wider bg-white/95 border border-stone-200/90 rounded-xl shadow-2xs">
+                        <div class="sm:col-span-2 flex items-center space-x-1">
+                            <span>Option Type</span>
+                        </div>
+                        <div class="sm:col-span-5 flex items-center space-x-1">
+                            <span>Variant Value / Sizing Label</span>
+                            <span class="text-rose-500 font-bold">*</span>
+                        </div>
+                        <div class="sm:col-span-2 flex items-center space-x-1">
+                            <span>Price Override</span>
+                            <span class="text-stone-400 font-normal normal-case">(₹)</span>
+                        </div>
+                        <div class="sm:col-span-2 flex items-center space-x-1">
+                            <span>Live Stock</span>
+                            <span class="text-rose-500 font-bold">*</span>
+                            <span class="text-stone-400 font-normal normal-case">(Units)</span>
+                        </div>
+                        <div class="sm:col-span-1 text-center">
+                            <span>Del</span>
+                        </div>
+                    </div>
+
+                    <template x-for="(v, index) in variants" :key="index">
+                        <div class="p-3 sm:p-2.5 rounded-xl bg-white border border-stone-200 hover:border-[#D4AF6A] transition-all shadow-2xs space-y-2.5 sm:space-y-0 sm:grid sm:grid-cols-12 sm:gap-2.5 sm:items-center">
+                            <input type="hidden" :name="'variants[' + index + '][id]'" :value="v.id">
+
+                            <!-- Mobile Top Header Bar (Hidden on Desktop) -->
+                            <div class="flex items-center justify-between gap-2 sm:hidden pb-2 border-b border-stone-100">
+                                <div class="flex items-center gap-1.5 min-w-0 flex-1">
+                                    <span class="inline-flex items-center justify-center w-5 h-5 rounded-md bg-[#FAF7F0] border border-[#D4AF6A] text-[#996E2E] font-bold text-[10px] shrink-0 font-mono" x-text="'#' + (index + 1)"></span>
+                                    <span class="text-xs font-bold text-[#4A2C1D] whitespace-nowrap">Variant <span x-text="'#' + (index + 1)"></span></span>
+                                    <span x-show="v.value" class="text-[11px] text-stone-500 font-medium truncate min-w-0" x-text="'(' + v.value + ')'"></span>
+                                </div>
+                                <button type="button" 
+                                        @click="removeVariant(index)" 
+                                        class="inline-flex items-center gap-1 text-[11px] font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 px-2 py-1 rounded-lg border border-rose-200/80 transition cursor-pointer shrink-0 active:scale-95"
+                                        title="Delete Variant">
+                                    <svg class="w-3.5 h-3.5 text-rose-600 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                    <span class="leading-none">Delete</span>
+                                </button>
+                            </div>
+
+                            <!-- Col 1: Option Type (Desktop: 2 cols, Mobile: full) -->
+                            <div class="sm:col-span-2">
+                                <label class="block text-[10.5px] font-bold text-stone-600 mb-1 sm:hidden">Option Type</label>
+                                <input type="text" 
+                                       :name="'variants[' + index + '][name]'" 
+                                       x-model="v.name" 
+                                       placeholder="e.g. Size" 
+                                       class="w-full border border-stone-300 rounded-lg px-2.5 py-1.5 text-xs font-semibold text-[#4A2C1D] bg-stone-50/70 focus:border-[#996E2E] focus:ring-1 focus:ring-[#996E2E]" required>
+                            </div>
+
+                            <!-- Col 2: Variant Value / Sizing Label (Desktop: 5 cols, Mobile: full) -->
+                            <div class="sm:col-span-5">
+                                <label class="block text-[10.5px] font-bold text-stone-600 mb-1 sm:hidden">Variant Name / Sizing Value *</label>
+                                <input type="text" 
+                                       :name="'variants[' + index + '][value]'" 
+                                       x-model="v.value" 
+                                       placeholder="e.g. 2.4 Size (2-4/16 inch) or 20 Inch" 
+                                       class="w-full border border-stone-300 rounded-lg px-3 py-1.5 text-xs text-stone-800 font-medium focus:border-[#996E2E] focus:ring-1 focus:ring-[#996E2E]" required>
+                            </div>
+
+                            <!-- Col 3: Price Override (Desktop: 2 cols, Mobile: full) -->
+                            <div class="sm:col-span-2">
+                                <label class="block text-[10.5px] font-bold text-stone-600 mb-1 sm:hidden">Price Override (Blank = Base ₹<span x-text="basePrice"></span>)</label>
+                                <div class="relative">
+                                    <span class="absolute left-2.5 top-1/2 -translate-y-1/2 text-stone-400 font-semibold text-xs pointer-events-none select-none">₹</span>
+                                    <input type="number" 
+                                           step="0.01" 
+                                           :name="'variants[' + index + '][price_override]'" 
+                                           x-model="v.price_override" 
+                                           :placeholder="'Base (₹' + (basePrice || 0) + ')'" 
+                                           class="w-full border border-stone-300 rounded-lg pl-6 pr-2.5 py-1.5 text-xs font-mono text-[#996E2E] font-bold focus:border-[#996E2E] focus:ring-1 focus:ring-[#996E2E]">
+                                </div>
+                            </div>
+
+                            <!-- Col 4: Live Stock (Desktop: 2 cols, Mobile: full) -->
+                            <div class="sm:col-span-2">
+                                <label class="block text-[10.5px] font-bold text-stone-600 mb-1 sm:hidden">Stock Quantity (Units) *</label>
+                                <div class="relative">
+                                    <input type="number" 
+                                           min="0"
+                                           step="1"
+                                           :name="'variants[' + index + '][stock_quantity]'" 
+                                           x-model="v.stock_quantity" 
+                                           placeholder="10" 
+                                           class="w-full border border-stone-300 rounded-lg pl-2.5 pr-9 py-1.5 text-xs font-mono text-stone-900 font-semibold focus:border-[#996E2E] focus:ring-1 focus:ring-[#996E2E]" required>
+                                    <span class="absolute right-2 top-1/2 -translate-y-1/2 text-[10px] font-bold text-stone-400 uppercase tracking-wider pointer-events-none select-none">pcs</span>
+                                </div>
+                            </div>
+
+                            <!-- Col 5: Desktop Delete Button (Desktop: 1 col, Mobile: hidden) -->
+                            <div class="hidden sm:flex sm:col-span-1 items-center justify-center">
+                                <button type="button" 
+                                        @click="removeVariant(index)" 
+                                        class="p-1.5 rounded-lg text-stone-400 hover:text-rose-600 hover:bg-rose-50 transition cursor-pointer" 
+                                        title="Delete Variant">
+                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16"/></svg>
+                                </button>
+                            </div>
+                        </div>
+                    </template>
+
+                    <div x-show="variants.length === 0" class="py-6 text-center text-stone-400 text-xs border-2 border-dashed border-stone-200 rounded-xl bg-white">
+                        No variants added yet. Click "+ Add Another Variant" or pick a preset above.
+                    </div>
+                </div>
+
+                <!-- Live SaaS Variant Inventory Summary & Sync Bar -->
+                <div x-show="variants.length > 0" class="p-3 bg-white rounded-xl border border-[#D4AF6A]/50 flex flex-col sm:flex-row sm:items-center justify-between gap-3 text-xs shadow-2xs">
+                    <div class="flex items-center gap-2.5 flex-wrap">
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-stone-100 text-stone-700 font-medium">
+                            <svg class="w-3.5 h-3.5 text-[#996E2E]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 7h.01M7 3h5c.512 0 1.024.195 1.414.586l7 7a2 2 0 010 2.828l-7 7a2 2 0 01-2.828 0l-7-7A1.994 1.994 0 013 12V7a4 4 0 014-4z"/></svg>
+                            <span x-text="variants.length + ' Active Variants'"></span>
+                        </span>
+                        <span class="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-emerald-50 text-emerald-800 font-semibold border border-emerald-200">
+                            <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M20 7l-8-4-8 4m16 0l-8 4m8-4v10l-8 4m0-10L4 7m8 4v10M4 7v10l8 4"/></svg>
+                            <span>Total Variant Inventory: <strong class="font-mono text-emerald-900" x-text="totalVariantStock() + ' pcs'"></strong></span>
+                        </span>
+                        <span x-show="variants.some(v => parseInt(v.stock_quantity) <= 0)" class="inline-flex items-center gap-1 px-2 py-0.5 rounded-md bg-rose-50 text-rose-700 font-medium border border-rose-200 text-[11px]" x-cloak>
+                            <svg class="w-3 h-3 text-rose-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"/></svg>
+                            <span>Has Sold-Out Variant</span>
+                        </span>
+                    </div>
+                    <div class="flex items-center gap-2">
+                        <button type="button" 
+                                @click="syncBaseStockWithVariants()" 
+                                class="inline-flex items-center space-x-1.5 px-3 py-1.5 rounded-lg bg-[#FAF7F0] hover:bg-[#FAF3E0] border border-[#D4AF6A] text-[#996E2E] hover:text-[#4A2C1D] text-xs font-semibold transition cursor-pointer active:scale-95 shadow-2xs"
+                                title="Set base product stock to match total variant units">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"/></svg>
+                            <span>1-Click Sync Base Stock (<span x-text="totalVariantStock()"></span> units)</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Add Button & Count -->
+                <div class="pt-2 flex items-center justify-between">
+                    <button type="button" 
+                            @click="addVariant('Size', '', parseInt(baseStock) || 10, '')" 
+                            class="inline-flex items-center space-x-1.5 px-3.5 py-2 rounded-lg bg-white hover:bg-[#FAF7F0] border border-[#D4AF6A] text-[#996E2E] hover:text-[#4A2C1D] text-xs font-semibold transition shadow-2xs active:scale-95 cursor-pointer">
+                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                        <span>Add Another Variant</span>
+                    </button>
+                    <span class="text-[11px] text-stone-500 font-medium" x-text="variants.length + ' variants active'"></span>
+                </div>
+            </div>
+
+            <div x-show="!hasVariants" class="text-center py-4 bg-white/70 rounded-xl border border-dashed border-stone-300 text-stone-500 text-xs">
+                <span>This product does not have variants. Selling price &amp; live stock from Section 1 apply.</span>
+                <button type="button" @click="hasVariants = true; addVariant('Size', '2.4 Size (2-4/16 inch)', parseInt(baseStock) || 10, '');" class="text-[#996E2E] font-bold hover:underline ml-1">Enable Variants</button>
             </div>
         </div>
 

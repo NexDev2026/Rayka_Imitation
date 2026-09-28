@@ -54,7 +54,7 @@ class AdminProductController extends Controller
 
     public function index(Request $request)
     {
-        $query = Product::with(['category', 'images']);
+        $query = Product::with(['category', 'images', 'variants']);
 
         if ($request->filled('category')) {
             $query->where('category_id', $request->category);
@@ -228,14 +228,27 @@ class AdminProductController extends Controller
         }
 
         // Add Variants (e.g. sizes)
-        if ($request->filled('variant_names') && is_array($request->variant_names)) {
+        if ($request->filled('variants') && is_array($request->variants)) {
+            foreach ($request->variants as $var) {
+                $val = trim($var['value'] ?? '');
+                if ($val !== '') {
+                    ProductVariant::create([
+                        'product_id' => $product->id,
+                        'name' => trim($var['name'] ?? 'Size') ?: 'Size',
+                        'value' => $val,
+                        'stock_quantity' => isset($var['stock_quantity']) && $var['stock_quantity'] !== '' ? (int)$var['stock_quantity'] : (int)$product->stock_quantity,
+                        'price_override' => ! empty($var['price_override']) ? (float)$var['price_override'] : null,
+                    ]);
+                }
+            }
+        } elseif ($request->filled('variant_names') && is_array($request->variant_names)) {
             foreach ($request->variant_names as $k => $vVal) {
                 if (! empty($vVal)) {
                     ProductVariant::create([
                         'product_id' => $product->id,
-                        'name' => 'Size / Option',
+                        'name' => 'Size',
                         'value' => $vVal,
-                        'stock_quantity' => (int) ($request->variant_stocks[$k] ?? 10),
+                        'stock_quantity' => (int) ($request->variant_stocks[$k] ?? $product->stock_quantity),
                         'price_override' => ! empty($request->variant_prices[$k]) ? $request->variant_prices[$k] : null,
                     ]);
                 }
@@ -433,6 +446,39 @@ class AdminProductController extends Controller
             $product->attributeValues()->sync($attrIds);
         } else {
             $product->attributeValues()->sync([]);
+        }
+
+        // Sync Product Variants
+        if ($request->has('variants_present')) {
+            $submittedIds = [];
+            if ($request->has('variants') && is_array($request->variants)) {
+                foreach ($request->variants as $var) {
+                    $val = trim($var['value'] ?? '');
+                    if ($val === '') {
+                        continue;
+                    }
+
+                    $varId = ! empty($var['id']) ? (int) $var['id'] : null;
+                    $varData = [
+                        'product_id' => $product->id,
+                        'name' => trim($var['name'] ?? 'Size') ?: 'Size',
+                        'value' => $val,
+                        'stock_quantity' => isset($var['stock_quantity']) && $var['stock_quantity'] !== '' ? (int) $var['stock_quantity'] : (int) $product->stock_quantity,
+                        'price_override' => ! empty($var['price_override']) ? (float) $var['price_override'] : null,
+                    ];
+
+                    if ($varId && $existingVar = ProductVariant::where('product_id', $product->id)->find($varId)) {
+                        $existingVar->update($varData);
+                        $submittedIds[] = $existingVar->id;
+                    } else {
+                        $newVar = ProductVariant::create($varData);
+                        $submittedIds[] = $newVar->id;
+                    }
+                }
+            }
+
+            // Remove any variants that were deleted from the form
+            ProductVariant::where('product_id', $product->id)->whereNotIn('id', $submittedIds)->delete();
         }
 
         return redirect()->route('admin.products.index')->with('success', 'Product updated successfully!');

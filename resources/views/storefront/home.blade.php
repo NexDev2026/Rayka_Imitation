@@ -458,7 +458,7 @@
                             <!-- View All Category Products Footer Button -->
                             <div class="text-center mt-8">
                                 <a href="{{ route('category.show', $cat->slug) }}" class="inline-flex items-center space-x-2 px-6 py-2.5 rounded-full bg-white border-2 border-[#4A2C1D] text-[#4A2C1D] hover:bg-[#4A2C1D] hover:text-[#E7C77B] font-bold text-xs uppercase tracking-wider transition shadow-2xs hover:scale-105">
-                                    <span>Explore All {{ $cat->name }} ({{ $cat->products_count ?? $cat->products()->count() }})</span>
+                                    <span>Explore All {{ $cat->name }} ({{ $cat->products_count ?? $cat->products->count() }})</span>
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                                 </a>
                             </div>
