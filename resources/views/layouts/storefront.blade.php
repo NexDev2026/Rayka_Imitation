@@ -710,34 +710,45 @@
 
     <!-- 6. Mobile Floating Liquid-Glass Navigation Dock (Luxury SaaS Pill Dock) -->
     @if(!request()->routeIs('checkout*') && !request()->routeIs('product.show'))
+    @php
+        $isHome = request()->routeIs('home');
+        $isCategory = request()->routeIs('category*') || request()->routeIs('nav.group*');
+        $isWishlist = request()->routeIs('wishlist*');
+        $isCart = request()->routeIs('cart*');
+        $isAccount = request()->routeIs('account*') || request()->routeIs('login*') || request()->routeIs('register*') || request()->routeIs('password.*') || request()->routeIs('order.track*');
+    @endphp
     <nav aria-label="Mobile Navigation"
-         class="mobile-bottom-bar lg:hidden fixed bottom-3 inset-x-3 sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 sm:w-full sm:max-w-md z-40 bg-[#FAF7F0]/85 backdrop-blur-xl backdrop-saturate-150 border border-[#D4AF6A]/55 rounded-full shadow-[0_12px_36px_rgba(74,44,29,0.22),0_2px_10px_rgba(212,175,106,0.25)] ring-1 ring-white/80 py-1 px-2 flex items-center justify-between gap-1 select-none transition-all duration-300">
+         class="mobile-bottom-bar lg:hidden fixed bottom-3 inset-x-3 sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 sm:w-full sm:max-w-md z-40 bg-[#FAF7F0]/90 backdrop-blur-xl backdrop-saturate-150 border border-[#D4AF6A]/55 rounded-full shadow-[0_12px_36px_rgba(74,44,29,0.22),0_2px_10px_rgba(212,175,106,0.25)] ring-1 ring-white/80 py-1.5 px-2 flex items-center justify-between gap-1 select-none transition-all duration-300">
         
         <!-- Home -->
         <a href="{{ route('home') }}" 
-           class="relative flex-1 flex flex-col items-center justify-center py-1 px-1 rounded-full transition-all duration-200 active:scale-92 group {{ request()->routeIs('home') ? 'bg-[#D4AF6A]/20 text-[#8C6226] font-bold border border-[#D4AF6A]/40 shadow-2xs' : 'text-[#4A2C1D] hover:text-[#996E2E] hover:bg-black/5' }}">
+           class="relative flex-1 flex flex-col items-center justify-center py-1 px-1 rounded-full transition-all duration-200 active:scale-92 group {{ $isHome ? 'bg-gradient-to-b from-[#D4AF6A]/30 to-[#D4AF6A]/15 text-[#6D4214] font-bold border border-[#D4AF6A]/60 shadow-[inset_0_1px_1px_rgba(255,255,255,0.7),0_2px_6px_rgba(212,175,106,0.25)]' : 'text-[#4A2C1D] hover:text-[#996E2E] hover:bg-black/5' }}">
             <svg class="w-5 h-5 mb-0.5 transition-transform duration-200 group-hover:scale-105" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
             </svg>
             <span class="text-[10px] tracking-tight leading-none">Home</span>
-            @if(request()->routeIs('home'))
-                <span class="w-1 h-1 rounded-full bg-[#996E2E] mt-0.5"></span>
+            @if($isHome)
+                <span class="w-1 h-1 rounded-full bg-[#996E2E] mt-0.5 ring-2 ring-[#D4AF6A]/40"></span>
             @endif
         </a>
 
         <!-- Categories -->
         <button type="button" 
                 @click="mobileMenuOpen = true" 
-                class="relative flex-1 flex flex-col items-center justify-center py-1 px-1 rounded-full transition-all duration-200 active:scale-92 group text-[#4A2C1D] hover:text-[#996E2E] hover:bg-black/5 cursor-pointer">
+                class="relative flex-1 flex flex-col items-center justify-center py-1 px-1 rounded-full transition-all duration-200 active:scale-92 group cursor-pointer {{ $isCategory ? 'bg-gradient-to-b from-[#D4AF6A]/30 to-[#D4AF6A]/15 text-[#6D4214] font-bold border border-[#D4AF6A]/60 shadow-[inset_0_1px_1px_rgba(255,255,255,0.7),0_2px_6px_rgba(212,175,106,0.25)]' : 'text-[#4A2C1D] hover:text-[#996E2E] hover:bg-black/5' }}"
+                :class="{'bg-gradient-to-b from-[#D4AF6A]/30 to-[#D4AF6A]/15 text-[#6D4214] font-bold border border-[#D4AF6A]/60 shadow-[inset_0_1px_1px_rgba(255,255,255,0.7),0_2px_6px_rgba(212,175,106,0.25)]': mobileMenuOpen}">
             <svg class="w-5 h-5 mb-0.5 transition-transform duration-200 group-hover:scale-105" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 10h16M4 14h16M4 18h16"></path>
             </svg>
             <span class="text-[10px] tracking-tight leading-none">Categories</span>
+            @if($isCategory)
+                <span class="w-1 h-1 rounded-full bg-[#996E2E] mt-0.5 ring-2 ring-[#D4AF6A]/40"></span>
+            @endif
         </button>
 
         <!-- Wishlist -->
         <a href="{{ route('wishlist') }}" 
-           class="relative flex-1 flex flex-col items-center justify-center py-1 px-1 rounded-full transition-all duration-200 active:scale-92 group {{ request()->routeIs('wishlist') ? 'bg-[#D4AF6A]/20 text-[#8C6226] font-bold border border-[#D4AF6A]/40 shadow-2xs' : 'text-[#4A2C1D] hover:text-[#996E2E] hover:bg-black/5' }}">
+           class="relative flex-1 flex flex-col items-center justify-center py-1 px-1 rounded-full transition-all duration-200 active:scale-92 group {{ $isWishlist ? 'bg-gradient-to-b from-[#D4AF6A]/30 to-[#D4AF6A]/15 text-[#6D4214] font-bold border border-[#D4AF6A]/60 shadow-[inset_0_1px_1px_rgba(255,255,255,0.7),0_2px_6px_rgba(212,175,106,0.25)]' : 'text-[#4A2C1D] hover:text-[#996E2E] hover:bg-black/5' }}">
             <div class="relative inline-flex items-center justify-center">
                 <svg class="w-5 h-5 mb-0.5 transition-transform duration-200 group-hover:scale-105" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
@@ -748,14 +759,14 @@
                       class="absolute -top-1.5 -right-2.5 bg-gradient-to-r from-[#D4AF6A] to-[#B38738] text-[#2E180E] font-bold text-[9px] min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center shadow-xs border border-white">0</span>
             </div>
             <span class="text-[10px] tracking-tight leading-none">Wishlist</span>
-            @if(request()->routeIs('wishlist'))
-                <span class="w-1 h-1 rounded-full bg-[#996E2E] mt-0.5"></span>
+            @if($isWishlist)
+                <span class="w-1 h-1 rounded-full bg-[#996E2E] mt-0.5 ring-2 ring-[#D4AF6A]/40"></span>
             @endif
         </a>
 
         <!-- Bag -->
         <a href="{{ route('cart') }}" 
-           class="relative flex-1 flex flex-col items-center justify-center py-1 px-1 rounded-full transition-all duration-200 active:scale-92 group {{ request()->routeIs('cart') ? 'bg-[#D4AF6A]/20 text-[#8C6226] font-bold border border-[#D4AF6A]/40 shadow-2xs' : 'text-[#4A2C1D] hover:text-[#996E2E] hover:bg-black/5' }}">
+           class="relative flex-1 flex flex-col items-center justify-center py-1 px-1 rounded-full transition-all duration-200 active:scale-92 group {{ $isCart ? 'bg-gradient-to-b from-[#D4AF6A]/30 to-[#D4AF6A]/15 text-[#6D4214] font-bold border border-[#D4AF6A]/60 shadow-[inset_0_1px_1px_rgba(255,255,255,0.7),0_2px_6px_rgba(212,175,106,0.25)]' : 'text-[#4A2C1D] hover:text-[#996E2E] hover:bg-black/5' }}">
             <div class="relative inline-flex items-center justify-center">
                 <svg class="w-5 h-5 mb-0.5 transition-transform duration-200 group-hover:scale-105" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
@@ -766,20 +777,20 @@
                       class="absolute -top-1.5 -right-2.5 bg-gradient-to-r from-[#4A2C1D] to-[#2E180E] text-[#E7C77B] font-bold text-[9px] min-w-[16px] h-4 px-1 rounded-full flex items-center justify-center shadow-xs border border-[#D4AF6A]/60">0</span>
             </div>
             <span class="text-[10px] tracking-tight leading-none">Bag</span>
-            @if(request()->routeIs('cart'))
-                <span class="w-1 h-1 rounded-full bg-[#996E2E] mt-0.5"></span>
+            @if($isCart)
+                <span class="w-1 h-1 rounded-full bg-[#996E2E] mt-0.5 ring-2 ring-[#D4AF6A]/40"></span>
             @endif
         </a>
 
         <!-- Account -->
-        <a href="{{ route('account.orders') }}" 
-           class="relative flex-1 flex flex-col items-center justify-center py-1 px-1 rounded-full transition-all duration-200 active:scale-92 group {{ request()->routeIs('account*') ? 'bg-[#D4AF6A]/20 text-[#8C6226] font-bold border border-[#D4AF6A]/40 shadow-2xs' : 'text-[#4A2C1D] hover:text-[#996E2E] hover:bg-black/5' }}">
+        <a href="{{ Auth::check() ? route('account.orders') : route('login') }}" 
+           class="relative flex-1 flex flex-col items-center justify-center py-1 px-1 rounded-full transition-all duration-200 active:scale-92 group {{ $isAccount ? 'bg-gradient-to-b from-[#D4AF6A]/30 to-[#D4AF6A]/15 text-[#6D4214] font-bold border border-[#D4AF6A]/60 shadow-[inset_0_1px_1px_rgba(255,255,255,0.7),0_2px_6px_rgba(212,175,106,0.25)]' : 'text-[#4A2C1D] hover:text-[#996E2E] hover:bg-black/5' }}">
             <svg class="w-5 h-5 mb-0.5 transition-transform duration-200 group-hover:scale-105" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"></path>
             </svg>
             <span class="text-[10px] tracking-tight leading-none">Account</span>
-            @if(request()->routeIs('account*'))
-                <span class="w-1 h-1 rounded-full bg-[#996E2E] mt-0.5"></span>
+            @if($isAccount)
+                <span class="w-1 h-1 rounded-full bg-[#996E2E] mt-0.5 ring-2 ring-[#D4AF6A]/40"></span>
             @endif
         </a>
     </nav>
