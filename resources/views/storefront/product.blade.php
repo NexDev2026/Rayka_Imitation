@@ -439,96 +439,135 @@
                     </span>
                 </div>
 
-                <!-- Action Buttons: Shown when maxStock > 0 -->
-                <div x-show="maxStock > 0" class="space-y-3 pt-2">
-                    <!-- State 1: NOT IN BAG -->
-                    <div x-show="$store.rayka.getCartQty({{ $product->id }}) === 0"
-                         x-cloak
-                         class="flex flex-col sm:flex-row gap-3 items-stretch">
-                        <!-- Add to Bag Button -->
-                        <button type="button" 
-                                @click.prevent="if($store.rayka.isLoading({{ $product->id }})) return; $store.rayka.addToCart({{ $product->id }}, 1, selectedVariantId || null)"
-                                class="flex-1 min-h-[48px] sm:min-h-[52px] py-3 sm:py-3.5 px-4 rounded-xl bg-[#FAF7F0] hover:bg-[#4A2C1D] text-[#4A2C1D] hover:text-[#E7C77B] border-2 border-[#D4AF6A] font-bold text-xs sm:text-sm uppercase tracking-wider transition-all duration-200 shadow-xs hover:shadow-md flex items-center justify-center gap-2 group cursor-pointer active:scale-98">
-                            
-                            <svg x-show="!$store.rayka.isLoading({{ $product->id }})" class="w-4 h-4 sm:w-5 sm:h-5 text-[#996E2E] group-hover:text-[#E7C77B] transition-colors shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
-                            </svg>
-                            <span x-show="!$store.rayka.isLoading({{ $product->id }})">
-                                Add to Bag
-                            </span>
-                            
-                            <span x-show="$store.rayka.isLoading({{ $product->id }})" class="flex items-center gap-2" x-cloak>
-                                <svg class="animate-spin h-4 w-4 sm:h-5 sm:w-5 text-[#D4AF6A]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                @php
+                    $isOrderButtonsHidden = (!empty($storeSettings['hide_order_buttons']) && $storeSettings['hide_order_buttons'] == '1') || \App\Models\StoreSetting::get('hide_order_buttons', '0') == '1';
+                @endphp
+
+                @if($isOrderButtonsHidden)
+                    <!-- Catalog Mode Notice & WhatsApp Inquiry (Buttons Hidden) -->
+                    <div class="rounded-2xl bg-gradient-to-br from-[#FAF7F0] via-white to-[#F7EFE1] border-2 border-[#D4AF6A]/60 p-4 sm:p-5 shadow-xs space-y-3 mt-3">
+                        <div class="flex items-start gap-3">
+                            <div class="w-10 h-10 rounded-xl bg-[#4A2C1D] text-[#E7C77B] flex items-center justify-center shrink-0 shadow-xs border border-[#D4AF6A]/40">
+                                <svg class="w-5 h-5 text-[#E7C77B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6h4.5m4.5 0a9 9 0 11-18 0 9 9 0 0118 0z" />
                                 </svg>
-                                <span>Adding...</span>
-                            </span>
-                        </button>
-
-                        <!-- Buy Now Button -->
-                        <button type="button" 
-                                @click.prevent="buyNow()"
-                                class="flex-1 min-h-[48px] sm:min-h-[52px] py-3 sm:py-3.5 px-4 rounded-xl bg-[#4A2C1D] hover:bg-[#2E180E] text-[#E7C77B] border-2 border-[#4A2C1D] hover:border-[#2E180E] font-bold text-xs sm:text-sm uppercase tracking-wider transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2 active:scale-98 cursor-pointer">
-                            <svg x-show="!buyingNow" class="w-4 h-4 sm:w-5 sm:h-5 shrink-0 text-[#E7C77B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                            </svg>
-                            <span x-show="!buyingNow">Buy Now</span>
-
-                            <span x-show="buyingNow" class="flex items-center gap-2" x-cloak>
-                                <svg class="animate-spin h-4 w-4 sm:h-5 sm:w-5 text-[#E7C77B]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
-                                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                <span>Processing...</span>
-                            </span>
-                        </button>
-                    </div>
-
-                    <!-- State 2: ALREADY IN BAG -->
-                    <div x-show="$store.rayka.getCartQty({{ $product->id }}) > 0" x-cloak class="flex flex-col sm:flex-row gap-3 items-stretch">
-                        <!-- Integrated Quantity Stepper -->
-                        <div class="flex items-stretch justify-between rounded-xl bg-[#4A2C1D] border-2 border-[#D4AF6A] text-[#E7C77B] overflow-hidden shadow-xs shrink-0 sm:w-40 min-h-[48px] sm:min-h-[52px]">
-                            <button type="button" 
-                                    @click.prevent="if($store.rayka.isLoading({{ $product->id }})) return; $store.rayka.changeQty({{ $product->id }}, -1)"
-                                    class="w-12 flex items-center justify-center hover:bg-[#2E180E] transition-colors text-xl font-bold active:scale-90 cursor-pointer select-none"
-                                    title="Decrease quantity">
-                                <svg class="w-4 h-4 text-[#E7C77B]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4"/></svg>
-                            </button>
-                            <div class="flex-1 flex items-center justify-center font-bold text-[#E7C77B] text-base font-mono relative">
-                                <span x-show="!$store.rayka.isLoading({{ $product->id }})" x-text="$store.rayka.getCartQty({{ $product->id }})"></span>
-                                <span x-show="$store.rayka.isLoading({{ $product->id }})" class="absolute">
-                                    <svg class="w-5 h-5 animate-spin text-[#E7C77B]" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
-                                </span>
                             </div>
+                            <div class="flex-1 min-w-0">
+                                <div class="flex items-center gap-2 flex-wrap">
+                                    <h4 class="font-serif-royal font-bold text-sm sm:text-base text-[#4A2C1D]">
+                                        Catalog Mode — Updating Prices & Details
+                                    </h4>
+                                    <span class="inline-flex items-center px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#D4AF6A]/20 text-[#4A2C1D] border border-[#D4AF6A]/40">
+                                        Catalog Only
+                                    </span>
+                                </div>
+                                <p class="text-xs text-stone-600 mt-1 leading-relaxed">
+                                    {{ !empty($storeSettings['order_buttons_notice']) ? $storeSettings['order_buttons_notice'] : 'Online ordering is temporarily paused while we update our product catalog and pricing. You can still explore all specifications and photos.' }}
+                                </p>
+                            </div>
+                        </div>
+
+                        @if(!empty($storeSettings['clean_whatsapp']))
+                            <a href="https://wa.me/{{ $storeSettings['clean_whatsapp'] }}?text={{ urlencode('Hi Rayka Jewellery, I am inquiring about ' . $product->name . ' (SKU: ' . $product->sku . '). Please share updated pricing & availability: ' . url()->current()) }}" 
+                               target="_blank"
+                               class="w-full min-h-[46px] sm:min-h-[50px] px-4 rounded-xl bg-gradient-to-r from-emerald-800 to-emerald-700 hover:from-emerald-700 hover:to-emerald-600 text-white font-bold text-xs sm:text-sm uppercase tracking-wider transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2 active:scale-98">
+                                <svg class="w-4 h-4 sm:w-5 sm:h-5 fill-current shrink-0" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.007c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.275.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.099.824zm-3.423-14.416c-6.627 0-12 5.373-12 12 0 2.155.57 4.175 1.565 5.922l-1.565 5.808 6.012-1.577c1.704.936 3.659 1.474 5.988 1.474 6.627 0 12-5.373 12-12s-5.373-12-12-12z"/></svg>
+                                <span>Inquire Pricing on WhatsApp</span>
+                            </a>
+                        @endif
+                    </div>
+                @else
+                    <!-- Action Buttons: Shown when maxStock > 0 -->
+                    <div x-show="maxStock > 0" class="space-y-3 pt-2">
+                        <!-- State 1: NOT IN BAG -->
+                        <div x-show="$store.rayka.getCartQty({{ $product->id }}) === 0"
+                             x-cloak
+                             class="flex flex-col sm:flex-row gap-3 items-stretch">
+                            <!-- Add to Bag Button -->
                             <button type="button" 
-                                    @click.prevent="if($store.rayka.isLoading({{ $product->id }}) || $store.rayka.getCartQty({{ $product->id }}) >= maxStock) return; $store.rayka.changeQty({{ $product->id }}, 1)"
-                                    :class="{'opacity-40': $store.rayka.getCartQty({{ $product->id }}) >= maxStock}"
-                                    class="w-12 flex items-center justify-center hover:bg-[#2E180E] transition-colors text-xl font-bold active:scale-90 cursor-pointer select-none"
-                                    title="Increase quantity">
-                                <svg class="w-4 h-4 text-[#E7C77B]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                    @click.prevent="if($store.rayka.isLoading({{ $product->id }})) return; $store.rayka.addToCart({{ $product->id }}, 1, selectedVariantId || null)"
+                                    class="flex-1 min-h-[48px] sm:min-h-[52px] py-3 sm:py-3.5 px-4 rounded-xl bg-[#FAF7F0] hover:bg-[#4A2C1D] text-[#4A2C1D] hover:text-[#E7C77B] border-2 border-[#D4AF6A] font-bold text-xs sm:text-sm uppercase tracking-wider transition-all duration-200 shadow-xs hover:shadow-md flex items-center justify-center gap-2 group cursor-pointer active:scale-98">
+                                
+                                <svg x-show="!$store.rayka.isLoading({{ $product->id }})" class="w-4 h-4 sm:w-5 sm:h-5 text-[#996E2E] group-hover:text-[#E7C77B] transition-colors shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                                </svg>
+                                <span x-show="!$store.rayka.isLoading({{ $product->id }})">
+                                    Add to Bag
+                                </span>
+                                
+                                <span x-show="$store.rayka.isLoading({{ $product->id }})" class="flex items-center gap-2" x-cloak>
+                                    <svg class="animate-spin h-4 w-4 sm:h-5 sm:w-5 text-[#D4AF6A]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    <span>Adding...</span>
+                                </span>
+                            </button>
+
+                            <!-- Buy Now Button -->
+                            <button type="button" 
+                                    @click.prevent="buyNow()"
+                                    class="flex-1 min-h-[48px] sm:min-h-[52px] py-3 sm:py-3.5 px-4 rounded-xl bg-[#4A2C1D] hover:bg-[#2E180E] text-[#E7C77B] border-2 border-[#4A2C1D] hover:border-[#2E180E] font-bold text-xs sm:text-sm uppercase tracking-wider transition-all duration-200 shadow-md hover:shadow-lg flex items-center justify-center gap-2 active:scale-98 cursor-pointer">
+                                <svg x-show="!buyingNow" class="w-4 h-4 sm:w-5 sm:h-5 shrink-0 text-[#E7C77B]" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                                </svg>
+                                <span x-show="!buyingNow">Buy Now</span>
+
+                                <span x-show="buyingNow" class="flex items-center gap-2" x-cloak>
+                                    <svg class="animate-spin h-4 w-4 sm:h-5 sm:w-5 text-[#E7C77B]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                                        <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                                        <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                                    </svg>
+                                    <span>Processing...</span>
+                                </span>
                             </button>
                         </div>
-                        <!-- Proceed To Bag Button -->
-                        <a href="{{ route('cart') }}" class="flex-1 min-h-[48px] sm:min-h-[52px] rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white border-2 border-emerald-800 font-bold text-xs sm:text-sm uppercase tracking-wider transition-all duration-200 shadow-md flex items-center justify-center gap-2 active:scale-98 cursor-pointer">
-                            <svg class="w-5 h-5 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
-                            <span>Proceed to Bag</span>
-                        </a>
-                    </div>
-                </div>
 
-                <!-- State: SOLD OUT / OUT OF STOCK (Shown when maxStock <= 0) -->
-                <div x-show="maxStock <= 0" x-cloak class="pt-2 space-y-2">
-                    <div class="w-full py-4 px-6 rounded-xl bg-stone-100 border-2 border-stone-300 text-stone-500 font-bold text-sm uppercase tracking-wider flex items-center justify-center gap-2 cursor-not-allowed select-none shadow-xs">
-                        <svg class="w-5 h-5 text-stone-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
-                        </svg>
-                        <span x-text="selectedVariantName ? (selectedVariantName + ' is Sold Out') : 'Currently Out of Stock / Sold Out'"></span>
+                        <!-- State 2: ALREADY IN BAG -->
+                        <div x-show="$store.rayka.getCartQty({{ $product->id }}) > 0" x-cloak class="flex flex-col sm:flex-row gap-3 items-stretch">
+                            <!-- Integrated Quantity Stepper -->
+                            <div class="flex items-stretch justify-between rounded-xl bg-[#4A2C1D] border-2 border-[#D4AF6A] text-[#E7C77B] overflow-hidden shadow-xs shrink-0 sm:w-40 min-h-[48px] sm:min-h-[52px]">
+                                <button type="button" 
+                                        @click.prevent="if($store.rayka.isLoading({{ $product->id }})) return; $store.rayka.changeQty({{ $product->id }}, -1)"
+                                        class="w-12 flex items-center justify-center hover:bg-[#2E180E] transition-colors text-xl font-bold active:scale-90 cursor-pointer select-none"
+                                        title="Decrease quantity">
+                                    <svg class="w-4 h-4 text-[#E7C77B]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4"/></svg>
+                                </button>
+                                <div class="flex-1 flex items-center justify-center font-bold text-[#E7C77B] text-base font-mono relative">
+                                    <span x-show="!$store.rayka.isLoading({{ $product->id }})" x-text="$store.rayka.getCartQty({{ $product->id }})"></span>
+                                    <span x-show="$store.rayka.isLoading({{ $product->id }})" class="absolute">
+                                        <svg class="w-5 h-5 animate-spin text-[#E7C77B]" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                                    </span>
+                                </div>
+                                <button type="button" 
+                                        @click.prevent="if($store.rayka.isLoading({{ $product->id }}) || $store.rayka.getCartQty({{ $product->id }}) >= maxStock) return; $store.rayka.changeQty({{ $product->id }}, 1)"
+                                        :class="{'opacity-40': $store.rayka.getCartQty({{ $product->id }}) >= maxStock}"
+                                        class="w-12 flex items-center justify-center hover:bg-[#2E180E] transition-colors text-xl font-bold active:scale-90 cursor-pointer select-none"
+                                        title="Increase quantity">
+                                    <svg class="w-4 h-4 text-[#E7C77B]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                </button>
+                            </div>
+                            <!-- Proceed To Bag Button -->
+                            <a href="{{ route('cart') }}" class="flex-1 min-h-[48px] sm:min-h-[52px] rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white border-2 border-emerald-800 font-bold text-xs sm:text-sm uppercase tracking-wider transition-all duration-200 shadow-md flex items-center justify-center gap-2 active:scale-98 cursor-pointer">
+                                <svg class="w-5 h-5 shrink-0" fill="currentColor" viewBox="0 0 20 20"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"></path></svg>
+                                <span>Proceed to Bag</span>
+                            </a>
+                        </div>
                     </div>
-                    <p class="text-xs text-stone-500 text-center">
-                        This piece or selected option is currently out of stock. Contact our royal concierge for restock inquiries.
-                    </p>
-                </div>
+
+                    <!-- State: SOLD OUT / OUT OF STOCK (Shown when maxStock <= 0) -->
+                    <div x-show="maxStock <= 0" x-cloak class="pt-2 space-y-2">
+                        <div class="w-full py-4 px-6 rounded-xl bg-stone-100 border-2 border-stone-300 text-stone-500 font-bold text-sm uppercase tracking-wider flex items-center justify-center gap-2 cursor-not-allowed select-none shadow-xs">
+                            <svg class="w-5 h-5 text-stone-400 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636" />
+                            </svg>
+                            <span x-text="selectedVariantName ? (selectedVariantName + ' is Sold Out') : 'Currently Out of Stock / Sold Out'"></span>
+                        </div>
+                        <p class="text-xs text-stone-500 text-center">
+                            This piece or selected option is currently out of stock. Contact our royal concierge for restock inquiries.
+                        </p>
+                    </div>
+                @endif
             </div>
 
             <!-- Trust Icons Row (Configured dynamically from Admin) -->
@@ -902,90 +941,119 @@
 
         <!-- Active When Stock Available (maxStock > 0) -->
         <div x-show="maxStock > 0">
-            <!-- State 1: NOT IN BAG -->
-            <div x-show="$store.rayka.getCartQty({{ $product->id }}) === 0" x-cloak class="flex items-center gap-1.5 sm:gap-2">
-                <!-- Quick Wishlist Button -->
-                <button type="button" 
-                        @click.prevent="$store.rayka.toggleWishlist({{ $product->id }})"
-                        class="w-9 h-9 sm:w-10 sm:h-10 shrink-0 rounded-xl bg-white/95 border border-[#D4AF6A]/50 flex items-center justify-center text-[#4A2C1D] active:scale-92 shadow-2xs hover:bg-white transition-all cursor-pointer"
-                        :class="{'text-rose-600 border-rose-300 bg-rose-50/90 shadow-rose-100': $store.rayka.isInWishlist({{ $product->id }})}"
-                        aria-label="Wishlist">
-                    <svg class="w-4 h-4 sm:w-4.5 sm:h-4.5 transition-transform duration-200 active:scale-125" :fill="$store.rayka.isInWishlist({{ $product->id }}) ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-                    </svg>
-                </button>
-
-                <!-- Add to Bag Button -->
-                <button type="button" 
-                        @click.prevent="if($store.rayka.isLoading({{ $product->id }})) return; $store.rayka.addToCart({{ $product->id }}, 1, selectedVariantId || null)"
-                        class="flex-1 min-w-0 min-h-[38px] sm:min-h-[42px] px-2 py-1.5 rounded-xl bg-white/95 hover:bg-white text-[#4A2C1D] border border-[#D4AF6A] font-bold text-[11px] sm:text-xs uppercase tracking-tight flex items-center justify-center gap-1 sm:gap-1.5 shadow-xs cursor-pointer active:scale-95 transition-all duration-200">
-                    <svg x-show="!$store.rayka.isLoading({{ $product->id }})" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#996E2E] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
-                    </svg>
-                    <span x-show="!$store.rayka.isLoading({{ $product->id }})" class="whitespace-nowrap truncate">Add to Bag</span>
-                    <span x-show="$store.rayka.isLoading({{ $product->id }})" class="flex items-center gap-1 whitespace-nowrap">
-                        <svg class="animate-spin h-3.5 w-3.5 text-[#D4AF6A]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
-                        <span>Adding..</span>
-                    </span>
-                </button>
-
-                <!-- Buy Now Button -->
-                <button type="button" 
-                        @click.prevent="buyNow()"
-                        class="flex-1 min-w-0 min-h-[38px] sm:min-h-[42px] px-2 py-1.5 rounded-xl bg-gradient-to-r from-[#4A2C1D] via-[#3D1F13] to-[#2E180E] text-[#E7C77B] border border-[#D4AF6A]/70 font-bold text-[11px] sm:text-xs uppercase tracking-tight flex items-center justify-center gap-1 sm:gap-1.5 shadow-md cursor-pointer active:scale-95 transition-all duration-200 ring-1 ring-white/15">
-                    <svg x-show="!buyingNow" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#E7C77B] shrink-0" fill="currentColor" viewBox="0 0 24 24">
-                        <path d="M13 2L3 14h7v8l10-12h-7l1-8z"/>
-                    </svg>
-                    <span x-show="!buyingNow" class="whitespace-nowrap truncate">Buy Now</span>
-                    <span x-show="buyingNow" class="flex items-center gap-1 whitespace-nowrap">
-                        <svg class="animate-spin h-3.5 w-3.5 text-[#E7C77B]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
-                        <span>Wait..</span>
-                    </span>
-                </button>
-            </div>
-            
-            <!-- State 2: ALREADY IN BAG -->
-            <div x-show="$store.rayka.getCartQty({{ $product->id }}) > 0" x-cloak class="flex items-center gap-1.5 sm:gap-2">
-                <!-- Quick Wishlist Button -->
-                <button type="button" 
-                        @click.prevent="$store.rayka.toggleWishlist({{ $product->id }})"
-                        class="w-9 h-9 sm:w-10 sm:h-10 shrink-0 rounded-xl bg-white/95 border border-[#D4AF6A]/50 flex items-center justify-center text-[#4A2C1D] active:scale-92 shadow-2xs hover:bg-white transition-all cursor-pointer"
-                        :class="{'text-rose-600 border-rose-300 bg-rose-50/90 shadow-rose-100': $store.rayka.isInWishlist({{ $product->id }})}"
-                        aria-label="Wishlist">
-                    <svg class="w-4 h-4 sm:w-4.5 sm:h-4.5 transition-transform duration-200 active:scale-125" :fill="$store.rayka.isInWishlist({{ $product->id }}) ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
-                    </svg>
-                </button>
-
-                <!-- Quantity Stepper -->
-                <div class="flex items-stretch justify-between rounded-xl bg-gradient-to-r from-[#4A2C1D] to-[#2E180E] border border-[#D4AF6A]/80 text-[#E7C77B] overflow-hidden w-[80px] xs:w-[90px] sm:w-[98px] min-h-[38px] sm:min-h-[42px] shrink-0 shadow-xs">
+            @if($isOrderButtonsHidden)
+                <!-- Catalog Mode Mobile Sticky Bar -->
+                <div class="flex items-center gap-2">
+                    <!-- Quick Wishlist Button -->
                     <button type="button" 
-                            @click.prevent="if($store.rayka.isLoading({{ $product->id }})) return; $store.rayka.changeQty({{ $product->id }}, -1)" 
-                            class="w-6 xs:w-7 flex items-center justify-center text-[#E7C77B] active:bg-black/30 select-none cursor-pointer"
-                            title="Decrease quantity">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4"/></svg>
+                            @click.prevent="$store.rayka.toggleWishlist({{ $product->id }})"
+                            class="w-10 h-10 shrink-0 rounded-xl bg-white/95 border border-[#D4AF6A]/50 flex items-center justify-center text-[#4A2C1D] active:scale-92 shadow-2xs hover:bg-white transition-all cursor-pointer"
+                            :class="{'text-rose-600 border-rose-300 bg-rose-50/90 shadow-rose-100': $store.rayka.isInWishlist({{ $product->id }})}"
+                            aria-label="Wishlist">
+                        <svg class="w-4.5 h-4.5 transition-transform duration-200 active:scale-125" :fill="$store.rayka.isInWishlist({{ $product->id }}) ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                        </svg>
                     </button>
-                    <div class="flex-1 flex items-center justify-center font-bold text-xs xs:text-sm font-mono relative">
-                        <span x-show="!$store.rayka.isLoading({{ $product->id }})" x-text="$store.rayka.getCartQty({{ $product->id }})"></span>
-                        <span x-show="$store.rayka.isLoading({{ $product->id }})" class="absolute">
-                            <svg class="w-3.5 h-3.5 animate-spin text-[#E7C77B]" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
-                        </span>
-                    </div>
+
+                    @if(!empty($storeSettings['clean_whatsapp']))
+                        <a href="https://wa.me/{{ $storeSettings['clean_whatsapp'] }}?text={{ urlencode('Hi Rayka Jewellery, I am inquiring about ' . $product->name . ' (SKU: ' . $product->sku . '). Please share updated pricing & availability: ' . url()->current()) }}" 
+                           target="_blank"
+                           class="flex-1 min-w-0 min-h-[40px] px-3 rounded-xl bg-gradient-to-r from-emerald-800 to-emerald-700 text-white font-bold text-xs uppercase tracking-tight flex items-center justify-center gap-1.5 shadow-md active:scale-95 transition-all">
+                            <svg class="w-4 h-4 fill-current shrink-0" viewBox="0 0 24 24"><path d="M12.031 6.172c-3.181 0-5.767 2.586-5.768 5.766-.001 1.298.38 2.27 1.019 3.287l-.582 2.128 2.182-.573c.978.58 1.911.928 3.145.929 3.178 0 5.767-2.587 5.768-5.766.001-3.187-2.575-5.77-5.764-5.771zm3.392 8.244c-.144.405-.837.774-1.17.824-.299.045-.677.063-1.092-.069-.252-.08-.575-.187-.988-.365-1.739-.751-2.874-2.502-2.961-2.617-.087-.116-.708-.94-.708-1.793s.448-1.273.607-1.446c.159-.173.346-.217.462-.217l.332.007c.106.005.249-.04.39.298.144.347.491 1.2.534 1.287.043.087.072.188.014.304-.058.116-.087.188-.173.289l-.26.304c-.087.086-.177.18-.076.354.101.174.449.741.964 1.201.662.591 1.221.774 1.394.86s.275.072.376-.043c.101-.116.433-.506.549-.68.116-.173.231-.145.39-.087s1.011.477 1.184.564.289.13.332.202c.045.072.045.419-.099.824zm-3.423-14.416c-6.627 0-12 5.373-12 12 0 2.155.57 4.175 1.565 5.922l-1.565 5.808 6.012-1.577c1.704.936 3.659 1.474 5.988 1.474 6.627 0 12-5.373 12-12s-5.373-12-12-12z"/></svg>
+                            <span class="truncate">WhatsApp Inquiry</span>
+                        </a>
+                    @else
+                        <div class="flex-1 min-h-[40px] px-3 rounded-xl bg-stone-100 border border-stone-200 text-stone-600 font-bold text-xs flex items-center justify-center">
+                            Catalog Updating
+                        </div>
+                    @endif
+                </div>
+            @else
+                <!-- State 1: NOT IN BAG -->
+                <div x-show="$store.rayka.getCartQty({{ $product->id }}) === 0" x-cloak class="flex items-center gap-1.5 sm:gap-2">
+                    <!-- Quick Wishlist Button -->
                     <button type="button" 
-                            @click.prevent="if($store.rayka.isLoading({{ $product->id }}) || $store.rayka.getCartQty({{ $product->id }}) >= maxStock) return; $store.rayka.changeQty({{ $product->id }}, 1)" 
-                            :class="{'opacity-40': $store.rayka.getCartQty({{ $product->id }}) >= maxStock}" 
-                            class="w-6 xs:w-7 flex items-center justify-center text-[#E7C77B] active:bg-black/30 select-none cursor-pointer"
-                            title="Increase quantity">
-                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                            @click.prevent="$store.rayka.toggleWishlist({{ $product->id }})"
+                            class="w-9 h-9 sm:w-10 sm:h-10 shrink-0 rounded-xl bg-white/95 border border-[#D4AF6A]/50 flex items-center justify-center text-[#4A2C1D] active:scale-92 shadow-2xs hover:bg-white transition-all cursor-pointer"
+                            :class="{'text-rose-600 border-rose-300 bg-rose-50/90 shadow-rose-100': $store.rayka.isInWishlist({{ $product->id }})}"
+                            aria-label="Wishlist">
+                        <svg class="w-4 h-4 sm:w-4.5 sm:h-4.5 transition-transform duration-200 active:scale-125" :fill="$store.rayka.isInWishlist({{ $product->id }}) ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                        </svg>
+                    </button>
+
+                    <!-- Add to Bag Button -->
+                    <button type="button" 
+                            @click.prevent="if($store.rayka.isLoading({{ $product->id }})) return; $store.rayka.addToCart({{ $product->id }}, 1, selectedVariantId || null)"
+                            class="flex-1 min-w-0 min-h-[38px] sm:min-h-[42px] px-2 py-1.5 rounded-xl bg-white/95 hover:bg-white text-[#4A2C1D] border border-[#D4AF6A] font-bold text-[11px] sm:text-xs uppercase tracking-tight flex items-center justify-center gap-1 sm:gap-1.5 shadow-xs cursor-pointer active:scale-95 transition-all duration-200">
+                        <svg x-show="!$store.rayka.isLoading({{ $product->id }})" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#996E2E] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z"></path>
+                        </svg>
+                        <span x-show="!$store.rayka.isLoading({{ $product->id }})" class="whitespace-nowrap truncate">Add to Bag</span>
+                        <span x-show="$store.rayka.isLoading({{ $product->id }})" class="flex items-center gap-1 whitespace-nowrap">
+                            <svg class="animate-spin h-3.5 w-3.5 text-[#D4AF6A]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                            <span>Adding..</span>
+                        </span>
+                    </button>
+
+                    <!-- Buy Now Button -->
+                    <button type="button" 
+                            @click.prevent="buyNow()"
+                            class="flex-1 min-w-0 min-h-[38px] sm:min-h-[42px] px-2 py-1.5 rounded-xl bg-gradient-to-r from-[#4A2C1D] via-[#3D1F13] to-[#2E180E] text-[#E7C77B] border border-[#D4AF6A]/70 font-bold text-[11px] sm:text-xs uppercase tracking-tight flex items-center justify-center gap-1 sm:gap-1.5 shadow-md cursor-pointer active:scale-95 transition-all duration-200 ring-1 ring-white/15">
+                        <svg x-show="!buyingNow" class="w-3.5 h-3.5 sm:w-4 sm:h-4 text-[#E7C77B] shrink-0" fill="currentColor" viewBox="0 0 24 24">
+                            <path d="M13 2L3 14h7v8l10-12h-7l1-8z"/>
+                        </svg>
+                        <span x-show="!buyingNow" class="whitespace-nowrap truncate">Buy Now</span>
+                        <span x-show="buyingNow" class="flex items-center gap-1 whitespace-nowrap">
+                            <svg class="animate-spin h-3.5 w-3.5 text-[#E7C77B]" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                            <span>Wait..</span>
+                        </span>
                     </button>
                 </div>
+                
+                <!-- State 2: ALREADY IN BAG -->
+                <div x-show="$store.rayka.getCartQty({{ $product->id }}) > 0" x-cloak class="flex items-center gap-1.5 sm:gap-2">
+                    <!-- Quick Wishlist Button -->
+                    <button type="button" 
+                            @click.prevent="$store.rayka.toggleWishlist({{ $product->id }})"
+                            class="w-9 h-9 sm:w-10 sm:h-10 shrink-0 rounded-xl bg-white/95 border border-[#D4AF6A]/50 flex items-center justify-center text-[#4A2C1D] active:scale-92 shadow-2xs hover:bg-white transition-all cursor-pointer"
+                            :class="{'text-rose-600 border-rose-300 bg-rose-50/90 shadow-rose-100': $store.rayka.isInWishlist({{ $product->id }})}"
+                            aria-label="Wishlist">
+                        <svg class="w-4 h-4 sm:w-4.5 sm:h-4.5 transition-transform duration-200 active:scale-125" :fill="$store.rayka.isInWishlist({{ $product->id }}) ? 'currentColor' : 'none'" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z"></path>
+                        </svg>
+                    </button>
 
-                <!-- Proceed to Bag Button -->
-                <a href="{{ route('cart') }}" class="flex-1 min-w-0 min-h-[38px] sm:min-h-[42px] px-2.5 rounded-xl bg-gradient-to-r from-emerald-800 to-emerald-700 hover:from-emerald-700 hover:to-emerald-600 text-white font-bold text-[11px] sm:text-xs uppercase tracking-tight flex items-center justify-center gap-1 sm:gap-1.5 shadow-md active:scale-95 transition-all">
-                    <span class="whitespace-nowrap truncate">Proceed to Bag</span>
-                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
-                </a>
-            </div>
+                    <!-- Quantity Stepper -->
+                    <div class="flex items-stretch justify-between rounded-xl bg-gradient-to-r from-[#4A2C1D] to-[#2E180E] border border-[#D4AF6A]/80 text-[#E7C77B] overflow-hidden w-[80px] xs:w-[90px] sm:w-[98px] min-h-[38px] sm:min-h-[42px] shrink-0 shadow-xs">
+                        <button type="button" 
+                                @click.prevent="if($store.rayka.isLoading({{ $product->id }})) return; $store.rayka.changeQty({{ $product->id }}, -1)" 
+                                class="w-6 xs:w-7 flex items-center justify-center text-[#E7C77B] active:bg-black/30 select-none cursor-pointer"
+                                title="Decrease quantity">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4"/></svg>
+                        </button>
+                        <div class="flex-1 flex items-center justify-center font-bold text-xs xs:text-sm font-mono relative">
+                            <span x-show="!$store.rayka.isLoading({{ $product->id }})" x-text="$store.rayka.getCartQty({{ $product->id }})"></span>
+                            <span x-show="$store.rayka.isLoading({{ $product->id }})" class="absolute">
+                                <svg class="w-3.5 h-3.5 animate-spin text-[#E7C77B]" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                            </span>
+                        </div>
+                        <button type="button" 
+                                @click.prevent="if($store.rayka.isLoading({{ $product->id }}) || $store.rayka.getCartQty({{ $product->id }}) >= maxStock) return; $store.rayka.changeQty({{ $product->id }}, 1)" 
+                                :class="{'opacity-40': $store.rayka.getCartQty({{ $product->id }}) >= maxStock}" 
+                                class="w-6 xs:w-7 flex items-center justify-center text-[#E7C77B] active:bg-black/30 select-none cursor-pointer"
+                                title="Increase quantity">
+                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                        </button>
+                    </div>
+
+                    <!-- Proceed to Bag Button -->
+                    <a href="{{ route('cart') }}" class="flex-1 min-w-0 min-h-[38px] sm:min-h-[42px] px-2.5 rounded-xl bg-gradient-to-r from-emerald-800 to-emerald-700 hover:from-emerald-700 hover:to-emerald-600 text-white font-bold text-[11px] sm:text-xs uppercase tracking-tight flex items-center justify-center gap-1 sm:gap-1.5 shadow-md active:scale-95 transition-all">
+                        <span class="whitespace-nowrap truncate">Proceed to Bag</span>
+                        <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.2" d="M14 5l7 7m0 0l-7 7m7-7H3"/></svg>
+                    </a>
+                </div>
+            @endif
         </div>
 
         <!-- Sold Out State on Mobile (maxStock <= 0) -->

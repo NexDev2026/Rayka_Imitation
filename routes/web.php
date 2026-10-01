@@ -277,6 +277,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         // Store Settings & QR
         Route::get('/settings', [AdminSettingController::class, 'index'])->name('settings.index');
         Route::post('/settings', [AdminSettingController::class, 'update'])->name('settings.update');
+        Route::post('/settings/toggle-order-buttons', [AdminSettingController::class, 'toggleOrderButtons'])->name('settings.toggle_order_buttons');
         Route::post('/settings/email', [AdminSettingController::class, 'updateEmail'])->name('settings.update_email');
         Route::post('/settings/email/verify', [AdminSettingController::class, 'verifyEmailOtp'])->name('settings.verify_email');
         Route::post('/settings/backup', [AdminSettingController::class, 'runBackup'])->name('settings.backup');

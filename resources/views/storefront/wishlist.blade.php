@@ -68,38 +68,50 @@
                                     @endif
                                 </div>
 
-                                <!-- Interactive Move to Bag / - [qty] + Controller -->
-                                <div x-show="$store.rayka.getCartQty({{ $item->product->id }}) <= 0">
-                                    <button type="button" 
-                                            @click.prevent.stop="$store.rayka.addToCart({{ $item->product->id }}, 1)" 
-                                            class="w-full mt-2 py-2 rounded-lg bg-[#FAF7F0] hover:bg-[#4A2C1D] text-[#4A2C1D] hover:text-[#E7C77B] border border-[#D4AF6A] text-xs font-bold transition flex items-center justify-center space-x-1 uppercase tracking-wider shadow-2xs">
-                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
-                                        <span>Add To Bag</span>
-                                    </button>
-                                </div>
+                                <!-- Interactive Move to Bag / - [qty] + Controller OR Catalog Mode View Piece -->
+                                @php
+                                    $isOrderButtonsHidden = (!empty($storeSettings['hide_order_buttons']) && $storeSettings['hide_order_buttons'] == '1') || \App\Models\StoreSetting::get('hide_order_buttons', '0') == '1';
+                                @endphp
 
-                                <div x-show="$store.rayka.getCartQty({{ $item->product->id }}) > 0"
-                                     class="w-full mt-2 flex items-center justify-between rounded-lg bg-[#4A2C1D] border border-[#D4AF6A] text-[#E7C77B] overflow-hidden shadow-xs text-sm font-bold"
-                                     @click.prevent.stop>
-                                    <button type="button" 
-                                            @click.prevent.stop="if($store.rayka.isLoading({{ $item->product->id }})) return; $store.rayka.changeQty({{ $item->product->id }}, -1)"
-                                            class="px-3 py-1.5 hover:bg-[#2E180E] text-[#E7C77B] transition font-bold active:scale-90 flex items-center justify-center cursor-pointer select-none"
-                                            title="Decrease quantity">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4"/></svg>
-                                    </button>
-                                    <span class="px-2 py-1 text-sm font-bold text-white min-w-[2rem] text-center font-mono relative flex items-center justify-center">
-                                        <span x-show="!$store.rayka.isLoading({{ $item->product->id }})" x-text="$store.rayka.getCartQty({{ $item->product->id }})"></span>
-                                        <span x-show="$store.rayka.isLoading({{ $item->product->id }})" class="absolute">
-                                            <svg class="w-3.5 h-3.5 animate-spin text-[#E7C77B]" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                                @if($isOrderButtonsHidden)
+                                    <a href="{{ route('product.show', $item->product->slug) }}" 
+                                       class="w-full mt-2 py-2 rounded-lg bg-[#FAF7F0] hover:bg-[#4A2C1D] text-[#4A2C1D] hover:text-[#E7C77B] border border-[#D4AF6A] text-xs font-bold transition flex items-center justify-center space-x-1.5 uppercase tracking-wider shadow-2xs group active:scale-98">
+                                        <svg class="w-3.5 h-3.5 text-[#996E2E] group-hover:text-[#E7C77B] transition-colors" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                        <span>View Piece</span>
+                                    </a>
+                                @else
+                                    <div x-show="$store.rayka.getCartQty({{ $item->product->id }}) <= 0">
+                                        <button type="button" 
+                                                @click.prevent.stop="$store.rayka.addToCart({{ $item->product->id }}, 1)" 
+                                                class="w-full mt-2 py-2 rounded-lg bg-[#FAF7F0] hover:bg-[#4A2C1D] text-[#4A2C1D] hover:text-[#E7C77B] border border-[#D4AF6A] text-xs font-bold transition flex items-center justify-center space-x-1 uppercase tracking-wider shadow-2xs">
+                                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path></svg>
+                                            <span>Add To Bag</span>
+                                        </button>
+                                    </div>
+
+                                    <div x-show="$store.rayka.getCartQty({{ $item->product->id }}) > 0"
+                                         class="w-full mt-2 flex items-center justify-between rounded-lg bg-[#4A2C1D] border border-[#D4AF6A] text-[#E7C77B] overflow-hidden shadow-xs text-sm font-bold"
+                                         @click.prevent.stop>
+                                        <button type="button" 
+                                                @click.prevent.stop="if($store.rayka.isLoading({{ $item->product->id }})) return; $store.rayka.changeQty({{ $item->product->id }}, -1)"
+                                                class="px-3 py-1.5 hover:bg-[#2E180E] text-[#E7C77B] transition font-bold active:scale-90 flex items-center justify-center cursor-pointer select-none"
+                                                title="Decrease quantity">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M20 12H4"/></svg>
+                                        </button>
+                                        <span class="px-2 py-1 text-sm font-bold text-white min-w-[2rem] text-center font-mono relative flex items-center justify-center">
+                                            <span x-show="!$store.rayka.isLoading({{ $item->product->id }})" x-text="$store.rayka.getCartQty({{ $item->product->id }})"></span>
+                                            <span x-show="$store.rayka.isLoading({{ $item->product->id }})" class="absolute">
+                                                <svg class="w-3.5 h-3.5 animate-spin text-[#E7C77B]" fill="none" viewBox="0 0 24 24"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4z"></path></svg>
+                                            </span>
                                         </span>
-                                    </span>
-                                    <button type="button" 
-                                            @click.prevent.stop="if($store.rayka.isLoading({{ $item->product->id }})) return; $store.rayka.changeQty({{ $item->product->id }}, 1)"
-                                            class="px-3 py-1.5 hover:bg-[#2E180E] text-[#E7C77B] transition font-bold active:scale-90 flex items-center justify-center cursor-pointer select-none"
-                                            title="Increase quantity">
-                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
-                                    </button>
-                                </div>
+                                        <button type="button" 
+                                                @click.prevent.stop="if($store.rayka.isLoading({{ $item->product->id }})) return; $store.rayka.changeQty({{ $item->product->id }}, 1)"
+                                                class="px-3 py-1.5 hover:bg-[#2E180E] text-[#E7C77B] transition font-bold active:scale-90 flex items-center justify-center cursor-pointer select-none"
+                                                title="Increase quantity">
+                                            <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M12 4v16m8-8H4"/></svg>
+                                        </button>
+                                    </div>
+                                @endif
                             </div>
                         </div>
                     </div>

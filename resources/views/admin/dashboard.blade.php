@@ -6,6 +6,37 @@
 @section('content')
 <div class="space-y-8">
 
+    @php
+        $isOrderButtonsHidden = (!empty($storeSettings['hide_order_buttons']) && $storeSettings['hide_order_buttons'] == '1') || \App\Models\StoreSetting::get('hide_order_buttons', '0') == '1';
+    @endphp
+
+    @if($isOrderButtonsHidden)
+        <!-- Catalog Mode Warning Banner -->
+        <div class="p-4 sm:p-5 rounded-2xl bg-amber-500/10 border-2 border-amber-500 text-amber-950 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
+            <div class="flex items-center gap-3">
+                <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-xs">
+                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                </div>
+                <div>
+                    <div class="flex items-center gap-2">
+                        <h4 class="font-bold text-sm text-[#4A2C1D]">Catalog Mode Active — Order Buttons Hidden</h4>
+                        <span class="bg-rose-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Prices Under Update</span>
+                    </div>
+                    <p class="text-xs text-stone-600 mt-0.5">
+                        Customers cannot add items to bag or checkout while you update product details and prices. Products are in catalog/viewing mode.
+                    </p>
+                </div>
+            </div>
+            <form action="{{ route('admin.settings.toggle_order_buttons') }}" method="POST" class="shrink-0 m-0">
+                @csrf
+                <button type="submit" class="w-full sm:w-auto px-4 py-2.5 rounded-xl bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold uppercase tracking-wider shadow-sm hover:shadow-md transition active:scale-95 flex items-center justify-center gap-2 cursor-pointer">
+                    <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                    <span>1-Click Resume Online Orders</span>
+                </button>
+            </form>
+        </div>
+    @endif
+
     <!-- 1. KEY METRICS ROW (5 Cards Grid) -->
     <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
         

@@ -36,6 +36,8 @@ class StoreSetting extends Model
                 'qr_code_image' => '',
                 'free_shipping_min' => '999',
                 'shipping_flat_fee' => '99',
+                'hide_order_buttons' => '0',
+                'order_buttons_notice' => 'Online ordering is temporarily paused while we update our product catalog and pricing. You can still explore all specifications and photos.',
                 'trust_badge_1' => '',
                 'trust_badge_2' => '',
                 'trust_badge_3' => '',

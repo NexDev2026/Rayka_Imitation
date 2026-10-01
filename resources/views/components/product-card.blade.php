@@ -112,9 +112,18 @@
                 @endif
             </div>
 
-            <!-- Add to Bag / Interactive - [qty] + Controller -->
+            <!-- Add to Bag / Interactive - [qty] + Controller OR Catalog Mode View Piece -->
+            @php
+                $isOrderButtonsHidden = (!empty($storeSettings['hide_order_buttons']) && $storeSettings['hide_order_buttons'] == '1') || \App\Models\StoreSetting::get('hide_order_buttons', '0') == '1';
+            @endphp
             <div>
-                @if($product->stock_quantity <= 0)
+                @if($isOrderButtonsHidden)
+                    <a href="{{ route('product.show', $product->slug) }}" 
+                       class="w-full h-8 sm:h-9 rounded-lg bg-[#FAF7F0] hover:bg-[#4A2C1D] text-[#4A2C1D] hover:text-[#E7C77B] border border-[#D4AF6A] text-[10px] sm:text-xs font-bold transition-all duration-200 flex items-center justify-center gap-1 sm:gap-1.5 uppercase tracking-normal sm:tracking-wider shadow-2xs hover:shadow-md cursor-pointer px-1 sm:px-2 group active:scale-98">
+                        <svg class="w-3.5 h-3.5 text-[#996E2E] group-hover:text-[#E7C77B] transition-colors shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                        <span class="whitespace-nowrap">View Piece</span>
+                    </a>
+                @elseif($product->stock_quantity <= 0)
                     <span class="w-full h-8 sm:h-9 rounded-lg bg-stone-100 text-stone-400 border border-stone-200 text-[10px] sm:text-xs font-bold flex items-center justify-center uppercase tracking-wider">
                         Sold Out
                     </span>

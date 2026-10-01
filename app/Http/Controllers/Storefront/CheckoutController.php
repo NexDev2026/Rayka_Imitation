@@ -30,6 +30,10 @@ class CheckoutController extends Controller
 {
     public function index()
     {
+        if (StoreSetting::get('hide_order_buttons', '0') === '1') {
+            return redirect()->route('cart')->with('error', 'Online ordering is temporarily paused while we update our product catalog and pricing. Please check back shortly.');
+        }
+
         $cart = GuestSessionService::getCart();
         $cart->load(['items.product.images', 'items.variant']);
 
@@ -106,6 +110,10 @@ class CheckoutController extends Controller
 
     public function process(Request $request)
     {
+        if (StoreSetting::get('hide_order_buttons', '0') === '1') {
+            return redirect()->route('cart')->with('error', 'Online ordering is temporarily paused while we update our product catalog and pricing. Please check back shortly.');
+        }
+
         // 1. Fail-safe base64 decoding if multipart upload was dropped or failed by PHP
         $uploaded = $request->file('payment_screenshot');
         if ((! $uploaded || ! $uploaded->isValid()) && $request->filled('payment_screenshot_base64')) {

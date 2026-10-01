@@ -38,6 +38,8 @@ class AdminSettingController extends Controller
             'google_map_url' => $allSettings['google_map_url'] ?? '',
             'free_shipping_min' => $allSettings['free_shipping_min'] ?? '999',
             'shipping_flat_fee' => $allSettings['shipping_flat_fee'] ?? '99',
+            'hide_order_buttons' => $allSettings['hide_order_buttons'] ?? '0',
+            'order_buttons_notice' => $allSettings['order_buttons_notice'] ?? 'Online ordering is temporarily paused while we update our product catalog and pricing. You can still explore all specifications and photos.',
             'trust_badge_1' => $allSettings['trust_badge_1'] ?? '',
             'trust_badge_2' => $allSettings['trust_badge_2'] ?? '',
             'trust_badge_3' => $allSettings['trust_badge_3'] ?? '',
@@ -91,6 +93,7 @@ class AdminSettingController extends Controller
             'showcase_title' => 'nullable|string|max:200',
             'showcase_subtitle' => 'nullable|string|max:500',
             'showcase_limit' => 'nullable|integer|min:1|max:50',
+            'order_buttons_notice' => 'nullable|string|max:500',
             // QR Code: max 10 MB, image types only
             'qr_code_file' => 'nullable|file|mimes:jpeg,png,jpg,webp,svg,gif|max:10240',
         ], [
@@ -127,6 +130,7 @@ class AdminSettingController extends Controller
             'showcase_title',
             'showcase_subtitle',
             'showcase_limit',
+            'order_buttons_notice',
         ];
 
         foreach ($fields as $field) {
@@ -134,6 +138,11 @@ class AdminSettingController extends Controller
                 $val = $request->input($field);
                 StoreSetting::set($field, $val !== null ? trim((string) $val) : '');
             }
+        }
+
+        // Hide Order Buttons (Add to Bag / Buy Now) Toggle
+        if ($request->has('hide_order_buttons_submitted')) {
+            StoreSetting::set('hide_order_buttons', $request->has('hide_order_buttons') ? '1' : '0');
         }
 
         // Showcase Enabled Toggle & Categories
@@ -171,6 +180,38 @@ class AdminSettingController extends Controller
         }
 
         return back()->with('success', 'Store settings and boutique contact details updated successfully and live across the site!');
+    }
+
+    /**
+     * Fast 1-click toggle to show or hide "Add to Bag" and "Buy Now" buttons across the storefront.
+     */
+    public function toggleOrderButtons(Request $request)
+    {
+        $current = StoreSetting::get('hide_order_buttons', '0');
+        $newStatus = ($current === '1') ? '0' : '1';
+
+        StoreSetting::set('hide_order_buttons', $newStatus);
+        StoreSetting::clearCache();
+
+        try {
+            Artisan::call('view:clear');
+        } catch (\Throwable $e) {
+            // Silently ignore if Artisan view:clear not permitted in specific runtime
+        }
+
+        $message = ($newStatus === '1')
+            ? 'Catalog Mode Activated: "Add to Bag" and "Buy Now" buttons are now hidden on the storefront.'
+            : 'Online Ordering Resumed: "Add to Bag" and "Buy Now" buttons are now visible to customers.';
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'hide_order_buttons' => $newStatus,
+                'message' => $message,
+            ]);
+        }
+
+        return back()->with('success', $message);
     }
 
     public function updateEmail(Request $request)

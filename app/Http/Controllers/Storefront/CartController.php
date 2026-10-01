@@ -72,6 +72,18 @@ class CartController extends Controller
             'variant_id' => 'nullable|exists:product_variants,id',
         ]);
 
+        if (StoreSetting::get('hide_order_buttons', '0') === '1') {
+            $msg = 'Online ordering is temporarily paused while we update product details and prices. Please check back shortly.';
+            if ($request->expectsJson() || $request->ajax()) {
+                return response()->json([
+                    'success' => false,
+                    'message' => $msg,
+                ], 422);
+            }
+
+            return back()->with('error', $msg);
+        }
+
         Log::info('CartController::add called!', $request->all());
 
         $product = Product::findOrFail($request->product_id);

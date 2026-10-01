@@ -297,7 +297,28 @@
                     </div>
 
                     <!-- Proceed to Checkout Button -->
-                    @if(!empty($hasOutOfStock))
+                    @php
+                        $isOrderButtonsHidden = (!empty($storeSettings['hide_order_buttons']) && $storeSettings['hide_order_buttons'] == '1') || \App\Models\StoreSetting::get('hide_order_buttons', '0') == '1';
+                    @endphp
+
+                    @if($isOrderButtonsHidden)
+                        <div class="p-4 rounded-2xl bg-amber-50 border-2 border-amber-300 text-amber-900 text-center space-y-2">
+                            <div class="flex items-center justify-center gap-1.5 text-amber-900 font-bold text-xs uppercase tracking-wider">
+                                <svg class="w-4 h-4 text-amber-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
+                                <span>Catalog Updates in Progress</span>
+                            </div>
+                            <p class="text-xs text-amber-800 leading-snug">
+                                Checkout is temporarily paused while we update our product pricing and catalog. Your items remain safely in your bag.
+                            </p>
+                            @if(!empty($storeSettings['clean_whatsapp']))
+                                <a href="https://wa.me/{{ $storeSettings['clean_whatsapp'] }}?text={{ urlencode('Hi Rayka Jewellery, I have items in my bag and would like to inquire about placing my order: ' . route('cart')) }}" 
+                                   target="_blank" 
+                                   class="inline-flex items-center gap-1 text-xs font-bold text-emerald-800 hover:text-emerald-950 underline pt-1">
+                                    Inquire via WhatsApp →
+                                </a>
+                            @endif
+                        </div>
+                    @elseif(!empty($hasOutOfStock))
                         <div class="w-full py-3.5 px-6 rounded-full bg-stone-200 text-stone-500 font-bold text-xs uppercase tracking-widest text-center cursor-not-allowed border border-stone-300">
                             Adjust Bag to Checkout
                         </div>
