@@ -2,14 +2,13 @@
 @extends('admin.layouts.admin')
 
 @section('title', 'Store Settings & Payment QR')
-@section('page_title', 'Store Settings & Static QR Code Configuration')
+@section('page_title', 'Store Settings & QR')
 
 @section('content')
 <div class="max-w-4xl bg-white rounded-2xl border border-stone-200 p-4 sm:p-8 shadow-xs">
 
     <form action="{{ route('admin.settings.update') }}" method="POST" enctype="multipart/form-data" class="space-y-8 text-xs">
         @csrf
-        <input type="hidden" name="hide_order_buttons_submitted" value="1">
 
         <!-- 0. STOREFRONT ORDERING & BUY BUTTONS VISIBILITY (1-CLICK CATALOG MODE) -->
         <div class="p-4 sm:p-6 rounded-2xl {{ $settings['hide_order_buttons'] == '1' ? 'bg-amber-50/90 border-2 border-amber-400' : 'bg-emerald-50/80 border-2 border-emerald-400' }} shadow-xs transition-colors space-y-4">
@@ -28,12 +27,12 @@
                                 Storefront "Add to Bag" & "Buy Now" Buttons Control
                             </h3>
                             @if($settings['hide_order_buttons'] == '1')
-                                <span class="bg-rose-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
-                                    Catalog Mode Active (Buttons Hidden)
+                                <span class="bg-amber-600 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                                    Currently: Buttons are Hidden (Catalog Mode)
                                 </span>
                             @else
-                                <span class="bg-emerald-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">
-                                    Buttons Live & Active
+                                <span class="bg-emerald-600 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                                    Currently: Buttons are Live (Ordering ON)
                                 </span>
                             @endif
                         </div>
@@ -47,6 +46,7 @@
                 <div class="shrink-0">
                     <button type="submit" 
                             formaction="{{ route('admin.settings.toggle_order_buttons') }}"
+                            formnovalidate
                             class="w-full sm:w-auto px-4 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all duration-200 shadow-sm hover:shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-95 {{ $settings['hide_order_buttons'] == '1' ? 'bg-emerald-700 hover:bg-emerald-800 text-white' : 'bg-amber-600 hover:bg-amber-700 text-white' }}">
                         @if($settings['hide_order_buttons'] == '1')
                             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
@@ -59,17 +59,10 @@
                 </div>
             </div>
 
-            <div class="space-y-3">
-                <label class="flex items-center gap-2 cursor-pointer font-semibold text-stone-800">
-                    <input type="checkbox" name="hide_order_buttons" value="1" {{ $settings['hide_order_buttons'] == '1' ? 'checked' : '' }} class="w-4 h-4 rounded text-amber-600 focus:ring-amber-500 border-stone-300">
-                    <span>Hide "Add to Bag" & "Buy Now" buttons (Catalog Mode active when checked)</span>
-                </label>
-
-                <div>
-                    <label class="block font-semibold text-stone-700 mb-1">Customer Notification Message (shown on product page & bag while buttons are hidden):</label>
-                    <input type="text" name="order_buttons_notice" value="{{ old('order_buttons_notice', $settings['order_buttons_notice']) }}" class="w-full border rounded-lg p-2.5 text-xs bg-white text-stone-800" placeholder="Online ordering is temporarily paused while we update our product catalog and pricing. You can still explore all specifications and photos.">
-                    <p class="text-[10px] text-stone-500 mt-1">When hidden, customers can browse all products, view full gallery photos, specs, and send direct WhatsApp inquiries without placing incomplete/wrong-price orders.</p>
-                </div>
+            <div>
+                <label class="block font-semibold text-stone-700 mb-1">Customer Notification Message (shown on product page & bag while buttons are hidden):</label>
+                <input type="text" name="order_buttons_notice" value="{{ old('order_buttons_notice', $settings['order_buttons_notice']) }}" class="w-full border rounded-lg p-2.5 text-xs bg-white text-stone-800" placeholder="Online ordering is temporarily paused while we update our product catalog and pricing. You can still explore all specifications and photos.">
+                <p class="text-[10px] text-stone-500 mt-1">When hidden, customers can browse all products, view full gallery photos, specs, and send direct WhatsApp inquiries without placing incomplete/wrong-price orders.</p>
             </div>
         </div>
 

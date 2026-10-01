@@ -140,10 +140,7 @@ class AdminSettingController extends Controller
             }
         }
 
-        // Hide Order Buttons (Add to Bag / Buy Now) Toggle
-        if ($request->has('hide_order_buttons_submitted')) {
-            StoreSetting::set('hide_order_buttons', $request->has('hide_order_buttons') ? '1' : '0');
-        }
+
 
         // Showcase Enabled Toggle & Categories
         StoreSetting::set('showcase_enabled', $request->has('showcase_enabled') ? '1' : '0');

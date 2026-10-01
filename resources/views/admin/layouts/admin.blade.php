@@ -193,17 +193,17 @@
     <div class="flex-1 flex flex-col min-w-0 overflow-x-hidden">
         
         <!-- Admin Top Navigation Bar -->
-        <header class="bg-white border-b border-stone-200 h-16 flex items-center justify-between px-4 sm:px-6 shrink-0 gap-2">
-            <div class="flex items-center gap-3 min-w-0">
-                <button @click="sidebarOpen = true" class="lg:hidden p-2 text-stone-600 hover:text-stone-900 shrink-0 -ml-1">
-                    <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
+        <header class="bg-white border-b border-stone-200 h-16 flex items-center justify-between px-2.5 sm:px-6 shrink-0 gap-1.5 sm:gap-3">
+            <div class="flex items-center gap-1.5 sm:gap-3 min-w-0 flex-1">
+                <button @click="sidebarOpen = true" class="lg:hidden p-1.5 text-stone-600 hover:text-stone-900 shrink-0 -ml-1" aria-label="Open sidebar menu">
+                    <svg class="w-5 h-5 sm:w-6 sm:h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"></path></svg>
                 </button>
-                <h2 class="font-serif-royal font-bold text-base sm:text-lg text-[#4A2C1D] truncate">
+                <h2 class="font-serif-royal font-bold text-xs sm:text-base md:text-lg text-[#4A2C1D] truncate leading-tight">
                     @yield('page_title', 'Admin Console')
                 </h2>
             </div>
 
-            <div class="flex items-center gap-2 shrink-0">
+            <div class="flex items-center gap-1.5 sm:gap-2 shrink-0">
                 <!-- 1-Click Storefront Order Buttons Toggle -->
                 @php
                     $isOrderButtonsHidden = (!empty($storeSettings['hide_order_buttons']) && $storeSettings['hide_order_buttons'] == '1') || \App\Models\StoreSetting::get('hide_order_buttons', '0') == '1';
@@ -212,31 +212,28 @@
                     @csrf
                     @if($isOrderButtonsHidden)
                         <button type="submit" 
-                                title="Click to SHOW Add to Bag & Buy Now buttons on storefront"
-                                class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border-2 border-amber-500 bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-bold transition shadow-xs group cursor-pointer active:scale-95">
-                            <span class="relative flex h-2 w-2">
-                                <span class="animate-ping absolute inline-flex h-full w-full rounded-full bg-amber-400 opacity-75"></span>
-                                <span class="relative inline-flex rounded-full h-2 w-2 bg-amber-500"></span>
-                            </span>
-                            <span class="hidden md:inline text-stone-600">Buy Buttons:</span>
-                            <span class="text-rose-700 uppercase tracking-wider font-extrabold text-[11px]">HIDDEN</span>
-                            <span class="text-[10px] font-semibold text-amber-900 bg-amber-200/90 px-1.5 py-0.5 rounded ml-0.5 group-hover:bg-amber-300 transition">1-Click Show ↻</span>
+                                title="Buttons are currently HIDDEN. Click to SHOW Add to Bag & Buy Now buttons on storefront"
+                                class="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg bg-emerald-700 hover:bg-emerald-800 text-white text-xs font-bold transition shadow-xs group cursor-pointer active:scale-95">
+                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                            <span class="sm:hidden font-bold">Show Buttons</span>
+                            <span class="hidden sm:inline font-bold">1-Click Show Buttons</span>
+                            <span class="text-[10px] text-emerald-100 bg-emerald-900/60 px-1 py-0.5 rounded hidden md:inline">Live ↻</span>
                         </button>
                     @else
                         <button type="submit" 
-                                title="Click to HIDE Add to Bag & Buy Now buttons while updating product prices"
-                                class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-emerald-400 bg-emerald-50 hover:bg-emerald-100 text-emerald-900 text-xs font-bold transition shadow-xs group cursor-pointer active:scale-95">
-                            <span class="inline-flex rounded-full h-2 w-2 bg-emerald-500"></span>
-                            <span class="hidden md:inline text-stone-600">Buy Buttons:</span>
-                            <span class="text-emerald-700 uppercase tracking-wider font-extrabold text-[11px]">LIVE</span>
-                            <span class="text-[10px] font-semibold text-stone-600 bg-white/90 border border-stone-200 px-1.5 py-0.5 rounded ml-0.5 group-hover:bg-stone-100 transition">1-Click Hide ↻</span>
+                                title="Buttons are currently LIVE. Click to HIDE Add to Bag & Buy Now buttons while updating product prices"
+                                class="inline-flex items-center gap-1 sm:gap-1.5 px-2 sm:px-3 py-1 sm:py-1.5 rounded-lg border border-amber-500 bg-amber-50 hover:bg-amber-100 text-amber-900 text-xs font-bold transition shadow-xs group cursor-pointer active:scale-95">
+                            <svg class="w-3.5 h-3.5 text-amber-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>
+                            <span class="sm:hidden font-bold text-amber-950">Hide Buttons</span>
+                            <span class="hidden sm:inline font-bold text-amber-950">1-Click Hide Buttons</span>
+                            <span class="text-[10px] text-amber-900 bg-amber-200/90 px-1 py-0.5 rounded hidden md:inline">Catalog ↻</span>
                         </button>
                     @endif
                 </form>
 
-                <a href="{{ route('home') }}" target="_blank" class="inline-flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg border border-[#D4AF6A] bg-[#FAF7F0] text-[#4A2C1D] text-xs font-semibold hover:bg-[#D4AF6A] hover:text-[#2E180E] transition" title="View Live Storefront">
+                <a href="{{ route('home') }}" target="_blank" class="inline-flex items-center gap-1.5 px-2 sm:px-2.5 py-1 sm:py-1.5 rounded-lg border border-[#D4AF6A] bg-[#FAF7F0] text-[#4A2C1D] text-xs font-semibold hover:bg-[#D4AF6A] hover:text-[#2E180E] transition shrink-0" title="View Live Storefront">
                     <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21a9.004 9.004 0 008.716-6.747M12 21a9.004 9.004 0 01-8.716-6.747M12 21c2.485 0 4.5-4.03 4.5-9S14.485 3 12 3m0 18c-2.485 0-4.5-4.03-4.5-9S9.515 3 12 3m0 0a8.997 8.997 0 017.843 4.582M12 3a8.997 8.997 0 00-7.843 4.582m15.686 0A11.953 11.953 0 0112 10.5c-2.998 0-5.74-1.1-7.843-2.918m15.686 0A8.959 8.959 0 0121 12c0 .778-.099 1.533-.284 2.253m0 0A17.919 17.919 0 0112 16.5c-3.162 0-6.133-.815-8.716-2.247m0 0A9.015 9.015 0 013 12c0-1.605.42-3.113 1.157-4.418" /></svg>
-                    <span class="hidden sm:inline">View Live Storefront</span>
+                    <span class="hidden md:inline">View Store</span>
                 </a>
             </div>
         </header>

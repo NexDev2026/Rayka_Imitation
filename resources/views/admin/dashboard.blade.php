@@ -13,12 +13,12 @@
     @if($isOrderButtonsHidden)
         <!-- Catalog Mode Warning Banner -->
         <div class="p-4 sm:p-5 rounded-2xl bg-amber-500/10 border-2 border-amber-500 text-amber-950 flex flex-col sm:flex-row sm:items-center justify-between gap-4 shadow-sm">
-            <div class="flex items-center gap-3">
+            <div class="flex items-start sm:items-center gap-3">
                 <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center shrink-0 shadow-xs">
                     <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" /></svg>
                 </div>
                 <div>
-                    <div class="flex items-center gap-2">
+                    <div class="flex items-center gap-2 flex-wrap">
                         <h4 class="font-bold text-sm text-[#4A2C1D]">Catalog Mode Active — Order Buttons Hidden</h4>
                         <span class="bg-rose-600 text-white text-[10px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider">Prices Under Update</span>
                     </div>
