@@ -384,9 +384,9 @@
                         </div>
 
                         <!-- Extra COD Fee Row -->
-                        <div x-show="paymentMethod === 'cod' && codExtraCharge > 0" class="flex justify-between text-stone-600 font-medium">
+                        <div x-show="paymentMethod === 'cod' && codExtraCharge > 0" class="flex items-center justify-between gap-2 text-stone-600 font-medium">
                             <span>COD Courier Handling Fee:</span>
-                            <span class="font-bold text-[#4A2C1D]">+ ₹{{ number_format($codExtraCharge) }}</span>
+                            <span class="font-bold text-[#4A2C1D] whitespace-nowrap shrink-0">+ ₹{{ number_format($codExtraCharge) }}</span>
                         </div>
 
                         <div class="pt-2 border-t border-[#D4AF6A]/30 flex justify-between items-baseline">

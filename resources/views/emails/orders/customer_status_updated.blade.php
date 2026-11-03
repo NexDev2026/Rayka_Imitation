@@ -2,11 +2,9 @@
   $currentStatus = (string) ($status ?? '');
   $isCod = $order->isCod();
   $statusIcon = match($currentStatus) {
-    'Confirmed' => $isCod
-      ? '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;display:inline-block;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>'
-      : '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;display:inline-block;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>',
+    'Confirmed' => '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D4AF6A" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;display:inline-block;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>',
     'Processing' => '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D4AF6A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;display:inline-block;"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>',
-    'Shipped' => '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;display:inline-block;"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>',
+    'Shipped' => '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D4AF6A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;display:inline-block;"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>',
     'Delivered' => '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D4AF6A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;display:inline-block;"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>',
     default => '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D4AF6A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;display:inline-block;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>',
   };
@@ -18,12 +16,12 @@
     : ('Order Status: ' . $currentStatus . ' — #' . $order->order_number . ' — Rayka');
 
   $headerTitle = ($currentStatus === 'Confirmed')
-    ? ($isCod ? 'Advance Token Verified & Order Confirmed' : 'Payment Confirmed')
+    ? ($isCod ? 'Advance Token Confirmed' : 'Payment Confirmed')
     : ('Order Status: ' . $currentStatus);
 
   $headerSubtitle = ($currentStatus === 'Confirmed')
     ? ($isCod 
-        ? ('Order #' . $order->order_number . ' • ' . $order->advance_percentage . '% Advance Token Verified & Booked') 
+        ? ('Order #' . $order->order_number . ' • ' . $order->advance_percentage . '% Token Advance Verified') 
         : ('Tax Invoice & Payment Receipt — Order #' . $order->order_number))
     : ('Latest progress on Order #' . $order->order_number);
 @endphp
@@ -81,42 +79,42 @@
 
 @section('content')
   @if($status === 'Confirmed')
-  <!-- Razorpay-Style SaaS Payment Card -->
-  <div style="background:linear-gradient(135deg, #152544 0%, #0d172a 100%); border:1px solid #3b82f6; border-radius:18px; padding:22px 24px; margin-bottom:28px; box-shadow:0 12px 35px rgba(0,0,0,0.55);">
+  <!-- Royal Velvet Payment Card -->
+  <div style="background:linear-gradient(135deg, #24140C 0%, #170B06 100%); border:1px solid rgba(212, 175, 106, 0.45); border-radius:18px; padding:22px 24px; margin-bottom:28px; box-shadow:0 12px 35px rgba(0,0,0,0.65);">
     <table width="100%" border="0" cellpadding="0" cellspacing="0">
       <tr>
         <td valign="top">
-          <div style="display:inline-block; background:#2563eb; color:#ffffff; font-size:10.5px; font-weight:800; letter-spacing:1px; text-transform:uppercase; padding:4px 12px; border-radius:20px; margin-bottom:10px;">
+          <div style="display:inline-block; background:rgba(212, 175, 106, 0.16); border:1px solid #D4AF6A; color:#E7C77B; font-size:10px; font-weight:800; letter-spacing:1px; text-transform:uppercase; padding:4px 12px; border-radius:20px; margin-bottom:10px;">
             {{ $order->isCod() ? 'Advance Token Verified on ' : 'Paid on ' }}{{ \Carbon\Carbon::parse($order->payment?->verified_at ?? $order->created_at)->format('d M') }}
           </div>
-          <div style="font-size:13px; color:#94a3b8; margin-bottom:6px; font-weight:500;">
+          <div style="font-size:12px; color:#A8988B; margin-bottom:6px; font-weight:500;">
             Rayka Imitation Jewellery bill • Order #{{ $order->order_number }}
           </div>
           @if($order->isCod())
-            <div style="font-size:11px; color:#38bdf8; text-transform:uppercase; letter-spacing:1px; margin-bottom:2px; font-weight:700;">
+            <div style="font-size:11px; color:#D4AF6A; text-transform:uppercase; letter-spacing:1px; margin-bottom:2px; font-weight:700;">
               1. Advance Token Paid ({{ $order->advance_percentage }}% Online)
             </div>
-            <div style="font-size:28px; font-weight:900; color:#38bdf8; font-family:ui-monospace,Menlo,Consolas,monospace; letter-spacing:-0.5px; line-height:1.1; margin-bottom:6px;">
+            <div style="font-size:28px; font-weight:900; color:#FFFFFF; font-family:ui-monospace,Menlo,Consolas,monospace; letter-spacing:-0.5px; line-height:1.1; margin-bottom:8px;">
               ₹{{ number_format($order->advance_amount, 2) }}
             </div>
-            <div style="font-size:11px; color:#cbd5e1; text-transform:uppercase; letter-spacing:1px; margin-bottom:2px; font-weight:700;">
+            <div style="font-size:11px; color:#E7C77B; text-transform:uppercase; letter-spacing:1px; margin-bottom:2px; font-weight:700;">
               2. Remaining Balance Payable on Delivery
             </div>
-            <div style="font-size:20px; font-weight:800; color:#ffffff; font-family:ui-monospace,Menlo,Consolas,monospace; line-height:1.1;">
+            <div style="font-size:20px; font-weight:800; color:#FDFBF7; font-family:ui-monospace,Menlo,Consolas,monospace; line-height:1.1;">
               ₹{{ number_format($order->balance_amount, 2) }}
             </div>
           @else
-            <div style="font-size:11px; color:#cbd5e1; text-transform:uppercase; letter-spacing:1px; margin-bottom:2px; font-weight:700;">
-              Amount paid
+            <div style="font-size:11px; color:#D4AF6A; text-transform:uppercase; letter-spacing:1px; margin-bottom:2px; font-weight:700;">
+              Amount Paid
             </div>
-            <div style="font-size:36px; font-weight:900; color:#ffffff; font-family:ui-monospace,Menlo,Consolas,monospace; letter-spacing:-0.5px; line-height:1.1;">
+            <div style="font-size:34px; font-weight:900; color:#FFFFFF; font-family:ui-monospace,Menlo,Consolas,monospace; letter-spacing:-0.5px; line-height:1.1;">
               ₹{{ number_format($order->total_amount, 2) }}
             </div>
           @endif
         </td>
-        <td align="right" valign="top" style="width:65px;">
-          <div style="width:54px; height:54px; background:#16a34a; border-radius:50%; text-align:center; line-height:54px; display:inline-block; box-shadow:0 0 25px rgba(34, 197, 94, 0.45);">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;display:inline-block;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        <td align="right" valign="top" style="width:60px;">
+          <div style="width:48px; height:48px; background:#059669; border:2px solid #10B981; border-radius:50%; text-align:center; line-height:44px; display:inline-block; box-shadow:0 0 20px rgba(16, 185, 129, 0.45); font-size:24px; color:#ffffff !important; font-weight:900; font-family:Arial,Helvetica,sans-serif;">
+            &#10004;
           </div>
         </td>
       </tr>
@@ -143,19 +141,27 @@
       <strong>Official Tax Invoice Attached:</strong> Your computer-generated GST Tax Invoice (PDF) has been generated and attached directly to this email. You can also download or print it anytime using the button below.
     </div>
     @else
-    <div class="alert-box" style="margin-bottom:20px; background:rgba(2,132,199,0.12); border:1px solid #0284c7; color:#bae6fd; padding:14px 18px; border-radius:12px; font-size:12px; line-height:1.6;">
-      <strong style="color:#38bdf8; display:block; margin-bottom:4px; font-size:13px;">COD Advance Booking Confirmed:</strong>
-      Your {{ $order->advance_percentage }}% advance token has been verified and settled. The remaining balance of <strong>₹{{ number_format($order->balance_amount, 2) }}</strong> will be collected upon delivery via Cash or QR. Your official final Tax Invoice will be issued upon delivery and balance settlement.
+    <div class="alert-box" style="margin-bottom:20px; background:rgba(212, 175, 106, 0.08); border-left:4px solid #D4AF6A; border:1px solid rgba(212, 175, 106, 0.25); border-left-width:4px; color:#FAF7F0; padding:14px 18px; border-radius:10px; font-size:12.5px; line-height:1.6;">
+      <strong style="color:#E7C77B; display:block; margin-bottom:4px; font-size:13px; font-weight:800;">COD Advance Booking Confirmed:</strong>
+      Your {{ $order->advance_percentage }}% advance token has been verified and settled. The remaining balance of <strong style="color:#FFFFFF;">₹{{ number_format($order->balance_amount, 2) }}</strong> will be collected upon delivery via Cash or QR. Your official final Tax Invoice will be issued upon delivery and balance settlement.
     </div>
     @endif
 
     <!-- Official In-Email Tax Invoice / COD Receipt Card -->
-    <div class="lg-box" style="margin-top:16px; border:1px solid {{ $order->isCod() ? '#0284c7' : '#D4AF6A' }};">
-      <div class="lg-box-header" style="background:{{ $order->isCod() ? '#0c2340' : '#241610' }}; color:{{ $order->isCod() ? '#38bdf8' : '#E7C77B' }}; display:flex; justify-content:space-between; align-items:center;">
-        <span>{{ $order->isCod() ? 'COD BOOKING RECEIPT & ADVANCE CONFIRMATION' : 'TAX INVOICE & RECEIPT' }}</span>
-        <span style="font-size:10px; font-weight:700; color:{{ $order->isCod() ? '#38bdf8' : '#10B981' }}; background:{{ $order->isCod() ? 'rgba(56,189,248,0.15)' : 'rgba(16,185,129,0.15)' }}; padding:2px 8px; border-radius:4px; border:1px solid {{ $order->isCod() ? '#38bdf8' : '#10B981' }}; white-space:nowrap;">
-          {{ $order->isCod() ? 'ADVANCE TOKEN VERIFIED' : 'VERIFIED & CONFIRMED' }}
-        </span>
+    <div class="lg-box" style="margin-top:16px; border:1px solid rgba(212, 175, 106, 0.35); border-radius:16px; overflow:hidden;">
+      <div style="background:#241610; border-bottom:1px solid rgba(212, 175, 106, 0.25); padding:10px 16px;">
+        <table width="100%" border="0" cellpadding="0" cellspacing="0">
+          <tr>
+            <td align="left" valign="middle" style="color:#E7C77B; font-size:11px; font-weight:800; letter-spacing:1px; text-transform:uppercase;">
+              {{ $order->isCod() ? 'COD BOOKING RECEIPT' : 'TAX INVOICE & RECEIPT' }}
+            </td>
+            <td align="right" valign="middle" style="white-space:nowrap; padding-left:8px;">
+              <span style="font-size:10px; font-weight:800; color:#10B981; background:rgba(16,185,129,0.15); border:1px solid #10B981; padding:3px 8px; border-radius:12px; display:inline-block; white-space:nowrap; text-transform:uppercase;">
+                {{ $order->isCod() ? 'ADVANCE VERIFIED' : 'CONFIRMED' }}
+              </span>
+            </td>
+          </tr>
+        </table>
       </div>
 
       <!-- Invoice Meta Grid -->
@@ -252,11 +258,11 @@
           <td class="lbl" style="font-size:13px; font-weight:800; color:#FFFFFF; padding-top:10px; padding-bottom:10px;">Total Order Value</td>
           <td class="val" style="font-size:16px; color:#D4AF6A; font-weight:900; padding-top:10px; padding-bottom:10px; font-family:monospace;">₹{{ number_format($order->total_amount, 2) }}</td>
         </tr>
-        <tr style="background:rgba(2,132,199,0.12); border-top:1px dashed #0284c7;">
-          <td class="lbl" style="color:#38bdf8; font-weight:700;">1. Advance Token Paid ({{ $order->advance_percentage }}%)</td>
-          <td class="val" style="color:#38bdf8; font-weight:800; font-family:monospace;">₹{{ number_format($order->advance_amount, 2) }}</td>
+        <tr style="background:rgba(212,175,106,0.12); border-top:1px dashed #D4AF6A;">
+          <td class="lbl" style="color:#E7C77B; font-weight:700;">1. Advance Token Paid ({{ $order->advance_percentage }}%)</td>
+          <td class="val" style="color:#E7C77B; font-weight:800; font-family:monospace;">₹{{ number_format($order->advance_amount, 2) }}</td>
         </tr>
-        <tr style="background:rgba(2,132,199,0.18);">
+        <tr style="background:rgba(212,175,106,0.18);">
           <td class="lbl" style="color:#ffffff; font-weight:800;">2. Balance Due on Delivery</td>
           <td class="val" style="color:#ffffff; font-weight:900; font-size:15px; font-family:monospace;">₹{{ number_format($order->balance_amount, 2) }}</td>
         </tr>
@@ -276,7 +282,7 @@
         Download Official Tax Invoice (PDF)
       </a>
       @else
-      <a href="{{ route('order.track', ['order_number' => $order->order_number]) }}" class="cta-btn" style="background:linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color:#ffffff!important; box-shadow:0 4px 15px rgba(2,132,199,0.35);">
+      <a href="{{ route('order.track', ['order_number' => $order->order_number]) }}" class="cta-btn" style="background:linear-gradient(135deg, #D4AF6A 0%, #996E2E 100%); color:#1C100B!important; box-shadow:0 4px 15px rgba(212,175,106,0.35);">
         View Live Order Tracking & Doorstep Balance →
       </a>
       @endif
@@ -333,8 +339,8 @@
           <td class="val">3 to 5 Business Days</td>
         </tr>
         @if($order->isCod())
-        <tr style="background:rgba(2,132,199,0.15); border-top:1px dashed #0284c7;">
-          <td class="lbl" style="color:#ffffff; font-weight:800;">Balance Due on Delivery</td>
+        <tr style="background:rgba(212,175,106,0.15); border-top:1px dashed #D4AF6A;">
+          <td class="lbl" style="color:#E7C77B; font-weight:800;">Balance Due on Delivery</td>
           <td class="val" style="color:#ffffff; font-weight:900; font-size:15px; font-family:monospace;">₹{{ number_format($order->balance_amount, 2) }}</td>
         </tr>
         @endif
@@ -342,8 +348,9 @@
     </div>
 
     @if($order->isCod())
-    <div class="alert-box alert-info" style="margin-top:15px;">
-      <strong>Doorstep Payment Reminder:</strong> Please keep the remaining balance of <strong>₹{{ number_format($order->balance_amount, 2) }}</strong> ready. You can pay our delivery partner in Cash or scan the Delivery UPI QR code upon arrival.
+    <div class="alert-box" style="margin-top:15px; background:rgba(212, 175, 106, 0.08); border:1px solid rgba(212, 175, 106, 0.25); border-left:4px solid #D4AF6A; color:#FAF7F0; padding:14px 18px; border-radius:10px; font-size:12.5px; line-height:1.6;">
+      <strong style="color:#E7C77B; display:block; margin-bottom:4px; font-size:13px; font-weight:800;">Doorstep Payment Reminder:</strong>
+      Please keep the remaining balance of <strong style="color:#FFFFFF;">₹{{ number_format($order->balance_amount, 2) }}</strong> ready. You can pay our delivery partner in Cash or scan the Delivery UPI QR code upon arrival.
     </div>
     @endif
 

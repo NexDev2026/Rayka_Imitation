@@ -24,9 +24,7 @@
 
   $headerIcon = $isPaid
     ? '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;display:inline-block;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>'
-    : ($isCod 
-        ? '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;display:inline-block;"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>'
-        : '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D4AF6A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;display:inline-block;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>');
+    : '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D4AF6A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;display:inline-block;"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>';
 @endphp
 
 @extends('emails.layouts.master', [
@@ -83,60 +81,60 @@
 
 @section('content')
   @if($isPaid)
-    <!-- Paid: Razorpay-Style SaaS Payment Card -->
-    <div style="background:linear-gradient(135deg, #152544 0%, #0d172a 100%); border:1px solid #3b82f6; border-radius:18px; padding:22px 24px; margin-bottom:28px; box-shadow:0 12px 35px rgba(0,0,0,0.55);">
+    <!-- Paid: Royal Velvet Dark Chocolate & Gold Card -->
+    <div style="background:linear-gradient(180deg, #24140C 0%, #170B06 100%); border:1px solid rgba(212, 175, 106, 0.45); border-radius:18px; padding:22px 24px; margin-bottom:28px; box-shadow:0 14px 40px rgba(0,0,0,0.6);">
       <table width="100%" border="0" cellpadding="0" cellspacing="0">
         <tr>
           <td valign="top">
-            <div style="display:inline-block; background:#2563eb; color:#ffffff; font-size:10.5px; font-weight:800; letter-spacing:1px; text-transform:uppercase; padding:4px 12px; border-radius:20px; margin-bottom:10px;">
+            <div style="display:inline-block; background:rgba(16,185,129,0.15); border:1px solid #10B981; color:#10B981; font-size:10px; font-weight:800; letter-spacing:1px; text-transform:uppercase; padding:4px 12px; border-radius:20px; margin-bottom:10px;">
               Paid on {{ \Carbon\Carbon::parse($order->payment?->verified_at ?? $order->created_at)->format('d M') }}
             </div>
-            <div style="font-size:13px; color:#94a3b8; margin-bottom:6px; font-weight:500;">
+            <div style="font-size:13px; color:#A8988B; margin-bottom:6px; font-weight:500;">
               Rayka Imitation Jewellery bill • Order #{{ $order->order_number }}
             </div>
-            <div style="font-size:11px; color:#cbd5e1; text-transform:uppercase; letter-spacing:1px; margin-bottom:2px; font-weight:700;">
-              Amount paid
+            <div style="font-size:11px; color:#D4AF6A; text-transform:uppercase; letter-spacing:1px; margin-bottom:2px; font-weight:700;">
+              Amount Paid (Full Payment)
             </div>
             <div style="font-size:36px; font-weight:900; color:#ffffff; font-family:ui-monospace,Menlo,Consolas,monospace; letter-spacing:-0.5px; line-height:1.1;">
               ₹{{ number_format($order->total_amount, 2) }}
             </div>
           </td>
-          <td align="right" valign="middle" style="width:65px;">
-            <div style="width:54px; height:54px; background:#16a34a; border-radius:50%; text-align:center; line-height:54px; display:inline-block; box-shadow:0 0 25px rgba(34, 197, 94, 0.45);">
-              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;display:inline-block;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          <td align="right" valign="middle" style="width:60px;">
+            <div style="width:48px; height:48px; background:#059669; border:2px solid #10B981; border-radius:50%; text-align:center; line-height:44px; display:inline-block; box-shadow:0 0 20px rgba(16, 185, 129, 0.45); font-size:24px; color:#ffffff !important; font-weight:900; font-family:Arial,Helvetica,sans-serif;">
+              &#10004;
             </div>
           </td>
         </tr>
       </table>
     </div>
   @elseif($isCod)
-    <!-- COD: Sky Blue Luxury Card with Advance Token & Balance Due -->
-    <div style="background:linear-gradient(135deg, #0c2d3a 0%, #081a24 100%); border:1px solid #0284c7; border-radius:18px; padding:22px 24px; margin-bottom:28px; box-shadow:0 12px 35px rgba(0,0,0,0.55);">
+    <!-- COD: Royal Velvet Dark Chocolate & Gold Card with Advance Token & Balance Due -->
+    <div style="background:linear-gradient(180deg, #24140C 0%, #170B06 100%); border:1px solid rgba(212, 175, 106, 0.45); border-radius:18px; padding:22px 24px; margin-bottom:28px; box-shadow:0 14px 40px rgba(0,0,0,0.6);">
       <table width="100%" border="0" cellpadding="0" cellspacing="0">
         <tr>
           <td valign="top">
-            <div style="display:inline-block; background:rgba(2, 132, 199, 0.2); border:1px solid #0284c7; color:#38bdf8; font-size:10.5px; font-weight:800; letter-spacing:1px; text-transform:uppercase; padding:4px 12px; border-radius:20px; margin-bottom:10px;">
-              ● {{ $isPaid ? 'Cash on Delivery (Advance Token Confirmed)' : 'Cash on Delivery (Advance Token Verification Pending)' }}
+            <div style="display:inline-block; background:rgba(212, 175, 106, 0.15); border:1px solid #D4AF6A; color:#E7C77B; font-size:10px; font-weight:800; letter-spacing:1px; text-transform:uppercase; padding:4px 12px; border-radius:20px; margin-bottom:10px;">
+              ● {{ $isPaid ? 'Cash on Delivery (Advance Token Confirmed)' : 'Cash on Delivery (Advance Verification Pending)' }}
             </div>
-            <div style="font-size:13px; color:#94a3b8; margin-bottom:6px; font-weight:500;">
+            <div style="font-size:13px; color:#A8988B; margin-bottom:8px; font-weight:500;">
               Rayka Imitation Jewellery • Order #{{ $order->order_number }}
             </div>
-            <div style="font-size:11px; color:#38bdf8; text-transform:uppercase; letter-spacing:1px; margin-bottom:2px; font-weight:700;">
+            <div style="font-size:11px; color:#E7C77B; text-transform:uppercase; letter-spacing:1px; margin-bottom:2px; font-weight:700;">
               1. Advance Token ({{ $order->advance_percentage }}% Online)
             </div>
-            <div style="font-size:30px; font-weight:900; color:#38bdf8; font-family:ui-monospace,Menlo,Consolas,monospace; letter-spacing:-0.5px; line-height:1.1; margin-bottom:8px;">
+            <div style="font-size:30px; font-weight:900; color:#FFFFFF; font-family:ui-monospace,Menlo,Consolas,monospace; letter-spacing:-0.5px; line-height:1.1; margin-bottom:10px;">
               ₹{{ number_format($order->advance_amount, 2) }}
             </div>
-            <div style="font-size:11px; color:#cbd5e1; text-transform:uppercase; letter-spacing:1px; margin-bottom:2px; font-weight:700;">
+            <div style="font-size:11px; color:#C4B5A5; text-transform:uppercase; letter-spacing:1px; margin-bottom:2px; font-weight:700;">
               2. Remaining Balance Payable on Delivery
             </div>
-            <div style="font-size:22px; font-weight:800; color:#ffffff; font-family:ui-monospace,Menlo,Consolas,monospace; line-height:1.1;">
+            <div style="font-size:22px; font-weight:900; color:#E7C77B; font-family:ui-monospace,Menlo,Consolas,monospace; line-height:1.1;">
               ₹{{ number_format($order->balance_amount, 2) }}
             </div>
           </td>
-          <td align="right" valign="top" style="width:75px;">
-            <div style="display:inline-block; background:rgba(2,132,199,0.25); border:1.5px solid #38bdf8; border-radius:12px; padding:8px 14px; text-align:center; white-space:nowrap;">
-              <span style="color:#38bdf8; font-size:15px; font-weight:900; letter-spacing:2px; display:inline-block; white-space:nowrap; line-height:1;">COD</span>
+          <td align="right" valign="top" style="width:70px; padding-left:10px;">
+            <div style="display:inline-block; background:rgba(212, 175, 106, 0.12); border:1.5px solid #D4AF6A; border-radius:12px; padding:6px 12px; text-align:center;">
+              <span style="color:#E7C77B; font-size:14px; font-weight:900; letter-spacing:1px; display:block; white-space:nowrap; line-height:1.2;">COD</span>
             </div>
           </td>
         </tr>
@@ -216,7 +214,7 @@
           @if($isPaid)
             <span style="color:#10B981; font-weight:700;">Verified & Confirmed</span>
           @elseif($isCod)
-            <span style="color:#38BDF8; font-weight:700;">Advance Token Verification in Progress</span>
+            <span style="color:#E7C77B; font-weight:700; background:rgba(212,175,106,0.12); padding:3px 10px; border-radius:4px; border:1px solid rgba(212,175,106,0.35); font-size:11px;">Advance Token Verification in Progress</span>
           @else
             <span style="color:#E7C77B; font-weight:700; background:rgba(212,175,106,0.12); padding:3px 10px; border-radius:4px; border:1px solid rgba(212,175,106,0.35); font-size:11px;">Verification in Progress</span>
           @endif
@@ -268,8 +266,8 @@
       </tr>
       @if($order->coupon_discount > 0)
       <tr>
-        <td class="lbl">Coupon ({{ $order->coupon_code }})</td>
-        <td class="val" style="color:#10B981;">− ₹{{ number_format($order->coupon_discount, 2) }}</td>
+        <td class="lbl" style="color:#10B981;">Coupon ({{ $order->coupon_code }})</td>
+        <td class="val" style="color:#10B981; font-weight:700;">− ₹{{ number_format($order->coupon_discount, 2) }}</td>
       </tr>
       @endif
       <tr>
@@ -291,11 +289,11 @@
         </td>
       </tr>
       @if($isCod)
-      <tr style="background:rgba(2,132,199,0.12); border-top:1px dashed #0284c7;">
-        <td class="lbl" style="color:#38bdf8; font-weight:700;">1. Advance Token Paid ({{ $order->advance_percentage }}%)</td>
-        <td class="val" style="color:#38bdf8; font-weight:800; font-family:monospace;">₹{{ number_format($order->advance_amount, 2) }}</td>
+      <tr style="background:rgba(212,175,106,0.12); border-top:1px dashed #D4AF6A;">
+        <td class="lbl" style="color:#E7C77B; font-weight:700;">1. Advance Token Paid ({{ $order->advance_percentage }}%)</td>
+        <td class="val" style="color:#E7C77B; font-weight:800; font-family:monospace;">₹{{ number_format($order->advance_amount, 2) }}</td>
       </tr>
-      <tr style="background:rgba(2,132,199,0.18);">
+      <tr style="background:rgba(212,175,106,0.18);">
         <td class="lbl" style="color:#ffffff; font-weight:800;">2. Remaining Due on Delivery</td>
         <td class="val" style="color:#ffffff; font-weight:900; font-size:16px; font-family:monospace;">₹{{ number_format($order->balance_amount, 2) }}</td>
       </tr>
@@ -320,9 +318,9 @@
       <strong>Payment Approved:</strong> Your order is now queued for careful hallmark inspection, royal packaging, and dispatch. You will receive tracking details once your parcel is handed to the courier.
     </div>
   @elseif($isCod)
-    <div class="alert-box" style="background:rgba(2, 132, 199, 0.08); border-left:4px solid #0284c7; border:1px solid rgba(2, 132, 199, 0.25); border-left-width:4px; color:#FAF7F0; padding:15px 18px; border-radius:8px; margin:22px 0;">
-      <strong style="color:#38bdf8; font-size:13px; display:block; margin-bottom:4px;">Advance Token Verification in Progress:</strong>
-      <span style="font-size:12.5px; color:#E2D9D0; line-height:1.6;">We have recorded your booking and submitted advance token payment proof (<strong>₹{{ number_format($order->advance_amount, 2) }}</strong>). Our accounts concierge is cross-verifying this transaction with our official bank ledger. As soon as the advance is verified, your order will be Confirmed and prepared for dispatch. The remaining balance of <strong>₹{{ number_format($order->balance_amount, 2) }}</strong> will be payable upon doorstep delivery via Cash or QR.</span>
+    <div class="alert-box" style="background:rgba(212, 175, 106, 0.08); border-left:4px solid #D4AF6A; border:1px solid rgba(212, 175, 106, 0.25); border-left-width:4px; color:#FAF7F0; padding:15px 18px; border-radius:10px; margin:22px 0;">
+      <strong style="color:#E7C77B; font-size:13px; display:block; margin-bottom:4px; font-weight:800;">Advance Token Verification in Progress:</strong>
+      <span style="font-size:12.5px; color:#E2D9D0; line-height:1.6;">We have recorded your booking and submitted advance token payment proof (<strong style="color:#FFFFFF;">₹{{ number_format($order->advance_amount, 2) }}</strong>). Our accounts concierge is cross-verifying this transaction with our official bank ledger. As soon as the advance is verified, your order will be Confirmed and prepared for dispatch. The remaining balance of <strong style="color:#FFFFFF;">₹{{ number_format($order->balance_amount, 2) }}</strong> will be payable upon doorstep delivery via Cash or QR.</span>
     </div>
   @else
     <div class="alert-box" style="background:rgba(212,175,106,0.06); border-left:4px solid #D4AF6A; border:1px solid rgba(212,175,106,0.2); border-left-width:4px; color:#FAF7F0; padding:15px 18px; border-radius:8px; margin:22px 0;">

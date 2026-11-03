@@ -131,9 +131,9 @@
                         <span>{{ $order->shipping_fee == 0 ? 'FREE' : '₹' . number_format($order->shipping_fee) }}</span>
                     </div>
                     @if($order->cod_extra_charge > 0)
-                        <div class="flex justify-between">
+                        <div class="flex items-center justify-between gap-2">
                             <span>COD Handling Fee:</span>
-                            <span class="font-semibold">+ ₹{{ number_format($order->cod_extra_charge) }}</span>
+                            <span class="font-semibold whitespace-nowrap shrink-0">+ ₹{{ number_format($order->cod_extra_charge) }}</span>
                         </div>
                     @endif
                     <div class="flex justify-between font-bold text-sm text-[#4A2C1D] pt-2 border-t border-[#D4AF6A]/30">

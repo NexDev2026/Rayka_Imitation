@@ -55,9 +55,9 @@
             Advance: ₹{{ number_format($order->advance_amount, 2) }} ({{ $order->advance_percentage }}%) + Delivery Balance: ₹{{ number_format($order->balance_amount, 2) }} (Settled via {{ $order->balance_status }})
           </div>
         </td>
-        <td align="right" valign="top" style="width:65px;">
-          <div style="width:54px; height:54px; background:#10b981; border-radius:50%; text-align:center; line-height:54px; display:inline-block; box-shadow:0 0 25px rgba(16, 185, 129, 0.45);">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;display:inline-block;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+        <td align="right" valign="middle" style="width:60px;">
+          <div style="width:48px; height:48px; background:#059669; border:2px solid #10B981; border-radius:50%; text-align:center; line-height:44px; display:inline-block; box-shadow:0 0 20px rgba(16, 185, 129, 0.45); font-size:24px; color:#ffffff !important; font-weight:900; font-family:Arial,Helvetica,sans-serif;">
+            &#10004;
           </div>
         </td>
       </tr>
@@ -76,12 +76,20 @@
   </div>
 
   <!-- Settlement Breakdown Card -->
-  <div class="lg-box" style="margin-top:16px; border:1px solid #10b981;">
-    <div class="lg-box-header" style="background:#062e22; color:#a7f3d0; display:flex; justify-content:space-between; align-items:center;">
-      <span>COD FINAL SETTLEMENT BREAKDOWN</span>
-      <span style="font-size:10px; font-weight:700; color:#34d399; background:rgba(52,211,153,0.15); padding:2px 8px; border-radius:4px; border:1px solid #34d399; white-space:nowrap;">
-        100% PAID & CLOSED
-      </span>
+  <div class="lg-box" style="margin-top:16px; border:1px solid #10b981; border-radius:16px; overflow:hidden;">
+    <div style="background:#062e22; border-bottom:1px solid rgba(16,185,129,0.3); padding:10px 16px;">
+      <table width="100%" border="0" cellpadding="0" cellspacing="0">
+        <tr>
+          <td align="left" valign="middle" style="color:#a7f3d0; font-size:11px; font-weight:800; letter-spacing:1px; text-transform:uppercase;">
+            COD FINAL SETTLEMENT BREAKDOWN
+          </td>
+          <td align="right" valign="middle" style="white-space:nowrap; padding-left:8px;">
+            <span style="font-size:10px; font-weight:800; color:#34d399; background:rgba(52,211,153,0.15); border:1px solid #34d399; padding:3px 8px; border-radius:12px; display:inline-block; white-space:nowrap; text-transform:uppercase;">
+              100% PAID & CLOSED
+            </span>
+          </td>
+        </tr>
+      </table>
     </div>
     <table class="detail-table">
       <tr>
@@ -94,7 +102,7 @@
       </tr>
       <tr>
         <td class="lbl">1. Advance Token (Paid Online)</td>
-        <td class="val" style="color:#38bdf8; font-weight:700;">₹{{ number_format($order->advance_amount, 2) }} ({{ $order->advance_percentage }}%)</td>
+        <td class="val" style="color:#E7C77B; font-weight:700;">₹{{ number_format($order->advance_amount, 2) }} ({{ $order->advance_percentage }}%)</td>
       </tr>
       <tr>
         <td class="lbl">2. Balance on Delivery (Settled)</td>
@@ -129,8 +137,8 @@
   </div>
 
   @if(!empty($order->delivery_payment_screenshot))
-    <div class="alert-box" style="background:rgba(56,189,248,0.08); border:1px solid rgba(56,189,248,0.3); color:#bae6fd; padding:12px 16px; border-radius:10px; margin:16px 0; font-size:12px;">
-      <strong style="color:#38bdf8;">Delivery Proof Attached:</strong> A copy of the confirmed balance transaction receipt has been attached to this email for your financial records.
+    <div class="alert-box" style="background:rgba(16,185,129,0.08); border:1px solid rgba(16,185,129,0.3); color:#a7f3d0; padding:12px 16px; border-radius:10px; margin:16px 0; font-size:12px;">
+      <strong style="color:#34d399;">Delivery Proof Attached:</strong> A copy of the confirmed balance transaction receipt has been attached to this email for your financial records.
     </div>
   @endif
 

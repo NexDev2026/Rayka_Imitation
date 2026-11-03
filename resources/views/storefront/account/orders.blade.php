@@ -118,6 +118,14 @@
                                     <p class="text-[10px] sm:text-xs text-stone-500 uppercase tracking-wider font-semibold mb-0.5">Total Amount</p>
                                     <p class="font-bold text-[#4A2C1D] text-xs sm:text-base whitespace-nowrap">₹{{ number_format($order->total_amount) }}</p>
                                 </div>
+                                @if($order->isCod())
+                                <div>
+                                    <p class="text-[10px] sm:text-xs text-stone-500 uppercase tracking-wider font-semibold mb-0.5">Payment</p>
+                                    <span class="inline-block text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300">
+                                        COD ({{ $order->advance_percentage }}%)
+                                    </span>
+                                </div>
+                                @endif
                             </div>
                             
                             <div class="flex items-center justify-end gap-2 sm:gap-3 shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-stone-200/50 w-full sm:w-auto">

@@ -544,6 +544,17 @@
                                                         {{ $order->refund_status === 'Refunded' ? 'Refunded' : ($order->refund_status === 'Not Applicable' ? 'Not Applicable' : ($order->isRefundPending() ? 'Refund Pending' : $order->refund_status)) }}
                                                     </span>
                                                 </div>
+                                            @elseif($order->isBalanceSettled())
+                                                <div class="flex items-center justify-between gap-2">
+                                                    <span class="text-emerald-800 font-bold">2. Delivery Balance (100% Settled):</span>
+                                                    <span class="font-bold text-emerald-800 font-serif-royal text-base whitespace-nowrap shrink-0">₹{{ number_format($order->balance_amount) }}</span>
+                                                </div>
+                                                <div class="flex items-center justify-between gap-2 pt-1.5 border-t border-amber-200/60 text-[11px]">
+                                                    <span class="text-stone-600">Balance Status:</span>
+                                                    <span class="font-bold px-2.5 py-0.5 rounded-full border whitespace-nowrap shrink-0 bg-emerald-100 text-emerald-800 border-emerald-300">
+                                                        Settled ({{ $order->balance_status }})
+                                                    </span>
+                                                </div>
                                             @else
                                                 <div class="flex items-center justify-between gap-2">
                                                     <span class="text-[#4A2C1D] font-bold">2. Remaining Balance Due on Delivery:</span>

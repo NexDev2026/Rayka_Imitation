@@ -28,7 +28,7 @@
       </tr>
       <tr>
         <td class="lbl">Payment Type</td>
-        <td class="val" style="font-weight:700; color:{{ $order->isCod() ? '#38BDF8' : '#10B981' }};">
+        <td class="val" style="font-weight:700; color:{{ $order->isCod() ? '#D4AF6A' : '#10B981' }};">
           {{ $order->isCod() ? 'Cash on Delivery (' . $order->advance_percentage . '% Advance Token)' : 'Full Online UPI' }}
         </td>
       </tr>
