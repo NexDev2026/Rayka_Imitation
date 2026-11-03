@@ -65,9 +65,9 @@
         <td class="lbl">Payment Proof</td>
         <td class="val">
           @if($order->payment?->screenshot_path)
-            <span style="color:#10B981; font-weight:700;">✓ Screenshot Attached</span>
+            <span style="color:#10B981; font-weight:700;">Screenshot Attached</span>
           @else
-            <span style="color:#EF4444; font-weight:700;">✕ No Proof Uploaded</span>
+            <span style="color:#EF4444; font-weight:700;">No Proof Uploaded</span>
           @endif
         </td>
       </tr>

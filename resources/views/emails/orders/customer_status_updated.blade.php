@@ -68,21 +68,36 @@
       <tr>
         <td valign="top">
           <div style="display:inline-block; background:#2563eb; color:#ffffff; font-size:10.5px; font-weight:800; letter-spacing:1px; text-transform:uppercase; padding:4px 12px; border-radius:20px; margin-bottom:10px;">
-            Paid on {{ \Carbon\Carbon::parse($order->payment?->verified_at ?? $order->created_at)->format('d M') }}
+            {{ $order->isCod() ? 'Advance Token Verified on ' : 'Paid on ' }}{{ \Carbon\Carbon::parse($order->payment?->verified_at ?? $order->created_at)->format('d M') }}
           </div>
           <div style="font-size:13px; color:#94a3b8; margin-bottom:6px; font-weight:500;">
             Rayka Imitation Jewellery bill • Order #{{ $order->order_number }}
           </div>
-          <div style="font-size:11px; color:#cbd5e1; text-transform:uppercase; letter-spacing:1px; margin-bottom:2px; font-weight:700;">
-            Amount paid
-          </div>
-          <div style="font-size:36px; font-weight:900; color:#ffffff; font-family:ui-monospace,Menlo,Consolas,monospace; letter-spacing:-0.5px; line-height:1.1;">
-            ₹{{ number_format($order->total_amount, 2) }}
-          </div>
+          @if($order->isCod())
+            <div style="font-size:11px; color:#38bdf8; text-transform:uppercase; letter-spacing:1px; margin-bottom:2px; font-weight:700;">
+              1. Advance Token Paid ({{ $order->advance_percentage }}% Online)
+            </div>
+            <div style="font-size:28px; font-weight:900; color:#38bdf8; font-family:ui-monospace,Menlo,Consolas,monospace; letter-spacing:-0.5px; line-height:1.1; margin-bottom:6px;">
+              ₹{{ number_format($order->advance_amount, 2) }}
+            </div>
+            <div style="font-size:11px; color:#cbd5e1; text-transform:uppercase; letter-spacing:1px; margin-bottom:2px; font-weight:700;">
+              2. Remaining Balance Payable on Delivery
+            </div>
+            <div style="font-size:20px; font-weight:800; color:#ffffff; font-family:ui-monospace,Menlo,Consolas,monospace; line-height:1.1;">
+              ₹{{ number_format($order->balance_amount, 2) }}
+            </div>
+          @else
+            <div style="font-size:11px; color:#cbd5e1; text-transform:uppercase; letter-spacing:1px; margin-bottom:2px; font-weight:700;">
+              Amount paid
+            </div>
+            <div style="font-size:36px; font-weight:900; color:#ffffff; font-family:ui-monospace,Menlo,Consolas,monospace; letter-spacing:-0.5px; line-height:1.1;">
+              ₹{{ number_format($order->total_amount, 2) }}
+            </div>
+          @endif
         </td>
-        <td align="right" valign="middle" style="width:65px;">
+        <td align="right" valign="top" style="width:65px;">
           <div style="width:54px; height:54px; background:#16a34a; border-radius:50%; text-align:center; line-height:54px; display:inline-block; box-shadow:0 0 25px rgba(34, 197, 94, 0.45);">
-            <span style="color:#ffffff; font-size:28px; font-weight:900; line-height:54px; display:block;">✓</span>
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;display:inline-block;"><polyline points="20 6 9 17 4 12"></polyline></svg>
           </div>
         </td>
       </tr>
@@ -93,9 +108,15 @@
   <div class="greeting">Dear {{ $order->address?->name ?? $order->user?->name ?? 'Valued Patron' }},</div>
   
   @if($status === 'Confirmed')
-    <p class="message-text">
-      We are delighted to confirm that your payment of <strong style="color:#D4AF6A; font-size:15px;">₹{{ number_format($order->total_amount, 2) }}</strong> for Order <strong>#{{ $order->order_number }}</strong> has been verified and settled by our accounts concierge!
-    </p>
+    @if($order->isCod())
+      <p class="message-text">
+        We are delighted to confirm that your <strong>{{ $order->advance_percentage }}% advance booking token of ₹{{ number_format($order->advance_amount, 2) }}</strong> for Order <strong>#{{ $order->order_number }}</strong> has been verified and settled! Your creations are now confirmed and queued for careful hallmark inspection, polishing, and royal packaging. The remaining balance of <strong>₹{{ number_format($order->balance_amount, 2) }}</strong> will be payable upon doorstep delivery via Cash or QR.
+      </p>
+    @else
+      <p class="message-text">
+        We are delighted to confirm that your payment of <strong style="color:#D4AF6A; font-size:15px;">₹{{ number_format($order->total_amount, 2) }}</strong> for Order <strong>#{{ $order->order_number }}</strong> has been verified and settled by our accounts concierge!
+      </p>
+    @endif
 
     <!-- Attached Invoice Alert -->
     <div class="alert-box alert-success" style="margin-bottom:20px;">
@@ -106,7 +127,7 @@
     <div class="lg-box" style="margin-top:16px; border:1px solid #D4AF6A;">
       <div class="lg-box-header" style="background:#241610; color:#E7C77B; display:flex; justify-content:space-between; align-items:center;">
         <span>TAX INVOICE & RECEIPT</span>
-        <span style="font-size:10px; font-weight:700; color:#10B981; background:rgba(16,185,129,0.15); padding:2px 8px; border-radius:4px; border:1px solid #10B981;">✓ VERIFIED & PAID</span>
+        <span style="font-size:10px; font-weight:700; color:#10B981; background:rgba(16,185,129,0.15); padding:2px 8px; border-radius:4px; border:1px solid #10B981;">VERIFIED & CONFIRMED</span>
       </div>
 
       <!-- Invoice Meta Grid -->
@@ -223,7 +244,7 @@
     <!-- Download Invoice Button -->
     <div class="btn-wrap" style="margin-top:24px;">
       <a href="{{ route('order.track.invoice', $order->order_number) }}" class="cta-btn" style="background:linear-gradient(135deg, #D4AF6A 0%, #996E2E 100%); color:#1C100B!important; box-shadow:0 4px 15px rgba(212,175,106,0.35);">
-        📥 Download Official Tax Invoice (PDF)
+        Download Official Tax Invoice (PDF)
       </a>
     </div>
 

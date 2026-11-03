@@ -55,3 +55,4 @@ class OrderRefundProcessedCustomerMail extends Mailable
         return $attachments;
     }
 }
+

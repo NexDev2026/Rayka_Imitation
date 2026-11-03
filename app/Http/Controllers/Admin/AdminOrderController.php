@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Mail\OrderCancelledByAdminCustomerMail;
+use App\Mail\OrderCodBalanceSettledCustomerMail;
 use App\Mail\OrderRefundProcessedCustomerMail;
 use App\Mail\OrderStatusUpdatedCustomerMail;
 use App\Models\ActivityLog;
@@ -222,6 +223,20 @@ class AdminOrderController extends Controller
                 'delivery_paid_at' => $order->delivery_paid_at,
                 'admin_note' => $request->filled('admin_balance_note') ? trim((string) $request->admin_balance_note) : $order->payment->admin_note,
             ]);
+        }
+
+        if (in_array($order->balance_status, ['Collected Cash', 'Paid Online'])) {
+            $adminBalanceNote = $request->filled('admin_balance_note') ? trim((string) $request->admin_balance_note) : null;
+            defer(function () use ($order, $adminBalanceNote) {
+                try {
+                    $customerEmail = $order->address?->email ?: ($order->user?->email ?: null);
+                    if ($customerEmail) {
+                        Mail::to($customerEmail)->send(new OrderCodBalanceSettledCustomerMail($order, $adminBalanceNote));
+                    }
+                } catch (\Throwable $e) {
+                    Log::warning("Order #{$order->order_number} COD balance settlement email warning: ".$e->getMessage());
+                }
+            });
         }
 
         ActivityLog::record(
