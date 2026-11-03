@@ -1,56 +1,115 @@
 @extends('emails.layouts.master', [
-    'emailTitle' => 'COD Balance Settled — Order #' . $order->order_number . ' — Rayka',
-    'headerIcon' => '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;display:inline-block;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>',
-    'headerTitle' => 'COD Balance Payment Settled',
-    'headerSubtitle' => 'Order #' . $order->order_number . ' • Consignment Balance Closed'
+    'emailTitle' => 'Full Payment Completed (COD Balance Settled) — Order #' . $order->order_number . ' — Rayka',
+    'headerIcon' => '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;display:inline-block;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>',
+    'headerTitle' => 'Full Payment Completed (COD)',
+    'headerSubtitle' => 'Order #' . $order->order_number . ' • 100% Fully Settled & Closed'
 ])
 
-@section('content')
-  <div class="greeting">Dear {{ $order->address?->name ?? $order->user?->name ?? 'Valued Patron' }},</div>
-  <p class="message-text">
-    We are pleased to inform you that the remaining Cash on Delivery balance for your Order <strong>#{{ $order->order_number }}</strong> has been officially confirmed, verified, and settled in our accounts ledger!
-  </p>
+@section('schema_markup')
+<script type="application/ld+json">
+{
+  "{{ '@context' }}": "https://schema.org",
+  "{{ '@type' }}": "Invoice",
+  "accountId": "{{ $order->order_number }}",
+  "name": "Rayka COD Settlement Bill",
+  "description": "Full Payment Completed for COD Order #{{ $order->order_number }}",
+  "paymentDue": "{{ \Carbon\Carbon::parse($order->created_at)->toIso8601String() }}",
+  "paymentStatus": "PaymentAutomaticallyApplied",
+  "provider": {
+    "{{ '@type' }}": "Organization",
+    "name": "Rayka Imitation Jewellery",
+    "url": "https://raykaimitation.com"
+  },
+  "totalPaymentDue": {
+    "{{ '@type' }}": "PriceSpecification",
+    "price": "{{ number_format($order->total_amount, 2, '.', '') }}",
+    "priceCurrency": "INR"
+  },
+  "customer": {
+    "{{ '@type' }}": "Person",
+    "name": "{{ addslashes($order->address?->name ?? $order->user?->name ?? 'Valued Patron') }}"
+  }
+}
+</script>
+@endsection
 
-  <!-- Big Amount Pill -->
-  <div style="background: linear-gradient(135deg, rgba(16, 185, 129, 0.12) 0%, rgba(212, 175, 106, 0.12) 100%); border: 1.5px solid #10B981; border-radius: 14px; padding: 20px 22px; text-align: center; margin: 20px 0 24px 0;">
-    <div style="font-size: 11px; text-transform: uppercase; letter-spacing: 1.5px; color: #065F46; font-weight: 700; margin-bottom: 6px;">Remaining Balance Collected & Settled</div>
-    <div style="font-family: 'Playfair Display', Georgia, serif; font-size: 32px; font-weight: 900; color: #064E3B; line-height: 1;">
-      ₹{{ number_format((float)$order->balance_amount, 2) }}
-    </div>
-    <div style="font-size: 11px; color: #047857; margin-top: 8px; font-weight: 600;">
-      Collection Mode: <span style="background: #D1FAE5; color: #065F46; padding: 2px 10px; border-radius: 9999px; font-weight: 800; border: 1px solid #A7F3D0;">{{ $order->balance_status }}</span>
-    </div>
+@section('content')
+  <!-- SaaS 100% Payment Completion Card -->
+  <div style="background:linear-gradient(135deg, #062e22 0%, #041f17 100%); border:1px solid #10b981; border-radius:18px; padding:22px 24px; margin-bottom:28px; box-shadow:0 12px 35px rgba(0,0,0,0.55);">
+    <table width="100%" border="0" cellpadding="0" cellspacing="0">
+      <tr>
+        <td valign="top">
+          <div style="display:inline-block; background:#059669; color:#ffffff; font-size:10.5px; font-weight:800; letter-spacing:1px; text-transform:uppercase; padding:4px 12px; border-radius:20px; margin-bottom:10px;">
+            100% Full Payment Settled
+          </div>
+          <div style="font-size:13px; color:#a7f3d0; margin-bottom:6px; font-weight:500;">
+            Rayka Imitation Jewellery • Order #{{ $order->order_number }}
+          </div>
+          <div style="font-size:11px; color:#cbd5e1; text-transform:uppercase; letter-spacing:1px; margin-bottom:2px; font-weight:700;">
+            Total Order Value (100% Paid)
+          </div>
+          <div style="font-size:34px; font-weight:900; color:#ffffff; font-family:ui-monospace,Menlo,Consolas,monospace; letter-spacing:-0.5px; line-height:1.1; margin-bottom:10px;">
+            ₹{{ number_format($order->total_amount, 2) }}
+          </div>
+          <div style="font-size:11px; color:#6ee7b7; font-weight:600; line-height:1.4;">
+            Advance: ₹{{ number_format($order->advance_amount, 2) }} ({{ $order->advance_percentage }}%) + Delivery Balance: ₹{{ number_format($order->balance_amount, 2) }} (Settled via {{ $order->balance_status }})
+          </div>
+        </td>
+        <td align="right" valign="top" style="width:65px;">
+          <div style="width:54px; height:54px; background:#10b981; border-radius:50%; text-align:center; line-height:54px; display:inline-block; box-shadow:0 0 25px rgba(16, 185, 129, 0.45);">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#FFFFFF" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;display:inline-block;"><polyline points="20 6 9 17 4 12"></polyline></svg>
+          </div>
+        </td>
+      </tr>
+    </table>
   </div>
 
-  <div class="lg-box">
-    <div class="lg-box-header">Payment & Settlement Breakdown</div>
+  <div class="greeting">Dear {{ $order->address?->name ?? $order->user?->name ?? 'Valued Patron' }},</div>
+  <p class="message-text">
+    We are pleased to inform you that the remaining Cash on Delivery balance of <strong style="color:#10b981; font-size:14px;">₹{{ number_format($order->balance_amount, 2) }}</strong> for Order <strong>#{{ $order->order_number }}</strong> has been verified and settled! Your entire order is now <strong>100% fully paid</strong> and complete in our royal accounts ledger.
+  </p>
+
+  <!-- Attached Invoice Alert -->
+  <div class="alert-box alert-success" style="margin-bottom:20px; background:rgba(16, 185, 129, 0.12); border:1px solid #10b981; color:#a7f3d0; padding:14px 18px; border-radius:12px; font-size:12px; line-height:1.6;">
+    <strong style="color:#34d399; display:block; margin-bottom:4px; font-size:13px;">Official GST Tax Invoice Attached:</strong>
+    Your computer-generated official Tax Invoice (PDF) has been generated and attached directly to this email. You can also download or view it anytime using the button below.
+  </div>
+
+  <!-- Settlement Breakdown Card -->
+  <div class="lg-box" style="margin-top:16px; border:1px solid #10b981;">
+    <div class="lg-box-header" style="background:#062e22; color:#a7f3d0; display:flex; justify-content:space-between; align-items:center;">
+      <span>COD FINAL SETTLEMENT BREAKDOWN</span>
+      <span style="font-size:10px; font-weight:700; color:#34d399; background:rgba(52,211,153,0.15); padding:2px 8px; border-radius:4px; border:1px solid #34d399; white-space:nowrap;">
+        100% PAID & CLOSED
+      </span>
+    </div>
     <table class="detail-table">
       <tr>
         <td class="lbl">Order Number</td>
-        <td class="val font-mono">#{{ $order->order_number }}</td>
+        <td class="val font-mono" style="font-weight:700; color:#ffffff;">#{{ $order->order_number }}</td>
       </tr>
       <tr>
         <td class="lbl">Total Order Value</td>
-        <td class="val font-mono">₹{{ number_format($order->total_amount, 2) }}</td>
+        <td class="val font-mono" style="font-weight:800; color:#ffffff;">₹{{ number_format($order->total_amount, 2) }}</td>
       </tr>
       <tr>
         <td class="lbl">1. Advance Token (Paid Online)</td>
-        <td class="val" style="color:#10B981; font-weight:700;">₹{{ number_format($order->advance_amount, 2) }} ({{ $order->advance_percentage }}%)</td>
+        <td class="val" style="color:#38bdf8; font-weight:700;">₹{{ number_format($order->advance_amount, 2) }} ({{ $order->advance_percentage }}%)</td>
       </tr>
       <tr>
-        <td class="lbl">2. Balance on Delivery (Now Settled)</td>
-        <td class="val" style="color:#10B981; font-weight:700;">₹{{ number_format($order->balance_amount, 2) }}</td>
+        <td class="lbl">2. Balance on Delivery (Settled)</td>
+        <td class="val" style="color:#34d399; font-weight:700;">₹{{ number_format($order->balance_amount, 2) }}</td>
       </tr>
-      <tr style="border-top:1px dashed rgba(212,175,106,0.3); background:rgba(16,185,129,0.06);">
-        <td class="lbl" style="color:#065F46; font-weight:800;">Total Settlement Status</td>
-        <td class="val" style="color:#10B981; font-weight:900; font-size:13px;">
-          100% Fully Paid & Closed
+      <tr style="border-top:1px dashed rgba(16,185,129,0.3); background:rgba(16,185,129,0.08);">
+        <td class="lbl" style="color:#a7f3d0; font-weight:800;">Settlement Mode</td>
+        <td class="val" style="color:#ffffff; font-weight:800; font-size:12px;">
+          <span style="background:rgba(16,185,129,0.25); color:#34d399; padding:2px 10px; border-radius:12px; border:1px solid #10b981; font-weight:800;">{{ $order->balance_status }}</span>
         </td>
       </tr>
       @if($order->delivery_transaction_reference)
       <tr>
-        <td class="lbl">Delivery UTR / Cash Slip Ref</td>
-        <td class="val font-mono" style="font-weight:800; color:#1F2937;">{{ $order->delivery_transaction_reference }}</td>
+        <td class="lbl">Delivery UTR / Cash Ref</td>
+        <td class="val font-mono" style="font-weight:800; color:#ffffff;">{{ $order->delivery_transaction_reference }}</td>
       </tr>
       @endif
       <tr>
@@ -63,23 +122,29 @@
       @if($note)
       <tr>
         <td class="lbl">Accounts Verification Note</td>
-        <td class="val" style="color:#4A2C1D; font-style:italic;">{{ $note }}</td>
+        <td class="val" style="color:#D4AF6A; font-style:italic;">{{ $note }}</td>
       </tr>
       @endif
     </table>
   </div>
 
   @if(!empty($order->delivery_payment_screenshot))
-    <div class="alert-box" style="background:#ECFDF5; border:1px solid #A7F3D0; color:#065F46; padding:12px 16px; border-radius:10px; margin:16px 0; font-size:12px;">
-      <strong>Payment Receipt Attached:</strong> A copy of the confirmed balance transaction receipt has been attached to this email for your records.
+    <div class="alert-box" style="background:rgba(56,189,248,0.08); border:1px solid rgba(56,189,248,0.3); color:#bae6fd; padding:12px 16px; border-radius:10px; margin:16px 0; font-size:12px;">
+      <strong style="color:#38bdf8;">Delivery Proof Attached:</strong> A copy of the confirmed balance transaction receipt has been attached to this email for your financial records.
     </div>
   @endif
 
   <div class="alert-box" style="background:#FAF7F0; border:1px solid rgba(212,175,106,0.4); color:#4A2C1D; padding:12px 16px; border-radius:10px; margin:16px 0; font-size:12px; line-height:1.6;">
-    <strong>Order Settlement Complete:</strong> No further amount is due for this consignment. We sincerely appreciate your trust in Rayka Imitation Jewellery. We hope our royal creations bring you enduring joy and grace!
+    <strong>Order Settlement Complete:</strong> No further amount is due for this consignment. We sincerely appreciate your patronage of Rayka Imitation Jewellery. We hope our handcrafted ornaments bring you elegance and enduring beauty!
   </div>
 
-  <div class="btn-wrap">
-    <a href="{{ route('order.track', ['order_number' => $order->order_number]) }}" class="cta-btn">View Order Consignment</a>
+  <!-- Action Buttons -->
+  <div class="btn-wrap" style="margin-top:24px;">
+    <a href="{{ route('order.track.invoice', $order->order_number) }}" class="cta-btn" style="background:linear-gradient(135deg, #D4AF6A 0%, #996E2E 100%); color:#1C100B!important; box-shadow:0 4px 15px rgba(212,175,106,0.35); margin-right:8px; margin-bottom:8px;">
+      Download Official Tax Invoice (PDF)
+    </a>
+    <a href="{{ route('order.track', ['order_number' => $order->order_number]) }}" class="cta-btn" style="background:rgba(212,175,106,0.15); color:#E7C77B!important; border:1px solid #D4AF6A; margin-bottom:8px;">
+      View Consignment Details
+    </a>
   </div>
 @endsection

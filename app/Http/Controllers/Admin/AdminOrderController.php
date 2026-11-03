@@ -90,7 +90,8 @@ class AdminOrderController extends Controller
                 try {
                     $customerEmail = $order->address?->email ?: ($order->user?->email ?: null);
                     if ($customerEmail) {
-                        Mail::to($customerEmail)->send(new OrderStatusUpdatedCustomerMail($order, 'Confirmed', $adminNote, true));
+                        $attachInvoice = ! $order->isCod();
+                        Mail::to($customerEmail)->send(new OrderStatusUpdatedCustomerMail($order, 'Confirmed', $adminNote, $attachInvoice));
                     }
                 } catch (\Throwable $e) {
                     Log::warning("Order #{$order->order_number} payment confirmation email warning: ".$e->getMessage());
@@ -453,7 +454,8 @@ class AdminOrderController extends Controller
                     if (in_array($newStatus, ['Cancelled', 'Rejected'])) {
                         Mail::to($customerEmail)->send(new OrderCancelledByAdminCustomerMail($order, $newStatus, $reasonNote ?: "Order marked as {$newStatus} by administrator."));
                     } elseif (in_array($newStatus, ['Confirmed', 'Processing', 'Shipped', 'Delivered'])) {
-                        Mail::to($customerEmail)->send(new OrderStatusUpdatedCustomerMail($order, $newStatus, $request->input('admin_note'), $newStatus === 'Confirmed'));
+                        $attachInvoice = ($newStatus === 'Confirmed') && ! $order->isCod();
+                        Mail::to($customerEmail)->send(new OrderStatusUpdatedCustomerMail($order, $newStatus, $request->input('admin_note'), $attachInvoice));
                     }
                 }
             } catch (\Throwable $e) {

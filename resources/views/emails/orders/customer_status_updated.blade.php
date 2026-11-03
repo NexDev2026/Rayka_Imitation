@@ -1,19 +1,38 @@
 @php
   $currentStatus = (string) ($status ?? '');
+  $isCod = $order->isCod();
   $statusIcon = match($currentStatus) {
-    'Confirmed' => '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;display:inline-block;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>',
+    'Confirmed' => $isCod
+      ? '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;display:inline-block;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>'
+      : '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#22C55E" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;display:inline-block;"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>',
     'Processing' => '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D4AF6A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;display:inline-block;"><circle cx="12" cy="12" r="3"></circle><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path></svg>',
     'Shipped' => '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#38BDF8" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;display:inline-block;"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>',
     'Delivered' => '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D4AF6A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;display:inline-block;"><polyline points="20 12 20 22 4 22 4 12"></polyline><rect x="2" y="7" width="20" height="5"></rect><line x1="12" y1="22" x2="12" y2="7"></line><path d="M12 7H7.5a2.5 2.5 0 0 1 0-5C11 2 12 7 12 7z"></path><path d="M12 7h4.5a2.5 2.5 0 0 0 0-5C13 2 12 7 12 7z"></path></svg>',
     default => '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#D4AF6A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" style="vertical-align:middle;display:inline-block;"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>',
   };
+
+  $emailTitle = ($currentStatus === 'Confirmed')
+    ? ($isCod 
+        ? ('COD Advance Token Verified & Confirmed — Order #' . $order->order_number . ' — Rayka') 
+        : ('Payment Confirmed & Tax Invoice — Order #' . $order->order_number . ' — Rayka'))
+    : ('Order Status: ' . $currentStatus . ' — #' . $order->order_number . ' — Rayka');
+
+  $headerTitle = ($currentStatus === 'Confirmed')
+    ? ($isCod ? 'Advance Token Verified & Order Confirmed' : 'Payment Confirmed')
+    : ('Order Status: ' . $currentStatus);
+
+  $headerSubtitle = ($currentStatus === 'Confirmed')
+    ? ($isCod 
+        ? ('Order #' . $order->order_number . ' • ' . $order->advance_percentage . '% Advance Token Verified & Booked') 
+        : ('Tax Invoice & Payment Receipt — Order #' . $order->order_number))
+    : ('Latest progress on Order #' . $order->order_number);
 @endphp
 
 @extends('emails.layouts.master', [
-    'emailTitle' => ($status === 'Confirmed' ? 'Payment Confirmed & Tax Invoice — Order #' : 'Order Status: ' . $status . ' — #') . $order->order_number . ' — Rayka',
+    'emailTitle' => $emailTitle,
     'headerIcon' => $statusIcon,
-    'headerTitle' => $status === 'Confirmed' ? 'Payment Confirmed' : 'Order Status: ' . $status,
-    'headerSubtitle' => $status === 'Confirmed' ? 'Tax Invoice & Payment Receipt — Order #' . $order->order_number : 'Latest progress on Order #' . $order->order_number
+    'headerTitle' => $headerTitle,
+    'headerSubtitle' => $headerSubtitle
 ])
 
 @section('schema_markup')
@@ -118,16 +137,25 @@
       </p>
     @endif
 
-    <!-- Attached Invoice Alert -->
+    <!-- Attached Invoice / Advance Notice Alert -->
+    @if(!$order->isCod())
     <div class="alert-box alert-success" style="margin-bottom:20px;">
       <strong>Official Tax Invoice Attached:</strong> Your computer-generated GST Tax Invoice (PDF) has been generated and attached directly to this email. You can also download or print it anytime using the button below.
     </div>
+    @else
+    <div class="alert-box" style="margin-bottom:20px; background:rgba(2,132,199,0.12); border:1px solid #0284c7; color:#bae6fd; padding:14px 18px; border-radius:12px; font-size:12px; line-height:1.6;">
+      <strong style="color:#38bdf8; display:block; margin-bottom:4px; font-size:13px;">COD Advance Booking Confirmed:</strong>
+      Your {{ $order->advance_percentage }}% advance token has been verified and settled. The remaining balance of <strong>₹{{ number_format($order->balance_amount, 2) }}</strong> will be collected upon delivery via Cash or QR. Your official final Tax Invoice will be issued upon delivery and balance settlement.
+    </div>
+    @endif
 
-    <!-- Official In-Email Tax Invoice Card -->
-    <div class="lg-box" style="margin-top:16px; border:1px solid #D4AF6A;">
-      <div class="lg-box-header" style="background:#241610; color:#E7C77B; display:flex; justify-content:space-between; align-items:center;">
-        <span>TAX INVOICE & RECEIPT</span>
-        <span style="font-size:10px; font-weight:700; color:#10B981; background:rgba(16,185,129,0.15); padding:2px 8px; border-radius:4px; border:1px solid #10B981;">VERIFIED & CONFIRMED</span>
+    <!-- Official In-Email Tax Invoice / COD Receipt Card -->
+    <div class="lg-box" style="margin-top:16px; border:1px solid {{ $order->isCod() ? '#0284c7' : '#D4AF6A' }};">
+      <div class="lg-box-header" style="background:{{ $order->isCod() ? '#0c2340' : '#241610' }}; color:{{ $order->isCod() ? '#38bdf8' : '#E7C77B' }}; display:flex; justify-content:space-between; align-items:center;">
+        <span>{{ $order->isCod() ? 'COD BOOKING RECEIPT & ADVANCE CONFIRMATION' : 'TAX INVOICE & RECEIPT' }}</span>
+        <span style="font-size:10px; font-weight:700; color:{{ $order->isCod() ? '#38bdf8' : '#10B981' }}; background:{{ $order->isCod() ? 'rgba(56,189,248,0.15)' : 'rgba(16,185,129,0.15)' }}; padding:2px 8px; border-radius:4px; border:1px solid {{ $order->isCod() ? '#38bdf8' : '#10B981' }}; white-space:nowrap;">
+          {{ $order->isCod() ? 'ADVANCE TOKEN VERIFIED' : 'VERIFIED & CONFIRMED' }}
+        </span>
       </div>
 
       <!-- Invoice Meta Grid -->
@@ -241,11 +269,17 @@
       </table>
     </div>
 
-    <!-- Download Invoice Button -->
+    <!-- Download Invoice Button / View Consignment Button -->
     <div class="btn-wrap" style="margin-top:24px;">
+      @if(!$order->isCod())
       <a href="{{ route('order.track.invoice', $order->order_number) }}" class="cta-btn" style="background:linear-gradient(135deg, #D4AF6A 0%, #996E2E 100%); color:#1C100B!important; box-shadow:0 4px 15px rgba(212,175,106,0.35);">
         Download Official Tax Invoice (PDF)
       </a>
+      @else
+      <a href="{{ route('order.track', ['order_number' => $order->order_number]) }}" class="cta-btn" style="background:linear-gradient(135deg, #0284c7 0%, #0369a1 100%); color:#ffffff!important; box-shadow:0 4px 15px rgba(2,132,199,0.35);">
+        View Live Order Tracking & Doorstep Balance →
+      </a>
+      @endif
     </div>
 
   @elseif($status === 'Processing')

@@ -27,7 +27,11 @@ class OrderStatusUpdatedCustomerMail extends Mailable
         $this->order->loadMissing(['items.product', 'address', 'payment', 'user']);
 
         // Generate and attach Tax Invoice PDF if payment is confirmed or explicitly requested
-        if ($attachInvoice || $status === 'Confirmed') {
+        // For COD orders, only attach invoice if explicitly requested or if full balance is settled,
+        // NEVER automatically on initial 'Confirmed' status because on COD Confirmed, only the advance token is paid!
+        // The full official tax invoice is sent when the COD delivery balance is settled via OrderCodBalanceSettledCustomerMail.
+        $shouldAttachInvoice = $attachInvoice || ($status === 'Confirmed' && ! $this->order->isCod());
+        if ($shouldAttachInvoice) {
             try {
                 $storeName = StoreSetting::get('store_name', 'Rayka Imitation Jewellery');
                 $storeAddress = StoreSetting::get('store_address', 'Surat, Gujarat, India');
@@ -53,13 +57,18 @@ class OrderStatusUpdatedCustomerMail extends Mailable
 
     public function envelope(): Envelope
     {
-        $subject = match ($this->status) {
-            'Confirmed' => 'Payment successful for Rayka Imitation Jewellery — Order #'.$this->order->order_number,
-            'Processing' => 'Creations in Crafting — Order #'.$this->order->order_number.' (Rayka)',
-            'Shipped' => 'Your Ornaments Have Been Dispatched — Order #'.$this->order->order_number.' (Rayka)',
-            'Delivered' => 'Order Delivered with Royal Compliments — #'.$this->order->order_number.' (Rayka)',
-            default => "Order #{$this->order->order_number} Status Update — Rayka",
-        };
+        if ($this->status === 'Confirmed') {
+            $subject = $this->order->isCod()
+                ? 'COD Advance Token Verified & Booking Confirmed — Order #'.$this->order->order_number.' (Rayka)'
+                : 'Payment successful for Rayka Imitation Jewellery — Order #'.$this->order->order_number;
+        } else {
+            $subject = match ($this->status) {
+                'Processing' => 'Creations in Crafting — Order #'.$this->order->order_number.' (Rayka)',
+                'Shipped' => 'Your Ornaments Have Been Dispatched — Order #'.$this->order->order_number.' (Rayka)',
+                'Delivered' => 'Order Delivered with Royal Compliments — #'.$this->order->order_number.' (Rayka)',
+                default => "Order #{$this->order->order_number} Status Update — Rayka",
+            };
+        }
 
         return new Envelope(subject: $subject);
     }

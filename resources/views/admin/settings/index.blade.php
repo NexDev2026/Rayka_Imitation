@@ -385,7 +385,10 @@
                                     <span>Reset to Primary Store QR</span>
                                 </label>
                             @else
-                                <img src="{{ asset($settings['qr_code_image']) }}" alt="Primary Store QR" class="w-32 h-32 object-contain mx-auto border rounded-lg p-1 bg-white shadow-2xs">
+                                @php
+                                    $fallbackPrimaryQr = !empty($settings['qr_code_image']) ? asset($settings['qr_code_image']) : asset('images/qr/sample-upi-qr.svg');
+                                @endphp
+                                <img src="{{ $fallbackPrimaryQr }}" alt="Primary Store QR" class="w-32 h-32 object-contain mx-auto border rounded-lg p-1 bg-white shadow-2xs">
                                 <span class="text-[10px] text-stone-500 font-medium block">Using Primary Store UPI QR (Default)</span>
                             @endif
                         </div>

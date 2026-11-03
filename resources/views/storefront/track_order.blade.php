@@ -715,6 +715,43 @@
                             </div>
                         </div>
                     @endif
+                @elseif($order->isCod() && $order->isBalanceSettled() && !$order->isCancelled() && !$order->isRejected())
+                    <!-- SETTLED STATE: 100% Full Payment Completed & Verified -->
+                    <div class="p-4 sm:p-6 bg-gradient-to-r from-emerald-50/80 via-white to-emerald-50/80 border-t border-emerald-200">
+                        <div class="max-w-2xl mx-auto p-4 sm:p-5 rounded-2xl bg-white border border-emerald-300 shadow-2xs space-y-3">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-2.5 border-b border-emerald-100">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-9 h-9 rounded-xl bg-emerald-600 text-white flex items-center justify-center font-bold text-base shrink-0 shadow-xs">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-serif-royal font-bold text-sm sm:text-base text-emerald-950">Full Payment Completed & Settled</h4>
+                                        <p class="text-[11px] text-stone-500">
+                                            100% of order value (₹{{ number_format($order->total_amount) }}) has been received. Token advance & doorstep balance are fully settled.
+                                        </p>
+                                    </div>
+                                </div>
+                                <span class="self-start sm:self-auto px-3 py-1 bg-emerald-100 text-emerald-900 border border-emerald-300 font-bold text-[11px] rounded-full whitespace-nowrap">
+                                    100% Settled & Closed
+                                </span>
+                            </div>
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pt-1">
+                                <div class="text-xs text-stone-600 space-y-0.5">
+                                    <p>Settlement Method: <strong class="text-emerald-900 font-semibold">{{ $order->balance_status }}</strong></p>
+                                    @if($order->delivery_transaction_reference)
+                                        <p>Ref / UTR: <strong class="font-mono text-stone-900">{{ $order->delivery_transaction_reference }}</strong></p>
+                                    @endif
+                                    <p class="text-[11px] text-stone-400">Verified: {{ $order->delivery_paid_at?->format('d M, Y \a\t h:i A') ?? 'Confirmed' }}</p>
+                                </div>
+                                <div class="shrink-0">
+                                    <a href="{{ route('order.track.invoice', $order->order_number) }}" class="inline-flex items-center gap-2 px-4 py-2 rounded-xl text-xs font-bold text-[#1C100B] bg-gradient-to-r from-[#D4AF6A] to-[#996E2E] shadow-xs hover:shadow-md transition">
+                                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"/></svg>
+                                        <span>Download Tax Invoice</span>
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 @endif
 
                 <!-- 5. Royal Concierge Assistance Bar -->

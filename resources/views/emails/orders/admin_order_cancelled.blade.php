@@ -51,7 +51,7 @@
       </tr>
       <tr>
         <td class="lbl">Inventory Status</td>
-        <td class="val" style="color:#10B981; font-weight:700;">✓ Automatically Restored</td>
+        <td class="val" style="color:#10B981; font-weight:700;">Restored to available stock</td>
       </tr>
     </table>
   </div>

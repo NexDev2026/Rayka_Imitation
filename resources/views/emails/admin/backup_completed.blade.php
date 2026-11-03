@@ -26,7 +26,7 @@
         <td class="lbl">Delivery Mode</td>
         <td class="val" style="font-weight:700;">
           @if(!empty($data['is_attached']))
-            <span style="color:#10B981;">✓ Attached directly to this email (.zip)</span>
+            <span style="color:#10B981; font-weight:700;">Attached directly to this email (.zip)</span>
           @else
             <span style="color:#D4AF6A;">Saved securely on server storage</span>
           @endif
