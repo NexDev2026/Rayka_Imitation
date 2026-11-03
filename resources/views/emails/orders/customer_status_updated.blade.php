@@ -11,18 +11,18 @@
 
   $emailTitle = ($currentStatus === 'Confirmed')
     ? ($isCod 
-        ? ('COD Advance Token Verified & Confirmed — Order #' . $order->order_number . ' — Rayka') 
-        : ('Payment Confirmed & Tax Invoice — Order #' . $order->order_number . ' — Rayka'))
+        ? ('Order Confirmed (COD Advance Verified) — #' . $order->order_number . ' — Rayka') 
+        : ('Payment Confirmed — Order #' . $order->order_number . ' — Rayka'))
     : ('Order Status: ' . $currentStatus . ' — #' . $order->order_number . ' — Rayka');
 
   $headerTitle = ($currentStatus === 'Confirmed')
-    ? ($isCod ? 'Advance Token Confirmed' : 'Payment Confirmed')
+    ? ($isCod ? 'Order Confirmed' : 'Payment Confirmed')
     : ('Order Status: ' . $currentStatus);
 
   $headerSubtitle = ($currentStatus === 'Confirmed')
     ? ($isCod 
-        ? ('Order #' . $order->order_number . ' • ' . $order->advance_percentage . '% Token Advance Verified') 
-        : ('Tax Invoice & Payment Receipt — Order #' . $order->order_number))
+        ? ('Order #' . $order->order_number . ' • ' . $order->advance_percentage . '% Token Verified') 
+        : ('Tax Invoice & Receipt — Order #' . $order->order_number))
     : ('Latest progress on Order #' . $order->order_number);
 @endphp
 
@@ -33,360 +33,160 @@
     'headerSubtitle' => $headerSubtitle
 ])
 
-@section('schema_markup')
-<script type="application/ld+json">
-{
-  "{{ '@context' }}": "https://schema.org",
-  "{{ '@type' }}": "Invoice",
-  "accountId": "{{ $order->order_number }}",
-  "name": "Rayka Imitation Jewellery bill",
-  "description": "Rayka Order #{{ $order->order_number }}",
-  "paymentDue": "{{ \Carbon\Carbon::parse($order->created_at)->toIso8601String() }}",
-  "paymentStatus": "{{ $status === 'Confirmed' ? 'PaymentAutomaticallyApplied' : 'PaymentDue' }}",
-  "provider": {
-    "{{ '@type' }}": "Organization",
-    "name": "Rayka Imitation Jewellery",
-    "url": "https://raykaimitation.com"
-  },
-  "totalPaymentDue": {
-    "{{ '@type' }}": "PriceSpecification",
-    "price": "{{ number_format($order->total_amount, 2, '.', '') }}",
-    "priceCurrency": "INR"
-  },
-  "customer": {
-    "{{ '@type' }}": "Person",
-    "name": "{{ addslashes($order->address?->name ?? $order->user?->name ?? 'Valued Patron') }}"
-  },
-  "referencesOrder": {
-    "{{ '@type' }}": "Order",
-    "merchant": {
-      "{{ '@type' }}": "Organization",
-      "name": "Rayka Imitation Jewellery"
-    },
-    "orderNumber": "{{ $order->order_number }}",
-    "priceCurrency": "INR",
-    "price": "{{ number_format($order->total_amount, 2, '.', '') }}",
-    "orderStatus": "https://schema.org/Order{{ $status === 'Delivered' ? 'Delivered' : ($status === 'Shipped' ? 'InTransit' : 'Processing') }}",
-    "potentialAction": {
-      "{{ '@type' }}": "ViewAction",
-      "name": "Track Order",
-      "target": "{{ route('order.track', ['order_number' => $order->order_number]) }}"
-    }
-  }
-}
-</script>
-@endsection
-
 @section('content')
-  @if($status === 'Confirmed')
-  <!-- Royal Velvet Payment Card -->
-  <div style="background:linear-gradient(135deg, #24140C 0%, #170B06 100%); border:1px solid rgba(212, 175, 106, 0.45); border-radius:18px; padding:22px 24px; margin-bottom:28px; box-shadow:0 12px 35px rgba(0,0,0,0.65);">
+  <!-- Compact Luxury Hero Card -->
+  <div style="background:linear-gradient(135deg, #24140C 0%, #170B06 100%); border:1px solid rgba(212, 175, 106, 0.45); border-radius:16px; padding:18px 20px; margin-bottom:22px; box-shadow:0 10px 30px rgba(0,0,0,0.65);">
     <table width="100%" border="0" cellpadding="0" cellspacing="0">
       <tr>
         <td valign="top">
-          <div style="display:inline-block; background:rgba(212, 175, 106, 0.16); border:1px solid #D4AF6A; color:#E7C77B; font-size:10px; font-weight:800; letter-spacing:1px; text-transform:uppercase; padding:4px 12px; border-radius:20px; margin-bottom:10px;">
-            {{ $order->isCod() ? 'Advance Token Verified on ' : 'Paid on ' }}{{ \Carbon\Carbon::parse($order->payment?->verified_at ?? $order->created_at)->format('d M') }}
+          <div style="display:inline-block; background:rgba(212, 175, 106, 0.16); border:1px solid #D4AF6A; color:#E7C77B; font-size:10px; font-weight:800; letter-spacing:1px; text-transform:uppercase; padding:3px 10px; border-radius:20px; margin-bottom:8px;">
+            {{ $status === 'Confirmed' ? ($isCod ? 'Advance Verified' : 'Payment Confirmed') : ('Status: ' . $status) }}
           </div>
-          <div style="font-size:12px; color:#A8988B; margin-bottom:6px; font-weight:500;">
-            Rayka Imitation Jewellery bill • Order #{{ $order->order_number }}
+          <div style="font-size:11.5px; color:#A8988B; margin-bottom:4px; font-weight:500;">
+            Order #{{ $order->order_number }} • {{ \Carbon\Carbon::parse($order->created_at)->format('d M, Y') }}
           </div>
-          @if($order->isCod())
-            <div style="font-size:11px; color:#D4AF6A; text-transform:uppercase; letter-spacing:1px; margin-bottom:2px; font-weight:700;">
-              1. Advance Token Paid ({{ $order->advance_percentage }}% Online)
+          @if($status === 'Confirmed' && $isCod)
+            <div style="font-size:10.5px; color:#D4AF6A; text-transform:uppercase; letter-spacing:1px; font-weight:700;">
+              Advance Paid Online: <span style="font-size:18px; color:#FFFFFF; font-weight:900; font-family:monospace;">₹{{ number_format($order->advance_amount, 2) }}</span>
             </div>
-            <div style="font-size:28px; font-weight:900; color:#FFFFFF; font-family:ui-monospace,Menlo,Consolas,monospace; letter-spacing:-0.5px; line-height:1.1; margin-bottom:8px;">
-              ₹{{ number_format($order->advance_amount, 2) }}
-            </div>
-            <div style="font-size:11px; color:#E7C77B; text-transform:uppercase; letter-spacing:1px; margin-bottom:2px; font-weight:700;">
-              2. Remaining Balance Payable on Delivery
-            </div>
-            <div style="font-size:20px; font-weight:800; color:#FDFBF7; font-family:ui-monospace,Menlo,Consolas,monospace; line-height:1.1;">
-              ₹{{ number_format($order->balance_amount, 2) }}
+            <div style="font-size:11px; color:#E7C77B; margin-top:4px; font-weight:600;">
+              Doorstep Balance Due: <strong style="color:#FFFFFF; font-family:monospace; font-size:14px;">₹{{ number_format($order->balance_amount, 2) }}</strong>
             </div>
           @else
-            <div style="font-size:11px; color:#D4AF6A; text-transform:uppercase; letter-spacing:1px; margin-bottom:2px; font-weight:700;">
-              Amount Paid
+            <div style="font-size:10.5px; color:#D4AF6A; text-transform:uppercase; letter-spacing:1px; font-weight:700;">
+              Total Order Value
             </div>
-            <div style="font-size:34px; font-weight:900; color:#FFFFFF; font-family:ui-monospace,Menlo,Consolas,monospace; letter-spacing:-0.5px; line-height:1.1;">
+            <div style="font-size:26px; font-weight:900; color:#FFFFFF; font-family:monospace; letter-spacing:-0.5px; line-height:1.1;">
               ₹{{ number_format($order->total_amount, 2) }}
             </div>
           @endif
         </td>
-        <td align="right" valign="top" style="width:60px;">
-          <div style="width:48px; height:48px; background:#059669; border:2px solid #10B981; border-radius:50%; text-align:center; line-height:44px; display:inline-block; box-shadow:0 0 20px rgba(16, 185, 129, 0.45); font-size:24px; color:#ffffff !important; font-weight:900; font-family:Arial,Helvetica,sans-serif;">
+        <td align="right" valign="top" style="width:50px;">
+          <div style="width:42px; height:42px; background:#059669; border:2px solid #10B981; border-radius:50%; text-align:center; line-height:38px; display:inline-block; font-size:20px; color:#ffffff !important; font-weight:900; font-family:Arial,Helvetica,sans-serif;">
             &#10004;
           </div>
         </td>
       </tr>
     </table>
   </div>
-  @endif
 
   <div class="greeting">Dear {{ $order->address?->name ?? $order->user?->name ?? 'Valued Patron' }},</div>
   
   @if($status === 'Confirmed')
-    @if($order->isCod())
+    @if($isCod)
       <p class="message-text">
-        We are delighted to confirm that your <strong>{{ $order->advance_percentage }}% advance booking token of ₹{{ number_format($order->advance_amount, 2) }}</strong> for Order <strong>#{{ $order->order_number }}</strong> has been verified and settled! Your creations are now confirmed and queued for careful hallmark inspection, polishing, and royal packaging. The remaining balance of <strong>₹{{ number_format($order->balance_amount, 2) }}</strong> will be payable upon doorstep delivery via Cash or QR.
+        Your <strong>{{ $order->advance_percentage }}% advance token (₹{{ number_format($order->advance_amount, 2) }})</strong> has been verified. Your order is confirmed and currently queued for hallmark inspection and royal packaging. The remaining balance of <strong>₹{{ number_format($order->balance_amount, 2) }}</strong> will be collected upon doorstep delivery via Cash or QR.
       </p>
     @else
       <p class="message-text">
-        We are delighted to confirm that your payment of <strong style="color:#D4AF6A; font-size:15px;">₹{{ number_format($order->total_amount, 2) }}</strong> for Order <strong>#{{ $order->order_number }}</strong> has been verified and settled by our accounts concierge!
+        Your payment of <strong style="color:#D4AF6A;">₹{{ number_format($order->total_amount, 2) }}</strong> has been verified. Your order is confirmed and being prepared for royal dispatch. Your official Tax Invoice (PDF) is attached.
       </p>
     @endif
-
-    <!-- Attached Invoice / Advance Notice Alert -->
-    @if(!$order->isCod())
-    <div class="alert-box alert-success" style="margin-bottom:20px;">
-      <strong>Official Tax Invoice Attached:</strong> Your computer-generated GST Tax Invoice (PDF) has been generated and attached directly to this email. You can also download or print it anytime using the button below.
-    </div>
-    @else
-    <div class="alert-box" style="margin-bottom:20px; background:rgba(212, 175, 106, 0.08); border-left:4px solid #D4AF6A; border:1px solid rgba(212, 175, 106, 0.25); border-left-width:4px; color:#FAF7F0; padding:14px 18px; border-radius:10px; font-size:12.5px; line-height:1.6;">
-      <strong style="color:#E7C77B; display:block; margin-bottom:4px; font-size:13px; font-weight:800;">COD Advance Booking Confirmed:</strong>
-      Your {{ $order->advance_percentage }}% advance token has been verified and settled. The remaining balance of <strong style="color:#FFFFFF;">₹{{ number_format($order->balance_amount, 2) }}</strong> will be collected upon delivery via Cash or QR. Your official final Tax Invoice will be issued upon delivery and balance settlement.
-    </div>
-    @endif
-
-    <!-- Official In-Email Tax Invoice / COD Receipt Card -->
-    <div class="lg-box" style="margin-top:16px; border:1px solid rgba(212, 175, 106, 0.35); border-radius:16px; overflow:hidden;">
-      <div style="background:#241610; border-bottom:1px solid rgba(212, 175, 106, 0.25); padding:10px 16px;">
-        <table width="100%" border="0" cellpadding="0" cellspacing="0">
-          <tr>
-            <td align="left" valign="middle" style="color:#E7C77B; font-size:11px; font-weight:800; letter-spacing:1px; text-transform:uppercase;">
-              {{ $order->isCod() ? 'COD BOOKING RECEIPT' : 'TAX INVOICE & RECEIPT' }}
-            </td>
-            <td align="right" valign="middle" style="white-space:nowrap; padding-left:8px;">
-              <span style="font-size:10px; font-weight:800; color:#10B981; background:rgba(16,185,129,0.15); border:1px solid #10B981; padding:3px 8px; border-radius:12px; display:inline-block; white-space:nowrap; text-transform:uppercase;">
-                {{ $order->isCod() ? 'ADVANCE VERIFIED' : 'CONFIRMED' }}
-              </span>
-            </td>
-          </tr>
-        </table>
-      </div>
-
-      <!-- Invoice Meta Grid -->
-      <table class="detail-table" style="border-bottom:1px solid #332017;">
-        <tr>
-          <td class="lbl">Invoice Number</td>
-          <td class="val font-mono" style="color:#FFFFFF; font-weight:700;">#{{ $order->order_number }}</td>
-        </tr>
-        <tr>
-          <td class="lbl">Payment Date</td>
-          <td class="val">{{ $order->payment?->verified_at ? $order->payment->verified_at->format('d M, Y \a\t h:i A') : now()->format('d M, Y \a\t h:i A') }} IST</td>
-        </tr>
-        <tr>
-          <td class="lbl">Payment Method</td>
-          <td class="val" style="color:#D4AF6A;">{{ $order->payment?->payment_method ?: 'UPI QR Code' }}</td>
-        </tr>
-        @if($order->payment?->transaction_reference)
-        <tr>
-          <td class="lbl">UTR / Ref No.</td>
-          <td class="val font-mono">{{ $order->payment->transaction_reference }}</td>
-        </tr>
-        @endif
-        <tr>
-          <td class="lbl">HSN Classification</td>
-          <td class="val">7117 (Imitation Jewellery — 3% GST Included)</td>
-        </tr>
-      </table>
-
-      <!-- Billing & Shipping Information -->
-      @if($order->address)
-      <div style="padding:14px 18px; border-bottom:1px solid #332017; font-size:12px; line-height:1.6; color:#D8CDC2;">
-        <span style="font-size:10px; text-transform:uppercase; font-weight:700; color:#D4AF6A; letter-spacing:1px; display:block; margin-bottom:4px;">Billed & Shipped To:</span>
-        <strong style="color:#FFFFFF; font-size:13px;">{{ $order->address->name }}</strong><br>
-        {{ $order->address->formatted_address }}<br>
-        <span style="color:#A8988B;">Phone: {{ $order->address->mobile }} | Email: {{ $order->address->email }}</span>
-      </div>
-      @endif
-
-      <!-- Itemized Table -->
-      <div style="padding:10px 14px 4px;">
-        <div style="font-size:10px; text-transform:uppercase; font-weight:700; color:#D4AF6A; letter-spacing:1px; margin-bottom:8px;">Itemized Jewellery Breakdown:</div>
-        <table style="width:100%; border-collapse:collapse; font-size:11.5px; color:#E2D9D0;">
-          <thead>
-            <tr style="border-bottom:1px solid #3D261B; text-align:left; color:#D4AF6A; font-size:10px; text-transform:uppercase;">
-              <th style="padding:6px 4px;">Creation Details</th>
-              <th style="padding:6px 4px; text-align:right;">Amount</th>
-            </tr>
-          </thead>
-          <tbody>
-            @foreach($order->items as $item)
-            <tr style="border-bottom:1px solid #291811;">
-              <td style="padding:8px 4px; vertical-align:middle;">
-                <strong style="color:#FFFFFF; font-size:12px; display:block;">{{ $item->product_name }}</strong>
-                @if($item->variant_info)
-                  <div style="font-size:10px; color:#A8988B;">Variant: {{ $item->variant_info }}</div>
-                @endif
-                <div style="font-size:10px; color:#A8988B; margin-top:2px;">
-                  ₹{{ number_format($item->unit_price, 2) }} × {{ $item->quantity }}
-                </div>
-              </td>
-              <td style="padding:8px 4px; text-align:right; font-family:monospace; font-weight:700; color:#FFFFFF; font-size:13px; vertical-align:middle; white-space:nowrap;">
-                ₹{{ number_format($item->subtotal, 2) }}
-              </td>
-            </tr>
-            @endforeach
-          </tbody>
-        </table>
-      </div>
-
-      <!-- Financial Totals -->
-      <table class="detail-table" style="margin-top:6px;">
-        <tr>
-          <td class="lbl">Subtotal</td>
-          <td class="val">₹{{ number_format($order->subtotal, 2) }}</td>
-        </tr>
-        @if($order->coupon_discount > 0)
-        <tr>
-          <td class="lbl" style="color:#10B981;">Coupon Discount ({{ $order->coupon_code }})</td>
-          <td class="val" style="color:#10B981; font-weight:700;">− ₹{{ number_format($order->coupon_discount, 2) }}</td>
-        </tr>
-        @endif
-        <tr>
-          <td class="lbl">Shipping & Handling</td>
-          <td class="val">{{ $order->shipping_fee == 0 ? 'FREE' : '₹' . number_format($order->shipping_fee, 2) }}</td>
-        </tr>
-        @if($order->cod_extra_charge > 0)
-        <tr>
-          <td class="lbl" style="color:#D4AF6A;">COD Courier Handling Fee</td>
-          <td class="val" style="color:#D4AF6A; font-weight:700;">+ ₹{{ number_format($order->cod_extra_charge, 2) }}</td>
-        </tr>
-        @endif
-        @if($order->isCod())
-        <tr style="background:#241610;">
-          <td class="lbl" style="font-size:13px; font-weight:800; color:#FFFFFF; padding-top:10px; padding-bottom:10px;">Total Order Value</td>
-          <td class="val" style="font-size:16px; color:#D4AF6A; font-weight:900; padding-top:10px; padding-bottom:10px; font-family:monospace;">₹{{ number_format($order->total_amount, 2) }}</td>
-        </tr>
-        <tr style="background:rgba(212,175,106,0.12); border-top:1px dashed #D4AF6A;">
-          <td class="lbl" style="color:#E7C77B; font-weight:700;">1. Advance Token Paid ({{ $order->advance_percentage }}%)</td>
-          <td class="val" style="color:#E7C77B; font-weight:800; font-family:monospace;">₹{{ number_format($order->advance_amount, 2) }}</td>
-        </tr>
-        <tr style="background:rgba(212,175,106,0.18);">
-          <td class="lbl" style="color:#ffffff; font-weight:800;">2. Balance Due on Delivery</td>
-          <td class="val" style="color:#ffffff; font-weight:900; font-size:15px; font-family:monospace;">₹{{ number_format($order->balance_amount, 2) }}</td>
-        </tr>
-        @else
-        <tr style="background:#241610;">
-          <td class="lbl" style="font-size:13px; font-weight:800; color:#FFFFFF; padding-top:10px; padding-bottom:10px;">Grand Total (Paid)</td>
-          <td class="val" style="font-size:16px; color:#D4AF6A; font-weight:900; padding-top:10px; padding-bottom:10px;">₹{{ number_format($order->total_amount, 2) }}</td>
-        </tr>
-        @endif
-      </table>
-    </div>
-
-    <!-- Download Invoice Button / View Consignment Button -->
-    <div class="btn-wrap" style="margin-top:24px;">
-      @if(!$order->isCod())
-      <a href="{{ route('order.track.invoice', $order->order_number) }}" class="cta-btn" style="background:linear-gradient(135deg, #D4AF6A 0%, #996E2E 100%); color:#1C100B!important; box-shadow:0 4px 15px rgba(212,175,106,0.35);">
-        Download Official Tax Invoice (PDF)
-      </a>
-      @else
-      <a href="{{ route('order.track', ['order_number' => $order->order_number]) }}" class="cta-btn" style="background:linear-gradient(135deg, #D4AF6A 0%, #996E2E 100%); color:#1C100B!important; box-shadow:0 4px 15px rgba(212,175,106,0.35);">
-        View Live Order Tracking & Doorstep Balance →
-      </a>
-      @endif
-    </div>
-
   @elseif($status === 'Processing')
     <p class="message-text">
-      Your royal creations for Order <strong>#{{ $order->order_number }}</strong> are now in our master workshop. Each piece is undergoing 1-gram micro gold quality inspection, polishing, and bespoke velvet jewelry packaging.
+      Your creations for Order <strong>#{{ $order->order_number }}</strong> are now in our master workshop undergoing 1-gram micro gold hallmark finishing and packaging.
     </p>
-
-    <!-- Order Details Box -->
-    <div class="lg-box" style="margin-top:20px;">
-      <div class="lg-box-header">Order Summary</div>
-      <table class="detail-table">
-        <tr>
-          <td class="lbl">Order Number</td>
-          <td class="val font-mono">#{{ $order->order_number }}</td>
-        </tr>
-        <tr>
-          <td class="lbl">Items Count</td>
-          <td class="val">{{ $order->items->sum('quantity') }} creations</td>
-        </tr>
-        <tr>
-          <td class="lbl">Total Value</td>
-          <td class="val" style="color:#D4AF6A; font-weight:800;">₹{{ number_format($order->total_amount, 2) }}</td>
-        </tr>
-        @if($order->address)
-        <tr>
-          <td class="lbl">Shipping Destination</td>
-          <td class="val" style="font-size:11px;">{{ $order->address->city }}, {{ $order->address->state }} ({{ $order->address->pincode }})</td>
-        </tr>
-        @endif
-      </table>
-    </div>
-
   @elseif($status === 'Shipped')
     <p class="message-text">
-      Exciting news! Your royal ornaments have been packed securely in tamper-evident velvet cases and handed over to our premium courier partner.
+      Your package has been dispatched via <strong>{{ $order->tracking_carrier ?: 'Express Courier' }}</strong> (AWB: <strong style="font-family:monospace;">{{ $order->tracking_number ?: 'In Transit' }}</strong>).
+      @if($isCod)
+        Please keep the remaining balance of <strong>₹{{ number_format($order->balance_amount, 2) }}</strong> ready for delivery.
+      @endif
     </p>
+  @elseif($status === 'Delivered')
+    <p class="message-text">
+      Your order <strong>#{{ $order->order_number }}</strong> has been successfully delivered. We hope you cherish wearing your royal creations!
+    </p>
+  @endif
 
-    <div class="lg-box" style="margin-top:20px;">
-      <div class="lg-box-header">Logistics & Tracking Details</div>
-      <table class="detail-table">
+  <!-- Compact Order & Financial Summary Box -->
+  <div class="lg-box" style="margin-top:16px; border:1px solid rgba(212, 175, 106, 0.35); border-radius:14px; overflow:hidden;">
+    <div style="background:#241610; border-bottom:1px solid rgba(212, 175, 106, 0.25); padding:9px 14px;">
+      <table width="100%" border="0" cellpadding="0" cellspacing="0">
         <tr>
-          <td class="lbl">Courier Partner</td>
-          <td class="val" style="color:#D4AF6A; font-weight:700;">{{ $order->tracking_carrier ?: 'Express Logistics' }}</td>
+          <td align="left" style="color:#E7C77B; font-size:10.5px; font-weight:800; letter-spacing:1px; text-transform:uppercase;">
+            Order Summary ({{ $order->items->count() }} {{ Str::plural('item', $order->items->count()) }})
+          </td>
+          <td align="right" style="color:#A8988B; font-size:10.5px; font-family:monospace;">
+            #{{ $order->order_number }}
+          </td>
         </tr>
-        <tr>
-          <td class="lbl">Airway Bill (AWB)</td>
-          <td class="val font-mono" style="font-size:14px; font-weight:800; color:#FFFFFF;">{{ $order->tracking_number ?: 'In Transit' }}</td>
-        </tr>
-        <tr>
-          <td class="lbl">Estimated Delivery</td>
-          <td class="val">3 to 5 Business Days</td>
-        </tr>
-        @if($order->isCod())
-        <tr style="background:rgba(212,175,106,0.15); border-top:1px dashed #D4AF6A;">
-          <td class="lbl" style="color:#E7C77B; font-weight:800;">Balance Due on Delivery</td>
-          <td class="val" style="color:#ffffff; font-weight:900; font-size:15px; font-family:monospace;">₹{{ number_format($order->balance_amount, 2) }}</td>
-        </tr>
-        @endif
       </table>
     </div>
 
-    @if($order->isCod())
-    <div class="alert-box" style="margin-top:15px; background:rgba(212, 175, 106, 0.08); border:1px solid rgba(212, 175, 106, 0.25); border-left:4px solid #D4AF6A; color:#FAF7F0; padding:14px 18px; border-radius:10px; font-size:12.5px; line-height:1.6;">
-      <strong style="color:#E7C77B; display:block; margin-bottom:4px; font-size:13px; font-weight:800;">Doorstep Payment Reminder:</strong>
-      Please keep the remaining balance of <strong style="color:#FFFFFF;">₹{{ number_format($order->balance_amount, 2) }}</strong> ready. You can pay our delivery partner in Cash or scan the Delivery UPI QR code upon arrival.
+    <!-- Items List -->
+    <table class="order-items-table">
+      @foreach($order->items as $item)
+        <tr>
+          <td style="padding:10px 14px;">
+            <div style="font-weight:700; color:#FFFFFF; font-size:12px;">{{ $item->product_name }}</div>
+            <div style="font-size:10.5px; color:#A8988B;">
+              @if($item->variant_info) {{ $item->variant_info }} • @endif Qty: {{ $item->quantity }}
+            </div>
+          </td>
+          <td align="right" style="padding:10px 14px; font-weight:700; color:#F8F4EE; font-family:monospace; white-space:nowrap; font-size:12px;">
+            ₹{{ number_format($item->subtotal, 2) }}
+          </td>
+        </tr>
+      @endforeach
+    </table>
+
+    <!-- Totals Table -->
+    <table class="detail-table" style="background:rgba(0,0,0,0.25); border-top:1px solid rgba(212,175,106,0.15);">
+      <tr>
+        <td class="lbl">Subtotal</td>
+        <td class="val">₹{{ number_format($order->subtotal, 2) }}</td>
+      </tr>
+      @if($order->coupon_discount > 0)
+      <tr>
+        <td class="lbl" style="color:#10B981;">Coupon ({{ $order->coupon_code }})</td>
+        <td class="val" style="color:#10B981; font-weight:700;">− ₹{{ number_format($order->coupon_discount, 2) }}</td>
+      </tr>
+      @endif
+      <tr>
+        <td class="lbl">Shipping Fee</td>
+        <td class="val">{{ $order->shipping_fee == 0 ? 'FREE' : '₹' . number_format($order->shipping_fee, 2) }}</td>
+      </tr>
+      @if($order->cod_extra_charge > 0)
+      <tr>
+        <td class="lbl" style="color:#D4AF6A;">COD Handling Fee</td>
+        <td class="val" style="color:#D4AF6A; font-weight:700;">+ ₹{{ number_format($order->cod_extra_charge, 2) }}</td>
+      </tr>
+      @endif
+      <tr style="border-top:1px solid rgba(212,175,106,0.3); background:#241610;">
+        <td class="lbl" style="font-size:12px; font-weight:800; color:#FFFFFF;">Total Order Value</td>
+        <td class="val" style="font-size:15px; color:#D4AF6A; font-weight:900; font-family:monospace;">₹{{ number_format($order->total_amount, 2) }}</td>
+      </tr>
+      @if($isCod)
+      <tr style="background:rgba(212,175,106,0.12); border-top:1px dashed #D4AF6A;">
+        <td class="lbl" style="color:#E7C77B; font-weight:700;">Advance Token Paid ({{ $order->advance_percentage }}%)</td>
+        <td class="val" style="color:#E7C77B; font-weight:800; font-family:monospace;">₹{{ number_format($order->advance_amount, 2) }}</td>
+      </tr>
+      <tr style="background:rgba(212,175,106,0.18);">
+        <td class="lbl" style="color:#ffffff; font-weight:800;">Balance Due on Delivery</td>
+        <td class="val" style="color:#ffffff; font-weight:900; font-size:14px; font-family:monospace;">₹{{ number_format($order->balance_amount, 2) }}</td>
+      </tr>
+      @endif
+    </table>
+
+    <!-- Destination Short Note -->
+    @if($order->address)
+    <div style="padding:10px 14px; border-top:1px solid rgba(212,175,106,0.15); font-size:11px; color:#A8988B; background:rgba(0,0,0,0.15);">
+      Deliver to: <strong style="color:#FAF7F0;">{{ $order->address->name }}</strong>, {{ $order->address->city }}, {{ $order->address->state }} ({{ $order->address->pincode }})
     </div>
     @endif
-
-    @if($order->tracking_url)
-    <div class="btn-wrap">
-      <a href="{{ $order->tracking_url }}" class="cta-btn">Track Consignment Live</a>
-    </div>
-    @endif
-
-  @elseif($status === 'Delivered')
-    <p class="message-text">
-      Your package for Order <strong>#{{ $order->order_number }}</strong> has been successfully delivered! We hope you cherish wearing these royal handcrafted creations as much as we enjoyed crafting them.
-    </p>
-
-    <div class="alert-box alert-success">
-      <strong>Royal Craftsmanship Guarantee:</strong> Your creations feature our 1-gram micro gold plating guarantee. For care instructions or inquiries, our concierge is always at your service.
-    </div>
-
-    <div class="btn-wrap">
-      <a href="{{ route('account.order.detail', $order->order_number) }}" class="cta-btn">Review Your Creations</a>
-    </div>
-
-  @else
-    <p class="message-text">
-      Your Order <strong>#{{ $order->order_number }}</strong> status has been updated to <strong>{{ $status }}</strong>.
-    </p>
-  @endif
-
-  @if(!empty($customNote))
-  <div class="alert-box alert-info" style="margin-top:20px;">
-    <strong>Message from Boutique Concierge:</strong><br>
-    {{ $customNote }}
   </div>
-  @endif
 
-  <div class="btn-wrap" style="margin-top:24px;">
-    <a href="{{ route('order.track', ['order_number' => $order->order_number]) }}" class="cta-btn" style="background:transparent; color:#D4AF6A!important; border:1px solid #D4AF6A; box-shadow:none;">View Full Order Tracking</a>
+  <!-- Primary CTA Button -->
+  <div class="btn-wrap" style="margin-top:20px;">
+    @if($status === 'Confirmed' && !$order->isCod())
+      <a href="{{ route('order.track.invoice', $order->order_number) }}" class="cta-btn">
+        Download Tax Invoice (PDF)
+      </a>
+    @else
+      <a href="{{ route('order.track', ['order_number' => $order->order_number]) }}" class="cta-btn">
+        Track Order Status →
+      </a>
+    @endif
   </div>
 @endsection

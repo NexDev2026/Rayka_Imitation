@@ -224,7 +224,7 @@ class TrackOrderController extends Controller
             'delivery_payment_screenshot' => $path,
             'delivery_transaction_reference' => $request->delivery_transaction_reference,
             'delivery_paid_at' => now(),
-            'balance_status' => 'Paid Online',
+            'balance_status' => 'Verification Pending',
         ]);
 
         if ($order->payment) {

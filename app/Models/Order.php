@@ -70,7 +70,7 @@ class Order extends Model
 
     public function hasBalancePending(): bool
     {
-        return $this->isCod() && (float) $this->balance_amount > 0 && in_array($this->balance_status, ['Pending', 'N/A', '']);
+        return $this->isCod() && (float) $this->balance_amount > 0 && in_array($this->balance_status, ['Pending', 'Verification Pending', 'N/A', '']);
     }
 
     public function isBalanceSettled(): bool
@@ -83,7 +83,8 @@ class Order extends Model
         return match ($this->balance_status) {
             'Collected Cash', 'Paid Online', 'Settled' => 'bg-emerald-100 text-emerald-800 border-emerald-300',
             'Pending' => 'bg-amber-100 text-amber-800 border-amber-300',
-            'Waived' => 'bg-blue-100 text-blue-800 border-blue-300',
+            'Verification Pending' => 'bg-blue-100 text-blue-800 border-blue-300',
+            'Waived' => 'bg-purple-100 text-purple-800 border-purple-300',
             default => 'bg-stone-100 text-stone-700 border-stone-300',
         };
     }

@@ -719,6 +719,7 @@
                                 <label class="block font-bold text-stone-700 mb-1">Update Balance Status *</label>
                                 <select name="balance_status" class="w-full border rounded-lg p-2.5 bg-stone-50 font-semibold focus:border-[#D4AF6A] focus:ring-1 focus:ring-[#D4AF6A]">
                                     <option value="Pending" {{ $order->balance_status === 'Pending' ? 'selected' : '' }}>Pending (Uncollected)</option>
+                                    <option value="Verification Pending" {{ $order->balance_status === 'Verification Pending' ? 'selected' : '' }}>Verification Pending (Proof Uploaded)</option>
                                     <option value="Collected Cash" {{ $order->balance_status === 'Collected Cash' ? 'selected' : '' }}>Collected Cash (Courier Collected)</option>
                                     <option value="Paid Online" {{ $order->balance_status === 'Paid Online' ? 'selected' : '' }}>Paid Online (Delivery QR Verified)</option>
                                     <option value="Waived" {{ $order->balance_status === 'Waived' ? 'selected' : '' }}>Waived / Exception</option>

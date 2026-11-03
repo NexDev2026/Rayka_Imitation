@@ -190,7 +190,7 @@ class AdminOrderController extends Controller
         $order = Order::with(['payment', 'address', 'user'])->findOrFail($id);
 
         $request->validate([
-            'balance_status' => 'required|in:Pending,Collected Cash,Paid Online,Waived',
+            'balance_status' => 'required|in:Pending,Verification Pending,Collected Cash,Paid Online,Waived',
             'delivery_transaction_reference' => 'nullable|string|max:100',
             'delivery_payment_screenshot' => 'nullable|file|mimes:jpeg,png,jpg,webp,svg,gif,heic|max:10240',
             'admin_balance_note' => 'nullable|string|max:500',
