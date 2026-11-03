@@ -192,10 +192,31 @@
           <td class="lbl">Shipping & Handling</td>
           <td class="val">{{ $order->shipping_fee == 0 ? 'FREE' : '₹' . number_format($order->shipping_fee, 2) }}</td>
         </tr>
+        @if($order->cod_extra_charge > 0)
+        <tr>
+          <td class="lbl" style="color:#D4AF6A;">COD Courier Handling Fee</td>
+          <td class="val" style="color:#D4AF6A; font-weight:700;">+ ₹{{ number_format($order->cod_extra_charge, 2) }}</td>
+        </tr>
+        @endif
+        @if($order->isCod())
+        <tr style="background:#241610;">
+          <td class="lbl" style="font-size:13px; font-weight:800; color:#FFFFFF; padding-top:10px; padding-bottom:10px;">Total Order Value</td>
+          <td class="val" style="font-size:16px; color:#D4AF6A; font-weight:900; padding-top:10px; padding-bottom:10px; font-family:monospace;">₹{{ number_format($order->total_amount, 2) }}</td>
+        </tr>
+        <tr style="background:rgba(2,132,199,0.12); border-top:1px dashed #0284c7;">
+          <td class="lbl" style="color:#38bdf8; font-weight:700;">1. Advance Token Paid ({{ $order->advance_percentage }}%)</td>
+          <td class="val" style="color:#38bdf8; font-weight:800; font-family:monospace;">₹{{ number_format($order->advance_amount, 2) }}</td>
+        </tr>
+        <tr style="background:rgba(2,132,199,0.18);">
+          <td class="lbl" style="color:#ffffff; font-weight:800;">2. Balance Due on Delivery</td>
+          <td class="val" style="color:#ffffff; font-weight:900; font-size:15px; font-family:monospace;">₹{{ number_format($order->balance_amount, 2) }}</td>
+        </tr>
+        @else
         <tr style="background:#241610;">
           <td class="lbl" style="font-size:13px; font-weight:800; color:#FFFFFF; padding-top:10px; padding-bottom:10px;">Grand Total (Paid)</td>
           <td class="val" style="font-size:16px; color:#D4AF6A; font-weight:900; padding-top:10px; padding-bottom:10px;">₹{{ number_format($order->total_amount, 2) }}</td>
         </tr>
+        @endif
       </table>
     </div>
 
@@ -256,8 +277,20 @@
           <td class="lbl">Estimated Delivery</td>
           <td class="val">3 to 5 Business Days</td>
         </tr>
+        @if($order->isCod())
+        <tr style="background:rgba(2,132,199,0.15); border-top:1px dashed #0284c7;">
+          <td class="lbl" style="color:#ffffff; font-weight:800;">Balance Due on Delivery</td>
+          <td class="val" style="color:#ffffff; font-weight:900; font-size:15px; font-family:monospace;">₹{{ number_format($order->balance_amount, 2) }}</td>
+        </tr>
+        @endif
       </table>
     </div>
+
+    @if($order->isCod())
+    <div class="alert-box alert-info" style="margin-top:15px;">
+      <strong>Doorstep Payment Reminder:</strong> Please keep the remaining balance of <strong>₹{{ number_format($order->balance_amount, 2) }}</strong> ready. You can pay our delivery partner in Cash or scan the Delivery UPI QR code upon arrival.
+    </div>
+    @endif
 
     @if($order->tracking_url)
     <div class="btn-wrap">

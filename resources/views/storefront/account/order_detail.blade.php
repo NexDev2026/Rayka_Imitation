@@ -93,7 +93,7 @@
                         <div class="max-w-2xl mx-auto p-4 sm:p-6 rounded-2xl bg-rose-50 border border-rose-200 text-rose-900 shadow-xs space-y-3.5">
                             <div class="flex items-start gap-3 sm:gap-4">
                                 <div class="w-10 h-10 sm:w-12 sm:h-12 rounded-xl sm:rounded-2xl bg-rose-600 text-white flex items-center justify-center font-bold text-base sm:text-lg shrink-0 shadow-xs">
-                                    ✕
+                                    <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
                                 </div>
                                 <div class="space-y-1.5 flex-1 min-w-0">
                                     <div class="flex flex-wrap items-center gap-1.5 sm:gap-2">
@@ -182,71 +182,102 @@
                         @endif
 
                         <!-- 2.1. CUSTOMER REFUND STATUS CARD (FOR CANCELLED ORDERS) -->
-                        @if($order->isCancelled() && $order->getRefundableAmount() > 0)
-                            <div class="max-w-2xl mx-auto mt-4 rounded-2xl border p-4 sm:p-5 shadow-xs transition {{ $order->isRefunded() ? 'bg-gradient-to-r from-emerald-50 via-white to-emerald-50 border-emerald-300' : 'bg-gradient-to-r from-amber-50 via-white to-amber-50 border-amber-300' }}">
-                                <div class="flex items-start gap-3.5">
-                                    <div class="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-base shrink-0 shadow-xs {{ $order->isRefunded() ? 'bg-emerald-600 text-white' : 'bg-amber-500 text-white animate-pulse' }}">
-                                        @if($order->isRefunded())
-                                            ✓
-                                        @else
-                                            ⏳
-                                        @endif
-                                    </div>
-                                    <div class="space-y-1.5 flex-1 min-w-0">
-                                        <div class="flex flex-wrap items-center justify-between gap-2">
-                                            <h4 class="font-serif-royal font-bold text-sm sm:text-base {{ $order->isRefunded() ? 'text-emerald-950' : 'text-[#4A2C1D]' }}">
-                                                @if($order->isRefunded())
+                        @if($order->isCancelled())
+                            @if($order->isRefunded())
+                                <div class="max-w-2xl mx-auto mt-4 rounded-2xl border border-emerald-300 bg-gradient-to-r from-emerald-50/90 via-white to-emerald-50/90 p-4 sm:p-5 shadow-xs transition">
+                                    <div class="space-y-2">
+                                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 pb-2 border-b border-emerald-200/70">
+                                            <div class="flex items-center gap-2">
+                                                <span class="w-2.5 h-2.5 rounded-full bg-emerald-600 shrink-0"></span>
+                                                <h4 class="font-serif-royal font-bold text-sm sm:text-base text-emerald-950">
                                                     Refund Processed & Returned (₹{{ number_format($order->refund_amount > 0 ? $order->refund_amount : $order->getRefundableAmount(), 2) }})
-                                                @else
-                                                    Refund In Process (₹{{ number_format($order->getRefundableAmount(), 2) }})
-                                                @endif
-                                            </h4>
-                                            <span class="text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full border {{ $order->isRefunded() ? 'bg-emerald-100 text-emerald-800 border-emerald-300' : 'bg-amber-100 text-amber-900 border-amber-300' }}">
-                                                {{ $order->isRefunded() ? 'Refund Completed' : 'Refund Queued' }}
+                                                </h4>
+                                            </div>
+                                            <span class="text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 self-start sm:self-auto">
+                                                Refund Completed
                                             </span>
                                         </div>
 
-                                        @if($order->isRefunded())
-                                            <p class="text-xs text-emerald-800 leading-relaxed">
-                                                Your {{ $order->isCod() ? 'advance booking token' : 'prepaid payment' }} of <strong>₹{{ number_format($order->refund_amount > 0 ? $order->refund_amount : $order->getRefundableAmount(), 2) }}</strong> has been returned to you on <strong class="text-emerald-950">{{ $order->refunded_at?->format('d M, Y \a\t h:i A') ?? 'Recently' }}</strong>.
-                                            </p>
-                                            <div class="p-3 bg-white/90 rounded-xl border border-emerald-200 text-xs text-stone-700 space-y-1 mt-2">
-                                                <div class="flex flex-wrap items-center justify-between gap-1">
-                                                    <span class="text-stone-500">Refund Method:</span>
-                                                    <strong class="text-stone-900">{{ $order->refund_method ?: 'UPI / Bank Reversal' }}</strong>
-                                                </div>
-                                                @if($order->refund_transaction_reference)
-                                                    <div class="flex flex-wrap items-center justify-between gap-1 pt-1 border-t border-emerald-100">
-                                                        <span class="text-stone-500">Bank / UPI Ref (UTR):</span>
-                                                        <span class="font-mono font-bold text-emerald-900">{{ $order->refund_transaction_reference }}</span>
-                                                    </div>
-                                                @endif
-                                                @if($order->refund_note)
-                                                    <div class="pt-1 text-[11px] text-stone-600 italic">
-                                                        Note: "{{ $order->refund_note }}"
-                                                    </div>
-                                                @endif
-                                            </div>
+                                        <p class="text-xs text-emerald-900 leading-relaxed">
+                                            Your {{ $order->isCod() ? 'advance booking token' : 'prepaid payment' }} of <strong>₹{{ number_format($order->refund_amount > 0 ? $order->refund_amount : $order->getRefundableAmount(), 2) }}</strong> has been returned to you on <strong class="text-emerald-950">{{ $order->refunded_at?->format('d M, Y \a\t h:i A') ?? 'Recently' }}</strong>.
+                                        </p>
 
-                                            @if($order->refund_screenshot)
-                                                <div class="pt-2">
-                                                    <a href="{{ asset($order->refund_screenshot) }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-[11px] rounded-lg shadow-2xs transition">
-                                                        <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
-                                                        <span>View Official Bank Refund Receipt</span>
-                                                    </a>
+                                        <div class="p-3 bg-white/95 rounded-xl border border-emerald-200 text-xs text-stone-700 space-y-1.5 mt-2">
+                                            <div class="flex flex-wrap items-center justify-between gap-1">
+                                                <span class="text-stone-500">Refund Method:</span>
+                                                <strong class="text-stone-900">{{ $order->refund_method ?: 'UPI / Bank Reversal' }}</strong>
+                                            </div>
+                                            @if($order->refund_transaction_reference)
+                                                <div class="flex flex-wrap items-center justify-between gap-1 pt-1 border-t border-emerald-100">
+                                                    <span class="text-stone-500">Bank / UPI Ref (UTR):</span>
+                                                    <span class="font-mono font-bold text-emerald-950">{{ $order->refund_transaction_reference }}</span>
                                                 </div>
                                             @endif
-                                        @else
-                                            <p class="text-xs text-amber-900 leading-relaxed">
-                                                Your {{ $order->isCod() ? 'advance booking token' : 'prepaid payment' }} of <strong>₹{{ number_format($order->getRefundableAmount(), 2) }}</strong> is in queue for refund. Our accounts team will return this amount to your source UPI or bank account within 24 to 48 business hours.
-                                            </p>
-                                            <p class="text-[11px] text-stone-500 mt-1">
-                                                Once processed, your bank transaction reference number (UTR) and payment proof will be updated right here.
-                                            </p>
+                                            @if($order->refund_note)
+                                                <div class="pt-1 text-[11px] text-stone-600 italic">
+                                                    Note: "{{ $order->refund_note }}"
+                                                </div>
+                                            @endif
+                                        </div>
+
+                                        @if($order->refund_screenshot)
+                                            <div class="pt-2">
+                                                <a href="{{ asset($order->refund_screenshot) }}" target="_blank" class="inline-flex items-center gap-1.5 px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white font-bold text-[11px] rounded-lg shadow-2xs transition">
+                                                    <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
+                                                    <span>View Official Bank Refund Receipt</span>
+                                                </a>
+                                            </div>
                                         @endif
                                     </div>
                                 </div>
-                            </div>
+                            @elseif($order->refund_status === 'Not Applicable')
+                                <div class="max-w-2xl mx-auto mt-4 rounded-2xl border border-stone-300 bg-stone-50/90 p-4 sm:p-5 shadow-xs transition">
+                                    <div class="space-y-1.5">
+                                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 pb-2 border-b border-stone-200">
+                                            <div class="flex items-center gap-2">
+                                                <span class="w-2.5 h-2.5 rounded-full bg-stone-400 shrink-0"></span>
+                                                <h4 class="font-serif-royal font-bold text-sm sm:text-base text-stone-800">
+                                                    Refund Settlement: Not Applicable
+                                                </h4>
+                                            </div>
+                                            <span class="text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full bg-stone-200/80 text-stone-700 border border-stone-300 self-start sm:self-auto">
+                                                No Refund Due
+                                            </span>
+                                        </div>
+                                        <p class="text-xs text-stone-600 leading-relaxed">
+                                            No refund is applicable for this cancelled order.
+                                        </p>
+                                        @if($order->refund_note)
+                                            <div class="p-2.5 bg-white rounded-xl border border-stone-200 text-xs text-stone-700">
+                                                <span class="text-stone-400 text-[10px] uppercase font-bold block mb-0.5">Accounts Note:</span>
+                                                <span>"{{ $order->refund_note }}"</span>
+                                            </div>
+                                        @endif
+                                    </div>
+                                </div>
+                            @elseif($order->isRefundPending())
+                                <div class="max-w-2xl mx-auto mt-4 rounded-2xl border border-amber-300 bg-gradient-to-r from-amber-50/90 via-white to-amber-50/90 p-4 sm:p-5 shadow-xs transition">
+                                    <div class="space-y-1.5">
+                                        <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-1.5 pb-2 border-b border-amber-200">
+                                            <div class="flex items-center gap-2">
+                                                <span class="w-2.5 h-2.5 rounded-full bg-amber-500 animate-pulse shrink-0"></span>
+                                                <h4 class="font-serif-royal font-bold text-sm sm:text-base text-[#4A2C1D]">
+                                                    Refund In Process (₹{{ number_format($order->getRefundableAmount(), 2) }})
+                                                </h4>
+                                            </div>
+                                            <span class="text-[10px] uppercase font-bold tracking-wider px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300 self-start sm:self-auto">
+                                                Refund Queued
+                                            </span>
+                                        </div>
+                                        <p class="text-xs text-amber-950 leading-relaxed">
+                                            Your {{ $order->isCod() ? 'advance booking token' : 'prepaid payment' }} of <strong>₹{{ number_format($order->getRefundableAmount(), 2) }}</strong> is in queue for refund. Our accounts team will return this amount to your source UPI or bank account within 24 to 48 business hours.
+                                        </p>
+                                        <p class="text-[11px] text-stone-500">
+                                            Once processed, your bank transaction reference number (UTR) and payment proof will be updated right here.
+                                        </p>
+                                    </div>
+                                </div>
+                            @endif
                         @endif
                     @else
                         <div class="relative max-w-3xl mx-auto">
@@ -469,55 +500,58 @@
                                     </div>
                                 @endif
                                 
-                                <div class="flex justify-between">
+                                <div class="flex items-center justify-between gap-2">
                                     <span>Shipping Fee</span>
-                                    <span class="font-semibold {{ $order->shipping_fee == 0 ? 'text-emerald-600' : 'text-[#4A2C1D]' }}">
+                                    <span class="font-semibold whitespace-nowrap shrink-0 {{ $order->shipping_fee == 0 ? 'text-emerald-600' : 'text-[#4A2C1D]' }}">
                                         {{ $order->shipping_fee == 0 ? 'FREE' : '₹' . number_format($order->shipping_fee) }}
                                     </span>
                                 </div>
 
                                 @if($order->cod_extra_charge > 0)
-                                    <div class="flex justify-between">
+                                    <div class="flex items-center justify-between gap-2">
                                         <span>COD Courier Handling Fee:</span>
-                                        <span class="font-semibold text-[#4A2C1D]">+ ₹{{ number_format($order->cod_extra_charge) }}</span>
+                                        <span class="font-semibold text-[#4A2C1D] whitespace-nowrap shrink-0">+ ₹{{ number_format($order->cod_extra_charge) }}</span>
                                     </div>
                                 @endif
                                 
-                                <div class="pt-3 border-t border-[#D4AF6A]/30 flex justify-between items-end">
+                                <div class="pt-3 border-t border-[#D4AF6A]/30 flex justify-between items-end gap-2">
                                     <div class="min-w-0 pr-2">
                                         <span class="block text-xs uppercase tracking-wider font-bold text-stone-400">Total Order Value</span>
                                         <span class="block text-xs text-stone-500 mt-0.5 truncate">{{ $order->payment_method ?: 'Static QR / UPI' }}</span>
                                     </div>
-                                    <span class="font-serif-royal text-2xl sm:text-3xl font-bold text-[#4A2C1D] shrink-0">₹{{ number_format($order->total_amount) }}</span>
+                                    <span class="font-serif-royal text-2xl sm:text-3xl font-bold text-[#4A2C1D] whitespace-nowrap shrink-0">₹{{ number_format($order->total_amount) }}</span>
                                 </div>
 
                                 @if($order->isCod())
                                     <!-- Detailed COD Token & Balance Breakdown -->
                                     <div class="pt-3 border-t border-stone-200/80 space-y-2">
                                         <div class="p-3 rounded-xl bg-amber-50/80 border border-amber-200/80 space-y-2 text-xs">
-                                            <div class="flex items-center justify-between">
+                                            <div class="flex items-center justify-between gap-2">
                                                 <span class="text-emerald-800 font-bold">1. Advance Token Paid ({{ $order->advance_percentage }}%):</span>
-                                                <span class="font-bold text-emerald-800 font-serif-royal text-sm">₹{{ number_format($order->advance_amount) }}</span>
+                                                <span class="font-bold text-emerald-800 font-serif-royal text-sm whitespace-nowrap shrink-0">₹{{ number_format($order->advance_amount) }}</span>
                                             </div>
                                             @if($order->isCancelled())
-                                                <div class="flex items-center justify-between text-stone-500">
-                                                    <span>2. Delivery Balance:</span>
-                                                    <span class="font-bold line-through">₹{{ number_format($order->balance_amount) }} (Voided)</span>
+                                                <div class="flex items-center justify-between gap-2 text-stone-600">
+                                                    <span>2. Remaining Delivery Balance:</span>
+                                                    <span class="font-bold font-serif-royal text-stone-500 whitespace-nowrap shrink-0">
+                                                        <span class="line-through">₹{{ number_format($order->balance_amount) }}</span>
+                                                        <span class="text-[10px] font-sans font-semibold text-rose-700 bg-rose-50 px-1.5 py-0.5 rounded border border-rose-200 ml-1">Voided</span>
+                                                    </span>
                                                 </div>
-                                                <div class="flex items-center justify-between pt-1 border-t border-amber-200/60 text-[11px]">
+                                                <div class="flex items-center justify-between gap-2 pt-1.5 border-t border-amber-200/60 text-[11px]">
                                                     <span class="text-stone-600">Token Refund Status:</span>
-                                                    <span class="font-bold px-2 py-0.5 rounded-full border {{ $order->refund_status_badge_class }}">
-                                                        {{ $order->refund_status === 'Refunded' ? '✓ Refunded' : ($order->isRefundPending() ? '⏳ Refund Pending' : $order->refund_status) }}
+                                                    <span class="font-bold px-2.5 py-0.5 rounded-full border whitespace-nowrap shrink-0 {{ $order->refund_status_badge_class }}">
+                                                        {{ $order->refund_status === 'Refunded' ? 'Refunded' : ($order->refund_status === 'Not Applicable' ? 'Not Applicable' : ($order->isRefundPending() ? 'Refund Pending' : $order->refund_status)) }}
                                                     </span>
                                                 </div>
                                             @else
-                                                <div class="flex items-center justify-between">
+                                                <div class="flex items-center justify-between gap-2">
                                                     <span class="text-[#4A2C1D] font-bold">2. Remaining Balance Due on Delivery:</span>
-                                                    <span class="font-bold text-[#4A2C1D] font-serif-royal text-base">₹{{ number_format($order->balance_amount) }}</span>
+                                                    <span class="font-bold text-[#4A2C1D] font-serif-royal text-base whitespace-nowrap shrink-0">₹{{ number_format($order->balance_amount) }}</span>
                                                 </div>
-                                                <div class="flex items-center justify-between pt-1 border-t border-amber-200/60 text-[11px]">
+                                                <div class="flex items-center justify-between gap-2 pt-1.5 border-t border-amber-200/60 text-[11px]">
                                                     <span class="text-stone-600">Balance Collection Status:</span>
-                                                    <span class="font-bold px-2 py-0.5 rounded-full border {{ $order->balance_status_badge_class }}">
+                                                    <span class="font-bold px-2.5 py-0.5 rounded-full border whitespace-nowrap shrink-0 {{ $order->balance_status_badge_class }}">
                                                         {{ $order->balance_status }}
                                                     </span>
                                                 </div>
@@ -531,26 +565,8 @@
                     </div>
                 </div>
 
-                @if($order->isCod() && (float)$order->balance_amount > 0 && !$order->isCancelled() && !$order->isRejected())
-                    @if($order->isBalanceSettled())
-                        <!-- SETTLED STATE: Balance is completely paid & verified (No payment reminders or forms) -->
-                        <div class="p-4 sm:p-6 rounded-2xl bg-gradient-to-r from-emerald-50 via-white to-emerald-50 border-2 border-emerald-300 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-                            <div class="flex items-center gap-3.5">
-                                <div class="w-11 h-11 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-bold text-lg shrink-0 shadow-xs">
-                                    ✓
-                                </div>
-                                <div class="space-y-0.5">
-                                    <h4 class="font-serif-royal font-bold text-base text-emerald-950">Cash on Delivery Balance Fully Settled</h4>
-                                    <p class="text-xs text-emerald-800">
-                                        Your remaining balance of <strong>₹{{ number_format($order->balance_amount) }}</strong> has been officially confirmed and settled via <strong>{{ $order->balance_status }}</strong>.
-                                    </p>
-                                </div>
-                            </div>
-                            <span class="self-start sm:self-auto px-3.5 py-1.5 bg-emerald-200/80 text-emerald-900 border border-emerald-300 text-xs font-bold rounded-full uppercase tracking-wider shrink-0">
-                                ✓ Fully Paid
-                            </span>
-                        </div>
-                    @elseif($order->delivery_payment_screenshot)
+                @if($order->isCod() && (float)$order->balance_amount > 0 && !$order->isCancelled() && !$order->isRejected() && !$order->isBalanceSettled())
+                    @if($order->delivery_payment_screenshot)
                         <!-- UNDER REVIEW STATE: Customer has uploaded proof, awaiting admin verification (No form or reminder) -->
                         <div class="p-4 sm:p-6 rounded-2xl bg-gradient-to-r from-amber-50/70 via-white to-amber-50/70 border-2 border-amber-300 shadow-xs space-y-3">
                             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-amber-200">
@@ -629,7 +645,10 @@
                                         <span class="font-mono text-stone-700 select-all font-semibold">{{ $deliveryUpi }}</span>
                                         <button type="button" @click="navigator.clipboard.writeText('{{ $deliveryUpi }}'); copiedDeliveryUpi = true; setTimeout(() => copiedDeliveryUpi = false, 2000)" class="font-bold text-[#996E2E] hover:underline cursor-pointer">
                                             <span x-show="!copiedDeliveryUpi">Copy</span>
-                                            <span x-show="copiedDeliveryUpi" class="text-emerald-700 font-bold" style="display:none;">✓ Copied</span>
+                                            <span x-show="copiedDeliveryUpi" class="text-emerald-700 font-bold inline-flex items-center gap-1" style="display:none;">
+                                                <svg class="w-3.5 h-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M5 13l4 4L19 7"/></svg>
+                                                Copied
+                                            </span>
                                         </button>
                                     </div>
                                     <p class="text-[11px] text-stone-500">Payee: <strong>{{ $deliveryPayee }}</strong> • Payable: <strong class="text-[#4A2C1D]">₹{{ number_format($order->balance_amount) }}</strong></p>

@@ -39,6 +39,28 @@
         <td class="lbl">Order Amount</td>
         <td class="val">₹{{ number_format($order->total_amount, 2) }}</td>
       </tr>
+      @if($order->isCod())
+      <tr>
+        <td class="lbl">Advance Token Paid Online</td>
+        <td class="val" style="color:#10B981; font-weight:700;">₹{{ number_format($order->advance_amount, 2) }} ({{ $order->advance_percentage }}%)</td>
+      </tr>
+      <tr>
+        <td class="lbl">Delivery Balance</td>
+        <td class="val" style="color:#A8988B; text-decoration:line-through;">₹{{ number_format($order->balance_amount, 2) }} (Voided)</td>
+      </tr>
+      @endif
+      @if($order->getRefundableAmount() > 0)
+      <tr style="border-top:1px dashed rgba(212,175,106,0.3); background:rgba(212,175,106,0.06);">
+        <td class="lbl" style="color:#E7C77B; font-weight:800;">Refundable Amount</td>
+        <td class="val" style="color:#E7C77B; font-weight:900; font-family:monospace; font-size:15px;">₹{{ number_format($order->getRefundableAmount(), 2) }}</td>
+      </tr>
+      <tr>
+        <td class="lbl">Refund Status</td>
+        <td class="val" style="color:{{ $order->refund_status === 'Refunded' ? '#10B981' : '#F59E0B' }}; font-weight:700;">
+          {{ $order->refund_status === 'Refunded' ? 'Refunded & Settled' : ($order->refund_status === 'Not Applicable' ? 'Not Applicable' : 'Queued for Reversal (Within 24–48 hrs)') }}
+        </td>
+      </tr>
+      @endif
       <tr>
         <td class="lbl">Status</td>
         <td class="val" style="color:#EF4444; font-weight:700;">{{ $actionType }}</td>

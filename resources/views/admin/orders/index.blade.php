@@ -65,11 +65,11 @@
                                 </span>
                                 @if($ord->isRefunded())
                                     <span class="block px-2 py-0.5 rounded text-[9px] font-bold uppercase bg-emerald-100 text-emerald-800 border border-emerald-300 ml-auto w-fit">
-                                        ✓ Refunded: ₹{{ number_format($ord->refund_amount) }}
+                                        Refunded: ₹{{ number_format($ord->refund_amount) }}
                                     </span>
                                 @elseif($ord->isRefundPending())
                                     <span class="block px-2 py-0.5 rounded text-[9px] font-bold uppercase bg-amber-100 text-amber-900 border border-amber-300 animate-pulse ml-auto w-fit">
-                                        ⏳ Refund Due: ₹{{ number_format($ord->getRefundableAmount()) }}
+                                        Refund Due: ₹{{ number_format($ord->getRefundableAmount()) }}
                                     </span>
                                 @endif
                                 @php $cReason = $ord->getCancellationDetails()['reason'] ?? null; @endphp
@@ -86,11 +86,11 @@
                                 </span>
                                 @if($ord->isRefunded())
                                     <span class="block px-2 py-0.5 rounded text-[9px] font-bold uppercase bg-emerald-100 text-emerald-800 border border-emerald-300 w-fit">
-                                        ✓ Refunded: ₹{{ number_format($ord->refund_amount) }}
+                                        Refunded: ₹{{ number_format($ord->refund_amount) }}
                                     </span>
                                 @elseif($ord->isRefundPending())
                                     <span class="block px-2 py-0.5 rounded text-[9px] font-bold uppercase bg-amber-100 text-amber-900 border border-amber-300 animate-pulse w-fit">
-                                        ⏳ Refund Due: ₹{{ number_format($ord->getRefundableAmount()) }}
+                                        Refund Due: ₹{{ number_format($ord->getRefundableAmount()) }}
                                     </span>
                                 @endif
                             </div>
@@ -144,7 +144,7 @@
 
                             @if($ord->refund_screenshot)
                                 <a href="{{ asset($ord->refund_screenshot) }}" target="_blank" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-300 text-emerald-900 font-bold text-[11px] hover:bg-emerald-100">
-                                    <span>✓ Refund Proof</span>
+                                    <span>Refund Proof</span>
                                 </a>
                             @endif
                         </div>
@@ -240,13 +240,13 @@
 
                                     @if($ord->delivery_payment_screenshot)
                                         <a href="{{ asset($ord->delivery_payment_screenshot) }}" target="_blank" class="inline-flex items-center space-x-1 px-2.5 py-1 rounded bg-emerald-50 border border-emerald-300 text-emerald-900 font-bold hover:bg-emerald-100 text-[11px] block w-fit">
-                                            <span>✓ Bal Proof</span>
+                                            <span>Bal Proof</span>
                                         </a>
                                     @endif
 
                                     @if($ord->refund_screenshot)
                                         <a href="{{ asset($ord->refund_screenshot) }}" target="_blank" class="inline-flex items-center space-x-1 px-2.5 py-1 rounded bg-emerald-50 border border-emerald-300 text-emerald-900 font-bold hover:bg-emerald-100 text-[11px] block w-fit">
-                                            <span>✓ Refund Slip</span>
+                                            <span>Refund Slip</span>
                                         </a>
                                     @endif
                                 </div>
@@ -259,11 +259,11 @@
                                         </span>
                                         @if($ord->isRefunded())
                                             <span class="block px-2 py-0.5 rounded text-[9px] font-bold uppercase bg-emerald-100 text-emerald-800 border border-emerald-300 w-fit">
-                                                ✓ Refunded: ₹{{ number_format($ord->refund_amount) }}
+                                                Refunded: ₹{{ number_format($ord->refund_amount) }}
                                             </span>
                                         @elseif($ord->isRefundPending())
                                             <span class="block px-2 py-0.5 rounded text-[9px] font-bold uppercase bg-amber-100 text-amber-900 border border-amber-300 animate-pulse w-fit">
-                                                ⏳ Refund Due: ₹{{ number_format($ord->getRefundableAmount()) }}
+                                                Refund Due: ₹{{ number_format($ord->getRefundableAmount()) }}
                                             </span>
                                         @endif
                                         @php $cReason = $ord->getCancellationDetails()['reason'] ?? null; @endphp
@@ -280,11 +280,11 @@
                                         </span>
                                         @if($ord->isRefunded())
                                             <span class="block px-2 py-0.5 rounded text-[9px] font-bold uppercase bg-emerald-100 text-emerald-800 border border-emerald-300 w-fit">
-                                                ✓ Refunded: ₹{{ number_format($ord->refund_amount) }}
+                                                Refunded: ₹{{ number_format($ord->refund_amount) }}
                                             </span>
                                         @elseif($ord->isRefundPending())
                                             <span class="block px-2 py-0.5 rounded text-[9px] font-bold uppercase bg-amber-100 text-amber-900 border border-amber-300 animate-pulse w-fit">
-                                                ⏳ Refund Due: ₹{{ number_format($ord->getRefundableAmount()) }}
+                                                Refund Due: ₹{{ number_format($ord->getRefundableAmount()) }}
                                             </span>
                                         @endif
                                     </div>

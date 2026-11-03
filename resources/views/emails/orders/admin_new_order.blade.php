@@ -27,9 +27,36 @@
         <td class="val">{{ $order->address?->mobile }} | {{ $order->address?->email ?? $order->user?->email }}</td>
       </tr>
       <tr>
-        <td class="lbl">Payable Amount</td>
-        <td class="val" style="color:#10B981; font-weight:800; font-size:15px;">₹{{ number_format($order->total_amount, 2) }}</td>
+        <td class="lbl">Payment Type</td>
+        <td class="val" style="font-weight:700; color:{{ $order->isCod() ? '#38BDF8' : '#10B981' }};">
+          {{ $order->isCod() ? 'Cash on Delivery (' . $order->advance_percentage . '% Advance Token)' : 'Full Online UPI' }}
+        </td>
       </tr>
+      @if($order->isCod())
+      <tr>
+        <td class="lbl">Advance Token to Verify</td>
+        <td class="val" style="color:#10B981; font-weight:800; font-size:15px; font-family:monospace;">₹{{ number_format($order->advance_amount, 2) }}</td>
+      </tr>
+      <tr>
+        <td class="lbl">Balance on Delivery</td>
+        <td class="val" style="color:#FFFFFF; font-weight:700; font-family:monospace;">₹{{ number_format($order->balance_amount, 2) }}</td>
+      </tr>
+      @if($order->cod_extra_charge > 0)
+      <tr>
+        <td class="lbl">COD Handling Fee</td>
+        <td class="val" style="color:#D4AF6A; font-family:monospace;">+ ₹{{ number_format($order->cod_extra_charge, 2) }}</td>
+      </tr>
+      @endif
+      <tr>
+        <td class="lbl">Total Order Value</td>
+        <td class="val" style="color:#D4AF6A; font-weight:800; font-family:monospace;">₹{{ number_format($order->total_amount, 2) }}</td>
+      </tr>
+      @else
+      <tr>
+        <td class="lbl">Total Paid to Verify</td>
+        <td class="val" style="color:#10B981; font-weight:800; font-size:15px; font-family:monospace;">₹{{ number_format($order->total_amount, 2) }}</td>
+      </tr>
+      @endif
       <tr>
         <td class="lbl">UTR / Ref</td>
         <td class="val font-mono">{{ $order->payment?->transaction_reference ?: 'Not Provided' }}</td>

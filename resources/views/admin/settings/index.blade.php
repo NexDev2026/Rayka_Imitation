@@ -152,8 +152,10 @@
                 <div class="p-3.5 rounded-xl border flex items-center justify-between gap-3 text-xs shadow-xs"
                      style="background-color: #ECFDF5 !important; border-color: #A7F3D0 !important; color: #065F46 !important;">
                     <div class="flex items-center gap-2.5">
-                        <span class="w-5 h-5 rounded-full flex items-center justify-center font-bold text-xs shrink-0"
-                              style="background-color: #059669 !important; color: #FFFFFF !important;">✓</span>
+                        <span class="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
+                              style="background-color: #059669 !important; color: #FFFFFF !important;">
+                            <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="3" d="M5 13l4 4L19 7"/></svg>
+                        </span>
                         <p class="leading-relaxed font-medium" style="color: #064E3B !important;">
                             <strong style="color: #065F46 !important;">Cash on Delivery is currently ENABLED.</strong> Customers can choose COD at checkout and pay the required advance percentage online.
                         </p>
@@ -167,8 +169,10 @@
                 <div class="p-3.5 rounded-xl border flex items-center justify-between gap-3 text-xs shadow-xs"
                      style="background-color: #F3F4F6 !important; border-color: #D1D5DB !important; color: #374151 !important;">
                     <div class="flex items-center gap-2.5">
-                        <span class="w-5 h-5 rounded-full flex items-center justify-center font-bold text-xs shrink-0"
-                              style="background-color: #4B5563 !important; color: #FFFFFF !important;">✕</span>
+                        <span class="w-5 h-5 rounded-full flex items-center justify-center shrink-0"
+                              style="background-color: #4B5563 !important; color: #FFFFFF !important;">
+                            <svg class="w-3 h-3 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                        </span>
                         <p class="leading-relaxed font-medium" style="color: #1F2937 !important;">
                             <strong style="color: #111827 !important;">Cash on Delivery is currently TURNED OFF.</strong> The COD payment option is completely hidden from customers at checkout (Full Online UPI only).
                         </p>
@@ -368,14 +372,14 @@
                         <!-- When new file selected in input -->
                         <div x-show="filePreview" x-cloak class="space-y-1">
                             <img :src="filePreview" alt="New Delivery QR Preview" class="w-32 h-32 object-contain mx-auto border rounded-lg p-1 bg-white shadow-2xs">
-                            <span class="text-[10px] text-emerald-700 font-bold block">✓ New QR Selected (Save Settings to Apply)</span>
+                            <span class="text-[10px] text-emerald-700 font-bold block">New QR Selected (Save Settings to Apply)</span>
                         </div>
 
                         <!-- Current saved state -->
                         <div x-show="!filePreview" class="space-y-1">
                             @if(!empty($settings['cod_delivery_qr_image']))
                                 <img src="{{ asset($settings['cod_delivery_qr_image']) }}" alt="Dedicated Delivery QR" class="w-32 h-32 object-contain mx-auto border rounded-lg p-1 bg-white shadow-2xs">
-                                <span class="text-[10px] text-emerald-700 font-semibold block">✓ Dedicated Delivery QR Configured</span>
+                                <span class="text-[10px] text-emerald-700 font-semibold block">Dedicated Delivery QR Configured</span>
                                 <label class="inline-flex items-center gap-1.5 mt-1.5 text-[11px] text-red-600 hover:text-red-700 cursor-pointer">
                                     <input type="checkbox" name="remove_cod_delivery_qr" value="1" class="rounded border-stone-300 text-red-600 focus:ring-red-500">
                                     <span>Reset to Primary Store QR</span>
@@ -472,7 +476,7 @@
                     <span class="text-[10px] uppercase font-bold text-[#996E2E] block mb-2">Current Active QR Code:</span>
                     <div x-show="filePreview" x-cloak class="space-y-1">
                         <img :src="filePreview" alt="New Active QR Preview" class="w-40 h-40 object-contain mx-auto border rounded p-1 bg-white shadow-2xs">
-                        <span class="text-[10px] text-emerald-700 font-bold block">✓ New QR Selected (Save Settings to Apply)</span>
+                        <span class="text-[10px] text-emerald-700 font-bold block">New QR Selected (Save Settings to Apply)</span>
                     </div>
                     <div x-show="!filePreview">
                         <img src="{{ asset($settings['qr_code_image']) }}" alt="Active QR" class="w-40 h-40 object-contain mx-auto border rounded p-1">

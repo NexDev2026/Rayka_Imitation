@@ -1,13 +1,13 @@
 @php
   $paymentStatus = (string) ($order->payment?->status ?? 'Pending');
-  $paymentMethod = (string) ($order->payment?->payment_method ?? 'Static QR / UPI');
+  $paymentMethod = (string) ($order->payment?->payment_method ?? ($order->payment_method ?: 'Static QR / UPI'));
   $isPaid = in_array(strtolower($paymentStatus), ['confirmed', 'success', 'paid']);
-  $isCod = str_contains(strtolower($paymentMethod), 'cod') || str_contains(strtolower($paymentMethod), 'cash');
+  $isCod = $order->isCod();
 
   $emailTitle = $isPaid 
     ? ('Payment Confirmed — Order #' . $order->order_number . ' — Rayka')
     : ($isCod 
-        ? ('Order Booked (Cash on Delivery) — Order #' . $order->order_number . ' — Rayka')
+        ? ('Order Booked (COD Advance Token Paid) — Order #' . $order->order_number . ' — Rayka')
         : ('Order Received (Payment Verification Pending) — Order #' . $order->order_number . ' — Rayka'));
 
   $headerTitle = $isPaid 
@@ -19,7 +19,7 @@
   $headerSubtitle = $isPaid 
     ? ('Payment Receipt — Order #' . $order->order_number) 
     : ($isCod 
-        ? ('Order #' . $order->order_number . ' • Pay on Delivery') 
+        ? ('Order #' . $order->order_number . ' • ' . $order->advance_percentage . '% Advance Token Paid') 
         : ('Order #' . $order->order_number . ' • Awaiting Admin Approval'));
 
   $headerIcon = $isPaid
@@ -110,27 +110,33 @@
       </table>
     </div>
   @elseif($isCod)
-    <!-- COD: Sky Blue Luxury Card -->
+    <!-- COD: Sky Blue Luxury Card with Advance Token & Balance Due -->
     <div style="background:linear-gradient(135deg, #0c2d3a 0%, #081a24 100%); border:1px solid #0284c7; border-radius:18px; padding:22px 24px; margin-bottom:28px; box-shadow:0 12px 35px rgba(0,0,0,0.55);">
       <table width="100%" border="0" cellpadding="0" cellspacing="0">
         <tr>
           <td valign="top">
             <div style="display:inline-block; background:#0284c7; color:#ffffff; font-size:10.5px; font-weight:800; letter-spacing:1px; text-transform:uppercase; padding:4px 12px; border-radius:20px; margin-bottom:10px;">
-              🚚 Cash on Delivery
+              Cash on Delivery ({{ $order->advance_percentage }}% Advance Token Paid)
             </div>
             <div style="font-size:13px; color:#94a3b8; margin-bottom:6px; font-weight:500;">
               Rayka Imitation Jewellery • Order #{{ $order->order_number }}
             </div>
-            <div style="font-size:11px; color:#cbd5e1; text-transform:uppercase; letter-spacing:1px; margin-bottom:2px; font-weight:700;">
-              Amount Payable at Delivery
+            <div style="font-size:11px; color:#38bdf8; text-transform:uppercase; letter-spacing:1px; margin-bottom:2px; font-weight:700;">
+              1. Advance Token Paid Online
             </div>
-            <div style="font-size:36px; font-weight:900; color:#ffffff; font-family:ui-monospace,Menlo,Consolas,monospace; letter-spacing:-0.5px; line-height:1.1;">
-              ₹{{ number_format($order->total_amount, 2) }}
+            <div style="font-size:32px; font-weight:900; color:#38bdf8; font-family:ui-monospace,Menlo,Consolas,monospace; letter-spacing:-0.5px; line-height:1.1; margin-bottom:8px;">
+              ₹{{ number_format($order->advance_amount, 2) }}
+            </div>
+            <div style="font-size:11px; color:#cbd5e1; text-transform:uppercase; letter-spacing:1px; margin-bottom:2px; font-weight:700;">
+              2. Remaining Balance Payable on Delivery
+            </div>
+            <div style="font-size:24px; font-weight:800; color:#ffffff; font-family:ui-monospace,Menlo,Consolas,monospace; line-height:1.1;">
+              ₹{{ number_format($order->balance_amount, 2) }}
             </div>
           </td>
-          <td align="right" valign="middle" style="width:65px;">
+          <td align="right" valign="top" style="width:65px;">
             <div style="width:54px; height:54px; background:#0284c7; border-radius:50%; text-align:center; line-height:54px; display:inline-block; box-shadow:0 0 25px rgba(2, 132, 199, 0.45);">
-              <span style="color:#ffffff; font-size:26px; font-weight:900; line-height:54px; display:block;">📦</span>
+              <span style="color:#ffffff; font-size:24px; font-weight:900; line-height:54px; display:block;">COD</span>
             </div>
           </td>
         </tr>
@@ -180,7 +186,7 @@
     </p>
   @elseif($isCod)
     <p class="message-text">
-      Thank you for choosing <strong>Rayka Imitation Jewellery</strong>. Your order <strong>#{{ $order->order_number }}</strong> has been booked for Cash on Delivery. Please keep <strong>₹{{ number_format($order->total_amount, 2) }}</strong> ready when our courier partner arrives.
+      Thank you for choosing <strong>Rayka Imitation Jewellery</strong>. Your order <strong>#{{ $order->order_number }}</strong> has been booked for Cash on Delivery. Your mandatory <strong>{{ $order->advance_percentage }}% advance token payment (₹{{ number_format($order->advance_amount, 2) }})</strong> has been received online. The remaining balance of <strong>₹{{ number_format($order->balance_amount, 2) }}</strong> will be payable upon delivery in Cash or via courier Delivery UPI QR.
     </p>
   @else
     <p class="message-text">
@@ -270,14 +276,30 @@
         <td class="lbl">Shipping Fee</td>
         <td class="val">{{ $order->shipping_fee == 0 ? 'FREE' : '₹' . number_format($order->shipping_fee, 2) }}</td>
       </tr>
+      @if($order->cod_extra_charge > 0)
+      <tr>
+        <td class="lbl" style="color:#D4AF6A;">COD Courier Handling Fee</td>
+        <td class="val" style="color:#D4AF6A; font-weight:700;">+ ₹{{ number_format($order->cod_extra_charge, 2) }}</td>
+      </tr>
+      @endif
       <tr style="border-top:1px solid rgba(212,175,106,0.3);">
         <td class="lbl" style="font-size:12px; color:#D4AF6A; font-weight:800;">
-          {{ $isPaid ? 'Total Paid' : ($isCod ? 'Total Payable on Delivery' : 'Total Order Value') }}
+          Total Order Value
         </td>
-        <td class="val" style="font-size:18px; color:{{ $isPaid ? '#10B981' : '#D4AF6A' }}; font-weight:900; font-family:monospace;">
+        <td class="val" style="font-size:18px; color:#D4AF6A; font-weight:900; font-family:monospace;">
           ₹{{ number_format($order->total_amount, 2) }}
         </td>
       </tr>
+      @if($isCod)
+      <tr style="background:rgba(2,132,199,0.12); border-top:1px dashed #0284c7;">
+        <td class="lbl" style="color:#38bdf8; font-weight:700;">1. Advance Token Paid ({{ $order->advance_percentage }}%)</td>
+        <td class="val" style="color:#38bdf8; font-weight:800; font-family:monospace;">₹{{ number_format($order->advance_amount, 2) }}</td>
+      </tr>
+      <tr style="background:rgba(2,132,199,0.18);">
+        <td class="lbl" style="color:#ffffff; font-weight:800;">2. Remaining Due on Delivery</td>
+        <td class="val" style="color:#ffffff; font-weight:900; font-size:16px; font-family:monospace;">₹{{ number_format($order->balance_amount, 2) }}</td>
+      </tr>
+      @endif
     </table>
   </div>
 
@@ -299,7 +321,7 @@
     </div>
   @elseif($isCod)
     <div class="alert-box alert-info">
-      <strong>Order Confirmed for Dispatch:</strong> Your order is being processed for shipping. Payment will be collected in cash or UPI by the delivery agent at your doorstep.
+      <strong>Order Confirmed for Dispatch:</strong> Your jewellery pieces are being prepared for shipping. We have received your {{ $order->advance_percentage }}% advance token of <strong>₹{{ number_format($order->advance_amount, 2) }}</strong>. The remaining balance of <strong>₹{{ number_format($order->balance_amount, 2) }}</strong> will be collected in Cash or via Delivery UPI QR by the courier agent upon doorstep arrival.
     </div>
   @else
     <div class="alert-box" style="background:rgba(212,175,106,0.06); border-left:4px solid #D4AF6A; border:1px solid rgba(212,175,106,0.2); border-left-width:4px; color:#FAF7F0; padding:15px 18px; border-radius:8px; margin:22px 0;">

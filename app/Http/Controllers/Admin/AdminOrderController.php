@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Mail\OrderCancelledByAdminCustomerMail;
+use App\Mail\OrderRefundProcessedCustomerMail;
 use App\Mail\OrderStatusUpdatedCustomerMail;
 use App\Models\ActivityLog;
 use App\Models\Order;
@@ -302,6 +303,19 @@ class AdminOrderController extends Controller
         }
 
         $order->save();
+
+        if ($order->refund_status === 'Refunded') {
+            defer(function () use ($order) {
+                try {
+                    $customerEmail = $order->address?->email ?: ($order->user?->email ?: null);
+                    if ($customerEmail) {
+                        Mail::to($customerEmail)->send(new OrderRefundProcessedCustomerMail($order));
+                    }
+                } catch (\Throwable $e) {
+                    Log::warning("Failed to dispatch refund confirmation email for order #{$order->order_number}: " . $e->getMessage());
+                }
+            });
+        }
 
         ActivityLog::record(
             action: 'ORDER_REFUND_UPDATED',

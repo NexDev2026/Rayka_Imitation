@@ -182,7 +182,7 @@
                             </div>
                         </div>
                         <p class="text-[11px] text-stone-500 italic">
-                            ✓ Payment re-approval and dispatch updates are disabled because this order was cancelled by the user.
+                            Payment re-approval and dispatch updates are disabled because this order was cancelled by the user.
                         </p>
                     </div>
                 @else
@@ -200,7 +200,7 @@
                                     Confirm Payment (Approve)
                                 </button>
                                 <button type="button" @click="openReasonModal('reject')" class="w-full sm:flex-1 py-3 bg-rose-700 text-white rounded-xl font-bold uppercase tracking-wider hover:bg-rose-800 transition shadow-sm text-center cursor-pointer">
-                                    ✕ Reject Payment
+                                    Reject Payment
                                 </button>
                             </div>
                         @else
@@ -221,7 +221,7 @@
                                     <div class="pt-1 flex items-center justify-between gap-2 border-t border-rose-200/60">
                                         <span class="text-[11px] text-stone-500">Need to change decision?</span>
                                         <button type="submit" name="action" value="confirm" class="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg font-bold text-[11px] transition shadow-xs cursor-pointer">
-                                            ✓ Re-Approve / Confirm Payment
+                                            Re-Approve / Confirm Payment
                                         </button>
                                     </div>
                                 </div>
@@ -241,7 +241,7 @@
                                     <div class="pt-1 flex items-center justify-between gap-2 border-t border-rose-200/60">
                                         <span class="text-[11px] text-stone-500">Need to reinstate or approve?</span>
                                         <button type="submit" name="action" value="confirm" class="px-3 py-1.5 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg font-bold text-[11px] transition shadow-xs cursor-pointer">
-                                            ✓ Re-Approve / Confirm Payment
+                                            Re-Approve / Confirm Payment
                                         </button>
                                     </div>
                                 </div>
@@ -262,7 +262,7 @@
                                     <div class="pt-1 flex items-center justify-between gap-2 border-t border-emerald-200/60">
                                         <span class="text-[11px] text-stone-500">Found an issue with proof?</span>
                                         <button type="submit" name="action" value="reject" onclick="return confirm('Change status to REJECTED? Customer tracking will reflect payment verification failed.');" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white rounded-lg font-bold text-[11px] transition shadow-xs cursor-pointer">
-                                            ✕ Reject Payment
+                                            Reject Payment
                                         </button>
                                     </div>
                                 </div>
@@ -386,7 +386,7 @@
                 @if(!in_array($order->status, ['Cancelled', 'Rejected', 'Delivered']) && !$order->isCancelledByCustomer())
                 <div>
                     <button type="button" @click="openReasonModal('cancel')" class="w-full py-2.5 bg-rose-50 text-rose-700 border border-rose-200 rounded-lg font-bold uppercase tracking-wider hover:bg-rose-100 transition cursor-pointer">
-                        ✕ Cancel Order
+                        Cancel Order
                     </button>
                 </div>
                 @endif
@@ -436,11 +436,11 @@
                 <div class="flex items-center gap-2">
                     @if($order->isRefunded())
                         <span class="text-xs font-bold px-3 py-1.5 rounded-full border bg-emerald-100 text-emerald-800 border-emerald-300">
-                            ✓ Refund Settled & Completed
+                            Refund Settled & Completed
                         </span>
                     @elseif($order->isRefundPending())
                         <span class="text-xs font-bold px-3 py-1.5 rounded-full border bg-amber-100 text-amber-800 border-amber-300 animate-pulse">
-                            ⏳ Action Required: Refund Pending
+                            Action Required: Refund Pending
                         </span>
                     @elseif($order->refund_status === 'Not Applicable')
                         <span class="text-xs font-bold px-3 py-1.5 rounded-full border bg-stone-100 text-stone-600 border-stone-300">
@@ -524,7 +524,7 @@
                     @if($order->isRefunded())
                         <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-200 space-y-1.5">
                             <div class="flex items-center justify-between text-emerald-900 font-bold">
-                                <span>✓ Refund Processed</span>
+                                <span>Refund Processed</span>
                                 <span class="font-mono text-xs">₹{{ number_format($order->refund_amount, 2) }}</span>
                             </div>
                             <div class="text-[11px] text-emerald-800 space-y-0.5">
@@ -561,9 +561,9 @@
                             <div>
                                 <label class="block font-bold text-stone-700 mb-1">Refund Settlement Status *</label>
                                 <select name="refund_status" class="w-full border rounded-lg p-2.5 bg-stone-50 font-semibold focus:border-[#D4AF6A] focus:ring-1 focus:ring-[#D4AF6A]">
-                                    <option value="Pending" {{ $order->refund_status === 'Pending' ? 'selected' : '' }}>⏳ Pending (Refund Queued / Awaiting)</option>
-                                    <option value="Refunded" {{ $order->refund_status === 'Refunded' ? 'selected' : '' }}>✓ Refunded (Payment Returned to Client)</option>
-                                    <option value="Not Applicable" {{ $order->refund_status === 'Not Applicable' ? 'selected' : '' }}>✕ Not Applicable (No Refund Due)</option>
+                                    <option value="Pending" {{ $order->refund_status === 'Pending' ? 'selected' : '' }}>Pending (Refund Queued / Awaiting)</option>
+                                    <option value="Refunded" {{ $order->refund_status === 'Refunded' ? 'selected' : '' }}>Refunded (Payment Returned to Client)</option>
+                                    <option value="Not Applicable" {{ $order->refund_status === 'Not Applicable' ? 'selected' : '' }}>Not Applicable (No Refund Due)</option>
                                 </select>
                             </div>
 
@@ -690,7 +690,28 @@
                 </div>
 
                 <!-- Right: Admin Balance Update Action Form (7 cols) -->
-                <div class="lg:col-span-7 bg-white p-4 rounded-xl border border-stone-200 space-y-4">
+                <div class="lg:col-span-7 bg-white p-4 rounded-xl border border-stone-200 space-y-4"
+                     x-data="{
+                        balanceProofPreview: null,
+                        previewBalanceFile(e) {
+                            let file = e.target.files[0];
+                            if (file) {
+                                if (file.size > 10 * 1024 * 1024) {
+                                    alert('Receipt image exceeds 10MB limit.');
+                                    e.target.value = '';
+                                    this.balanceProofPreview = null;
+                                    return;
+                                }
+                                if (file.type.startsWith('image/')) {
+                                    let reader = new FileReader();
+                                    reader.onload = (ev) => { this.balanceProofPreview = ev.target.result; };
+                                    reader.readAsDataURL(file);
+                                } else {
+                                    this.balanceProofPreview = null;
+                                }
+                            }
+                        }
+                     }">
                     <form action="{{ route('admin.orders.settle_balance', $order->id) }}" method="POST" enctype="multipart/form-data" class="space-y-3">
                         @csrf
                         <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -710,9 +731,27 @@
                             </div>
                         </div>
 
+                        <!-- Drag & Drop Luxury File Chooser -->
                         <div>
                             <label class="block font-bold text-stone-700 mb-1">Upload Receipt / Proof (Optional)</label>
-                            <input type="file" name="delivery_payment_screenshot" accept="image/*,.heic,.heif" class="w-full border rounded-lg p-2 bg-stone-50 file:mr-2 file:py-1 file:px-2.5 file:rounded file:border-0 file:text-xs file:bg-stone-800 file:text-white hover:file:bg-black">
+                            <label class="relative flex flex-col items-center justify-center p-3 sm:p-4 border-2 border-dashed border-stone-300 rounded-xl bg-stone-50 hover:bg-stone-100/70 cursor-pointer transition">
+                                <input type="file" name="delivery_payment_screenshot" accept="image/*,.heic,.heif,.pdf" @change="previewBalanceFile($event)" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
+                                
+                                <template x-if="balanceProofPreview">
+                                    <div class="space-y-1.5 text-center">
+                                        <img :src="balanceProofPreview" class="max-h-24 mx-auto rounded shadow-sm border border-stone-200">
+                                        <p class="text-[10px] text-emerald-700 font-bold">New receipt selected (Click or drag to change)</p>
+                                    </div>
+                                </template>
+
+                                <template x-if="!balanceProofPreview">
+                                    <div class="space-y-1 text-center">
+                                        <svg class="w-6 h-6 mx-auto text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                                        <p class="text-xs font-semibold text-stone-700">Click to upload or drag & drop proof</p>
+                                        <p class="text-[10px] text-stone-400">PNG, JPG, WEBP, PDF up to 10MB</p>
+                                    </div>
+                                </template>
+                            </label>
                         </div>
 
                         <div>
@@ -831,7 +870,9 @@
                         <svg class="w-4 h-4 text-[#996E2E]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
                         Payment Screenshot Proof
                     </h4>
-                    <button type="button" @click="proofModal = false" class="w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-600 hover:text-stone-900 font-bold flex items-center justify-center text-lg leading-none cursor-pointer transition">✕</button>
+                    <button type="button" @click="proofModal = false" class="w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-600 hover:text-stone-900 font-bold flex items-center justify-center cursor-pointer transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
                 </div>
                 <!-- Image Area: fills remaining space, scrollable if very tall -->
                 @if($order->payment && $order->payment->screenshot_path)
@@ -868,7 +909,9 @@
                         <svg class="w-4 h-4 text-[#996E2E]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
                         Customer Delivery / Balance Payment Proof
                     </h4>
-                    <button type="button" @click="deliveryProofModal = false" class="w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-600 hover:text-stone-900 font-bold flex items-center justify-center text-lg leading-none cursor-pointer transition">✕</button>
+                    <button type="button" @click="deliveryProofModal = false" class="w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-600 hover:text-stone-900 font-bold flex items-center justify-center cursor-pointer transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
                 </div>
                 <div class="flex-1 overflow-auto bg-stone-100 flex items-center justify-center p-2 sm:p-4 min-h-0">
                     <img src="{{ asset($order->delivery_payment_screenshot) }}" 
@@ -899,7 +942,9 @@
                         <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
                         Official Bank / UPI Refund Transfer Receipt
                     </h4>
-                    <button type="button" @click="refundProofModal = false" class="w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-600 hover:text-stone-900 font-bold flex items-center justify-center text-lg leading-none cursor-pointer transition">✕</button>
+                    <button type="button" @click="refundProofModal = false" class="w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-600 hover:text-stone-900 font-bold flex items-center justify-center cursor-pointer transition">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
                 </div>
                 <div class="flex-1 overflow-auto bg-stone-100 flex items-center justify-center p-2 sm:p-4 min-h-0">
                     <img src="{{ asset($order->refund_screenshot) }}" 
@@ -936,7 +981,9 @@
                             <p class="text-[11px] text-stone-500 mt-0.5">Please specify the official reason. This note will be permanently recorded and emailed to the customer.</p>
                         </div>
                     </div>
-                    <button type="button" @click="reasonModal = false" class="text-stone-400 hover:text-stone-800 font-bold p-1 text-lg leading-none cursor-pointer shrink-0 ml-2">✕</button>
+                    <button type="button" @click="reasonModal = false" class="text-stone-400 hover:text-stone-800 font-bold p-1 cursor-pointer shrink-0 ml-2">
+                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M6 18L18 6M6 6l12 12"/></svg>
+                    </button>
                 </div>
 
                 <!-- Modal Body with Smooth Inner Scroll -->

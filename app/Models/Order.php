@@ -104,7 +104,12 @@ class Order extends Model
 
     public function isRefundPending(): bool
     {
-        return $this->isCancelled() && (in_array($this->refund_status, ['Pending', 'None', '']) && $this->getRefundableAmount() > 0);
+        return $this->isCancelled() && $this->refund_status !== 'Not Applicable' && (in_array($this->refund_status, ['Pending', 'None', '']) && $this->getRefundableAmount() > 0);
+    }
+
+    public function isRefundNotApplicable(): bool
+    {
+        return $this->refund_status === 'Not Applicable' || ($this->isCancelled() && $this->getRefundableAmount() <= 0);
     }
 
     public function getRefundStatusBadgeClassAttribute(): string
