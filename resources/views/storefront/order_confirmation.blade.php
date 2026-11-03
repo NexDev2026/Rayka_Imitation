@@ -130,10 +130,37 @@
                         <span>Shipping:</span>
                         <span>{{ $order->shipping_fee == 0 ? 'FREE' : '₹' . number_format($order->shipping_fee) }}</span>
                     </div>
+                    @if($order->cod_extra_charge > 0)
+                        <div class="flex justify-between">
+                            <span>COD Handling Fee:</span>
+                            <span class="font-semibold">+ ₹{{ number_format($order->cod_extra_charge) }}</span>
+                        </div>
+                    @endif
                     <div class="flex justify-between font-bold text-sm text-[#4A2C1D] pt-2 border-t border-[#D4AF6A]/30">
-                        <span>Total Paid:</span>
+                        <span>Total Order Value:</span>
                         <span class="font-serif-royal text-base">₹{{ number_format($order->total_amount) }}</span>
                     </div>
+
+                    @if($order->isCod())
+                        <div class="p-2.5 rounded-xl bg-white border border-[#D4AF6A]/40 space-y-1.5 text-xs mt-2 shadow-2xs">
+                            <div class="flex justify-between text-emerald-800 font-bold">
+                                <span>Advance Paid ({{ $order->advance_percentage }}%):</span>
+                                <span>₹{{ number_format($order->advance_amount) }}</span>
+                            </div>
+                            <div class="flex justify-between text-[#4A2C1D] font-bold">
+                                <span>Remaining Balance on Delivery:</span>
+                                <span class="text-amber-900 font-bold">₹{{ number_format($order->balance_amount) }}</span>
+                            </div>
+                            <p class="text-[10px] text-stone-500 italic pt-1 border-t border-stone-100">
+                                Mode: <strong>Cash on Delivery (COD)</strong> • Balance of ₹{{ number_format($order->balance_amount) }} to be paid upon courier arrival.
+                            </p>
+                        </div>
+                    @else
+                        <div class="flex justify-between text-[11px] text-stone-500 pt-1">
+                            <span>Payment Mode:</span>
+                            <span class="font-semibold text-stone-700">100% Online UPI</span>
+                        </div>
+                    @endif
                 </div>
             </div>
         </div>

@@ -50,6 +50,13 @@ class AdminSettingController extends Controller
             'product_badge_2_subtitle' => $allSettings['product_badge_2_subtitle'] ?? '7 Days Delivery',
             'product_badge_3_title' => $allSettings['product_badge_3_title'] ?? 'Fast Delivery',
             'product_badge_3_subtitle' => $allSettings['product_badge_3_subtitle'] ?? 'Express Courier',
+            'cod_enabled' => $allSettings['cod_enabled'] ?? '1',
+            'cod_advance_percentage' => $allSettings['cod_advance_percentage'] ?? '20',
+            'cod_extra_charge' => $allSettings['cod_extra_charge'] ?? '0',
+            'cod_notice' => $allSettings['cod_notice'] ?? 'Pay advance online via UPI to confirm booking. Remaining balance can be paid on delivery via Cash or QR.',
+            'cod_delivery_qr_image' => $allSettings['cod_delivery_qr_image'] ?? '',
+            'cod_delivery_upi_id' => $allSettings['cod_delivery_upi_id'] ?? '',
+            'cod_delivery_payee_name' => $allSettings['cod_delivery_payee_name'] ?? '',
             'showcase_enabled' => $allSettings['showcase_enabled'] ?? '1',
             'showcase_title' => $allSettings['showcase_title'] ?? '',
             'showcase_subtitle' => $allSettings['showcase_subtitle'] ?? '',
@@ -94,11 +101,19 @@ class AdminSettingController extends Controller
             'showcase_subtitle' => 'nullable|string|max:500',
             'showcase_limit' => 'nullable|integer|min:1|max:50',
             'order_buttons_notice' => 'nullable|string|max:500',
+            'cod_advance_percentage' => 'nullable|integer|min:10|max:100',
+            'cod_extra_charge' => 'nullable|numeric|min:0',
+            'cod_notice' => 'nullable|string|max:500',
+            'cod_delivery_upi_id' => 'nullable|string|max:100',
+            'cod_delivery_payee_name' => 'nullable|string|max:255',
             // QR Code: max 10 MB, image types only
             'qr_code_file' => 'nullable|file|mimes:jpeg,png,jpg,webp,svg,gif|max:10240',
+            'cod_delivery_qr_file' => 'nullable|file|mimes:jpeg,png,jpg,webp,svg,gif|max:10240',
         ], [
             'qr_code_file.max' => 'The QR code image must not exceed 10MB.',
             'qr_code_file.mimes' => 'The QR code image must be a JPEG, PNG, JPG, WebP, SVG, or GIF file.',
+            'cod_delivery_qr_file.max' => 'The delivery QR code image must not exceed 10MB.',
+            'cod_delivery_qr_file.mimes' => 'The delivery QR code image must be a JPEG, PNG, JPG, WebP, SVG, or GIF file.',
         ]);
 
         $fields = [
@@ -131,6 +146,11 @@ class AdminSettingController extends Controller
             'showcase_subtitle',
             'showcase_limit',
             'order_buttons_notice',
+            'cod_advance_percentage',
+            'cod_extra_charge',
+            'cod_notice',
+            'cod_delivery_upi_id',
+            'cod_delivery_payee_name',
         ];
 
         foreach ($fields as $field) {
@@ -140,7 +160,8 @@ class AdminSettingController extends Controller
             }
         }
 
-
+        // Cash on Delivery Master Switch Toggle
+        StoreSetting::set('cod_enabled', $request->input('cod_enabled') === '1' ? '1' : '0');
 
         // Showcase Enabled Toggle & Categories
         StoreSetting::set('showcase_enabled', $request->has('showcase_enabled') ? '1' : '0');
@@ -164,6 +185,25 @@ class AdminSettingController extends Controller
 
             // Double guarantee: mirror QR code to both 'qr' and 'settings' folders
             $qrFn = basename($qrPath);
+            ImageUploadService::mirrorToExternalUploads(public_path('uploads/qr/'.$qrFn), 'qr', $qrFn);
+            ImageUploadService::mirrorToExternalUploads(public_path('uploads/qr/'.$qrFn), 'settings', $qrFn);
+        }
+
+        // COD Delivery / Final Payment QR Code Upload or Reset
+        if ($request->has('remove_cod_delivery_qr') && $request->input('remove_cod_delivery_qr') == '1') {
+            StoreSetting::set('cod_delivery_qr_image', '');
+        } elseif ($request->hasFile('cod_delivery_qr_file')) {
+            $deliveryQrPath = ImageUploadService::uploadAndConvertToWebp(
+                file: $request->file('cod_delivery_qr_file'),
+                folder: 'uploads/qr',
+                prefix: 'cod_delivery_qr',
+                maxWidth: 1200,
+                maxHeight: 1200,
+                quality: 90
+            );
+            StoreSetting::set('cod_delivery_qr_image', $deliveryQrPath);
+
+            $qrFn = basename($deliveryQrPath);
             ImageUploadService::mirrorToExternalUploads(public_path('uploads/qr/'.$qrFn), 'qr', $qrFn);
             ImageUploadService::mirrorToExternalUploads(public_path('uploads/qr/'.$qrFn), 'settings', $qrFn);
         }
@@ -204,6 +244,38 @@ class AdminSettingController extends Controller
             return response()->json([
                 'success' => true,
                 'hide_order_buttons' => $newStatus,
+                'message' => $message,
+            ]);
+        }
+
+        return back()->with('success', $message);
+    }
+
+    /**
+     * Fast 1-click toggle to show or hide Cash on Delivery (COD) across the storefront.
+     */
+    public function toggleCod(Request $request)
+    {
+        $current = StoreSetting::get('cod_enabled', '1');
+        $newStatus = ($current === '1') ? '0' : '1';
+
+        StoreSetting::set('cod_enabled', $newStatus);
+        StoreSetting::clearCache();
+
+        try {
+            Artisan::call('view:clear');
+        } catch (\Throwable $e) {
+            // Silently ignore if Artisan view:clear not permitted in specific runtime
+        }
+
+        $message = ($newStatus === '1')
+            ? 'Cash on Delivery (COD) is now ACTIVE and visible to customers on the site checkout.'
+            : 'Cash on Delivery (COD) is now TURNED OFF and hidden from the site checkout.';
+
+        if ($request->expectsJson() || $request->ajax()) {
+            return response()->json([
+                'success' => true,
+                'cod_enabled' => $newStatus,
                 'message' => $message,
             ]);
         }

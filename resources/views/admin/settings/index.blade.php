@@ -14,11 +14,12 @@
         <div class="p-4 sm:p-6 rounded-2xl {{ $settings['hide_order_buttons'] == '1' ? 'bg-amber-50/90 border-2 border-amber-400' : 'bg-emerald-50/80 border-2 border-emerald-400' }} shadow-xs transition-colors space-y-4">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b {{ $settings['hide_order_buttons'] == '1' ? 'border-amber-300' : 'border-emerald-300' }}">
                 <div class="flex items-start gap-3">
-                    <div class="w-10 h-10 rounded-xl {{ $settings['hide_order_buttons'] == '1' ? 'bg-amber-500 text-white' : 'bg-emerald-600 text-white' }} flex items-center justify-center text-xl shrink-0 shadow-xs">
+                    <div class="w-10 h-10 rounded-xl flex items-center justify-center text-xl shrink-0 shadow-xs"
+                         style="background-color: {{ $settings['hide_order_buttons'] == '1' ? '#D97706' : '#059669' }} !important; color: #FFFFFF !important;">
                         @if($settings['hide_order_buttons'] == '1')
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21" /></svg>
                         @else
-                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
+                            <svg class="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 11V7a4 4 0 00-8 0v4M5 9h14l1 12H4L5 9z" /></svg>
                         @endif
                     </div>
                     <div>
@@ -27,11 +28,13 @@
                                 Storefront "Add to Bag" & "Buy Now" Buttons Control
                             </h3>
                             @if($settings['hide_order_buttons'] == '1')
-                                <span class="bg-amber-600 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                                <span class="text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider"
+                                      style="background-color: #D97706 !important; color: #FFFFFF !important;">
                                     Currently: Buttons are Hidden (Catalog Mode)
                                 </span>
                             @else
-                                <span class="bg-emerald-600 text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider">
+                                <span class="text-white text-[10px] font-bold px-2.5 py-0.5 rounded-full uppercase tracking-wider"
+                                      style="background-color: #059669 !important; color: #FFFFFF !important;">
                                     Currently: Buttons are Live (Ordering ON)
                                 </span>
                             @endif
@@ -47,7 +50,8 @@
                     <button type="submit" 
                             formaction="{{ route('admin.settings.toggle_order_buttons') }}"
                             formnovalidate
-                            class="w-full sm:w-auto px-4 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all duration-200 shadow-sm hover:shadow-md flex items-center justify-center gap-2 cursor-pointer active:scale-95 {{ $settings['hide_order_buttons'] == '1' ? 'bg-emerald-700 hover:bg-emerald-800 text-white' : 'bg-amber-600 hover:bg-amber-700 text-white' }}">
+                            style="background-color: {{ $settings['hide_order_buttons'] == '1' ? '#047857' : '#D97706' }} !important; color: #FFFFFF !important;"
+                            class="w-full sm:w-auto px-4 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider transition-all duration-200 shadow-md hover:brightness-110 flex items-center justify-center gap-2 cursor-pointer active:scale-95 text-white">
                         @if($settings['hide_order_buttons'] == '1')
                             <svg class="w-4 h-4 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                             <span>1-Click Show Buttons (Make Live)</span>
@@ -66,6 +70,349 @@
             </div>
         </div>
 
+        <!-- 0.5. CASH ON DELIVERY (COD) & DYNAMIC ADVANCE PAYMENT ENGINE -->
+        <div class="p-4 sm:p-6 rounded-2xl {{ $settings['cod_enabled'] == '1' ? 'bg-[#FAF7F0] border-2 border-[#D4AF6A]' : 'bg-stone-100/90 border-2 border-stone-300' }} shadow-xs transition-colors space-y-5"
+             x-data="{
+                codEnabled: {{ $settings['cod_enabled'] == '1' ? 'true' : 'false' }},
+                codAdvance: {{ (int) ($settings['cod_advance_percentage'] ?? 20) }},
+                codExtra: {{ (float) ($settings['cod_extra_charge'] ?? 0) }},
+                codNotice: '{{ addslashes($settings['cod_notice'] ?? 'Pay advance online via UPI to confirm booking. Remaining balance can be paid on delivery via Cash or QR.') }}',
+                sampleOrderTotal: 1000,
+                calcAdvance() {
+                    let total = this.sampleOrderTotal + (parseFloat(this.codExtra) || 0);
+                    return Math.round(total * (this.codAdvance / 100));
+                },
+                calcBalance() {
+                    let total = this.sampleOrderTotal + (parseFloat(this.codExtra) || 0);
+                    return Math.max(0, total - this.calcAdvance());
+                }
+             }">
+
+            <!-- Hidden input preserves current cod_enabled status on general form save -->
+            <input type="hidden" name="cod_enabled" value="{{ $settings['cod_enabled'] == '1' ? '1' : '0' }}">
+
+            <!-- Header with High-Contrast Turn On / Turn Off Action -->
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-[#D4AF6A]/30">
+                <div class="flex items-start gap-3">
+                    <div class="w-11 h-11 rounded-2xl flex items-center justify-center text-xl shrink-0 shadow-xs"
+                         style="background-color: {{ $settings['cod_enabled'] == '1' ? '#4A2C1D' : '#4B5563' }} !important; color: {{ $settings['cod_enabled'] == '1' ? '#E7C77B' : '#FFFFFF' }} !important;">
+                        <svg class="w-6 h-6 shrink-0" style="color: {{ $settings['cod_enabled'] == '1' ? '#E7C77B' : '#FFFFFF' }} !important;" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 9V7a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2m2 4h10a2 2 0 002-2v-6a2 2 0 00-2-2H9a2 2 0 00-2 2v6a2 2 0 002 2zm7-5a2 2 0 11-4 0 2 2 0 014 0z"/></svg>
+                    </div>
+                    <div>
+                        <div class="flex items-center gap-2.5 flex-wrap">
+                            <h3 class="font-serif-royal text-base font-bold text-[#4A2C1D]">
+                                Cash on Delivery (COD) & Dynamic Advance Payment Engine
+                            </h3>
+                            @if($settings['cod_enabled'] == '1')
+                                <span class="inline-flex items-center gap-1.5 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-xs"
+                                      style="background-color: #059669 !important; color: #FFFFFF !important;">
+                                    <span class="w-2 h-2 rounded-full" style="background-color: #FFFFFF !important;"></span>
+                                    <span style="color: #FFFFFF !important;">CURRENTLY: COD ACTIVE ON SITE</span>
+                                </span>
+                            @else
+                                <span class="inline-flex items-center gap-1.5 text-[10px] font-bold px-3 py-1 rounded-full uppercase tracking-wider shadow-xs"
+                                      style="background-color: #4B5563 !important; color: #FFFFFF !important;">
+                                    <span class="w-2 h-2 rounded-full" style="background-color: #D1D5DB !important;"></span>
+                                    <span style="color: #FFFFFF !important;">CURRENTLY: COD TURNED OFF (HIDDEN)</span>
+                                </span>
+                            @endif
+                        </div>
+                        <p class="text-stone-600 text-[11px] mt-0.5 leading-relaxed">
+                            Configure customer Cash on Delivery availability, mandatory token advance percentage (10% to 100%), extra delivery handling fee, customer notification, and after-delivery final payment QR.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- High-Contrast Turn On / Turn Off Button -->
+                <div class="shrink-0">
+                    @if($settings['cod_enabled'] == '1')
+                        <button type="submit" 
+                                formaction="{{ route('admin.settings.toggle_cod') }}"
+                                formnovalidate
+                                style="background-color: #B91C1C !important; color: #FFFFFF !important;"
+                                class="w-full sm:w-auto px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider shadow-md hover:shadow-lg hover:brightness-110 flex items-center justify-center gap-2 cursor-pointer active:scale-95 text-white transition-all">
+                            <svg class="w-4 h-4 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M18.364 18.364A9 9 0 005.636 5.636m12.728 12.728A9 9 0 015.636 5.636m12.728 12.728L5.636 5.636"/></svg>
+                            <span class="text-white font-bold">1-Click Turn Off COD</span>
+                        </button>
+                    @else
+                        <button type="submit" 
+                                formaction="{{ route('admin.settings.toggle_cod') }}"
+                                formnovalidate
+                                style="background-color: #047857 !important; color: #FFFFFF !important;"
+                                class="w-full sm:w-auto px-5 py-2.5 rounded-xl font-bold text-xs uppercase tracking-wider shadow-md hover:shadow-lg hover:brightness-110 flex items-center justify-center gap-2 cursor-pointer active:scale-95 text-white transition-all">
+                            <svg class="w-4 h-4 text-white shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                            <span class="text-white font-bold">1-Click Turn On COD</span>
+                        </button>
+                    @endif
+                </div>
+            </div>
+
+            <!-- Informational Status Banner (Clear explanation without redundant checkbox) -->
+            @if($settings['cod_enabled'] == '1')
+                <div class="p-3.5 rounded-xl border flex items-center justify-between gap-3 text-xs shadow-xs"
+                     style="background-color: #ECFDF5 !important; border-color: #A7F3D0 !important; color: #065F46 !important;">
+                    <div class="flex items-center gap-2.5">
+                        <span class="w-5 h-5 rounded-full flex items-center justify-center font-bold text-xs shrink-0"
+                              style="background-color: #059669 !important; color: #FFFFFF !important;">✓</span>
+                        <p class="leading-relaxed font-medium" style="color: #064E3B !important;">
+                            <strong style="color: #065F46 !important;">Cash on Delivery is currently ENABLED.</strong> Customers can choose COD at checkout and pay the required advance percentage online.
+                        </p>
+                    </div>
+                    <span class="hidden sm:inline-block px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shrink-0 border"
+                          style="background-color: #D1FAE5 !important; border-color: #A7F3D0 !important; color: #065F46 !important;">
+                        Live on Checkout
+                    </span>
+                </div>
+            @else
+                <div class="p-3.5 rounded-xl border flex items-center justify-between gap-3 text-xs shadow-xs"
+                     style="background-color: #F3F4F6 !important; border-color: #D1D5DB !important; color: #374151 !important;">
+                    <div class="flex items-center gap-2.5">
+                        <span class="w-5 h-5 rounded-full flex items-center justify-center font-bold text-xs shrink-0"
+                              style="background-color: #4B5563 !important; color: #FFFFFF !important;">✕</span>
+                        <p class="leading-relaxed font-medium" style="color: #1F2937 !important;">
+                            <strong style="color: #111827 !important;">Cash on Delivery is currently TURNED OFF.</strong> The COD payment option is completely hidden from customers at checkout (Full Online UPI only).
+                        </p>
+                    </div>
+                    <span class="hidden sm:inline-block px-3 py-1 rounded-full text-[10px] font-bold uppercase tracking-wider shrink-0 border"
+                          style="background-color: #E5E7EB !important; border-color: #D1D5DB !important; color: #374151 !important;">
+                        Hidden from Site
+                    </span>
+                </div>
+            @endif
+
+            <!-- 10% to 100% Dynamic Advance Selection System -->
+            <div class="p-4 bg-white rounded-xl border border-[#D4AF6A]/40 shadow-2xs space-y-4">
+                <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-2 pb-2 border-b border-stone-100">
+                    <div>
+                        <label class="block font-bold text-xs text-[#4A2C1D]">
+                            COD Advance Payment Percentage (10% to 100%) *
+                        </label>
+                        <p class="text-[11px] text-stone-500">
+                            Customer must pay this percentage online via UPI before order is dispatched. The remainder is collected on delivery.
+                        </p>
+                    </div>
+                    <div class="flex items-center gap-2 self-start sm:self-auto">
+                        <span class="text-xs font-semibold text-stone-500">Advance:</span>
+                        <div class="flex items-center">
+                            <input type="number" 
+                                   name="cod_advance_percentage" 
+                                   min="10" 
+                                   max="100" 
+                                   x-model.number="codAdvance" 
+                                   value="{{ old('cod_advance_percentage', $settings['cod_advance_percentage'] ?? 20) }}"
+                                   class="w-20 border-2 border-[#D4AF6A] rounded-lg p-1.5 font-mono text-center font-bold text-sm text-[#4A2C1D] bg-[#FAF7F0] focus:outline-hidden">
+                            <span class="ml-1 text-sm font-bold text-[#4A2C1D]">%</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Interactive Preset Quick-Selection Chips (Instantly rendered in HTML, crystal-clear buttons) -->
+                <div>
+                    <label class="block text-[11px] font-semibold text-stone-600 mb-2">Preset Quick-Select System (Click to Set):</label>
+                    <div class="grid grid-cols-4 sm:grid-cols-8 gap-1.5 sm:gap-2">
+                        @foreach([10, 15, 20, 25, 30, 40, 50, 100] as $preset)
+                            <button type="button" 
+                                    @click="codAdvance = {{ $preset }}"
+                                    :class="codAdvance == {{ $preset }} 
+                                        ? 'border-[#4A2C1D] shadow-sm font-bold ring-2 ring-[#D4AF6A]' 
+                                        : 'border-[#D4AF6A]/40 hover:bg-[#D4AF6A]/20 font-medium'"
+                                    :style="codAdvance == {{ $preset }}
+                                        ? 'background-color: #4A2C1D !important; color: #E7C77B !important;'
+                                        : 'background-color: #FAF7F0 !important; color: #4A2C1D !important;'"
+                                    style="background-color: {{ (int)($settings['cod_advance_percentage'] ?? 20) == $preset ? '#4A2C1D' : '#FAF7F0' }}; color: {{ (int)($settings['cod_advance_percentage'] ?? 20) == $preset ? '#E7C77B' : '#4A2C1D' }};"
+                                    class="py-2.5 px-1 text-center rounded-xl border text-xs transition cursor-pointer flex flex-col items-center justify-center min-w-0">
+                                <span class="text-xs font-bold">{{ $preset }}%</span>
+                                <span class="text-[9px] opacity-80 truncate">{{ $preset === 100 ? 'Full' : ($preset === 50 ? 'Half' : ($preset === 10 ? 'Min Token' : 'Token')) }}</span>
+                            </button>
+                        @endforeach
+                    </div>
+                </div>
+
+                <!-- Smooth Percentage Range Slider -->
+                <div class="space-y-1 pt-1">
+                    <div class="flex justify-between text-[11px] text-stone-500 font-medium">
+                        <span>10% (Minimum Token)</span>
+                        <span class="font-bold text-[#996E2E]" x-text="codAdvance + '% Online Advance'"></span>
+                        <span>100% (Full Advance)</span>
+                    </div>
+                    <input type="range" 
+                           min="10" 
+                           max="100" 
+                           step="5" 
+                           x-model.number="codAdvance" 
+                           class="w-full h-2.5 bg-stone-200 rounded-lg appearance-none cursor-pointer accent-[#996E2E]">
+                </div>
+
+                <!-- Real-Time Calculation Explainer Card -->
+                <div class="p-3 rounded-xl bg-amber-50/70 border border-amber-200/80 text-xs text-amber-900 space-y-1.5">
+                    <div class="flex items-center gap-1.5 font-bold text-[11px] uppercase tracking-wider text-amber-950">
+                        <svg class="w-4 h-4 text-amber-700 shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        <span>Real-Time Math Demonstration (For ₹1,000 Order):</span>
+                    </div>
+                    <div class="grid grid-cols-1 sm:grid-cols-3 gap-2 pt-1 font-medium">
+                        <div class="bg-white p-2 rounded-lg border border-amber-200/60">
+                            <span class="text-[10px] text-stone-500 block">Advance Payable Now:</span>
+                            <span class="text-xs font-bold text-emerald-800" x-text="'₹' + calcAdvance() + ' (' + codAdvance + '%)'"></span>
+                        </div>
+                        <div class="bg-white p-2 rounded-lg border border-amber-200/60">
+                            <span class="text-[10px] text-stone-500 block">Balance on Delivery:</span>
+                            <span class="text-xs font-bold text-[#4A2C1D]" x-text="'₹' + calcBalance() + ' (' + (100 - codAdvance) + '%)'"></span>
+                        </div>
+                        <div class="bg-white p-2 rounded-lg border border-amber-200/60">
+                            <span class="text-[10px] text-stone-500 block">Extra COD Charge:</span>
+                            <span class="text-xs font-bold text-stone-700" x-text="(parseFloat(codExtra) > 0 ? '+ ₹' + codExtra : '₹0 (Free)')"></span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Extra Fee & Notice Configuration -->
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div>
+                    <label class="block font-semibold text-stone-700 mb-1">
+                        Extra COD Handling Charge (₹)
+                    </label>
+                    <div class="relative">
+                        <span class="absolute left-3 top-2.5 text-stone-500 font-bold">₹</span>
+                        <input type="number" 
+                               name="cod_extra_charge" 
+                               min="0" 
+                               step="1" 
+                               x-model.number="codExtra" 
+                               value="{{ old('cod_extra_charge', $settings['cod_extra_charge'] ?? '0') }}" 
+                               class="w-full border rounded-lg pl-8 p-2.5 font-mono text-xs bg-white text-stone-800" 
+                               placeholder="e.g. 50 (or 0 for no extra fee)">
+                    </div>
+                    <p class="text-[10px] text-stone-500 mt-1">
+                        Optional extra rupees added to the order total when customer chooses Cash on Delivery to offset courier COD processing costs.
+                    </p>
+                </div>
+
+                <div>
+                    <label class="block font-semibold text-stone-700 mb-1">
+                        Customer Notification & Description Banner (Shown on COD selection):
+                    </label>
+                    <textarea name="cod_notice" 
+                              rows="2" 
+                              x-model="codNotice" 
+                              class="w-full border rounded-lg p-2.5 text-xs bg-white text-stone-800" 
+                              placeholder="e.g. Pay advance online via UPI to confirm booking. Remaining balance can be paid on delivery via Cash or QR.">{{ old('cod_notice', $settings['cod_notice'] ?? 'Pay advance online via UPI to confirm booking. Remaining balance can be paid on delivery via Cash or QR.') }}</textarea>
+                    <p class="text-[10px] text-stone-500 mt-1">
+                        Explains the advance booking requirement and final cash/QR payment terms directly to the customer at checkout.
+                    </p>
+                </div>
+            </div>
+
+            <!-- After-Delivery Final Payment QR Code Settings -->
+            <div class="p-4 bg-white rounded-xl border border-[#D4AF6A]/40 shadow-2xs space-y-4">
+                <div class="flex items-center justify-between pb-2 border-b border-stone-100">
+                    <div>
+                        <h4 class="font-serif-royal text-sm font-bold text-[#4A2C1D] flex items-center gap-1.5">
+                            <svg class="w-4 h-4 text-[#996E2E]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+                            <span>After-Delivery Final Balance Payment QR & Payee Details</span>
+                        </h4>
+                        <p class="text-[11px] text-stone-500">
+                            Option to set a dedicated UPI QR code and VPA for customers paying the remaining balance after delivery or to courier. If left empty, the store's primary UPI QR code is automatically used.
+                        </p>
+                    </div>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-center" x-data="{ isDropping: false, fileSelected: false, fileName: '', filePreview: null }">
+                    <div class="space-y-3">
+                        <div>
+                            <label class="block font-semibold text-stone-700 mb-1">Delivery UPI ID (VPA) (Optional)</label>
+                            <input type="text" name="cod_delivery_upi_id" value="{{ old('cod_delivery_upi_id', $settings['cod_delivery_upi_id'] ?? '') }}" class="w-full border rounded-lg p-2.5 font-mono text-xs" placeholder="Leave empty to use store primary UPI ID ({{ $settings['upi_id'] ?: 'Not set' }})">
+                        </div>
+
+                        <div>
+                            <label class="block font-semibold text-stone-700 mb-1">Delivery Payee Display Name (Optional)</label>
+                            <input type="text" name="cod_delivery_payee_name" value="{{ old('cod_delivery_payee_name', $settings['cod_delivery_payee_name'] ?? '') }}" class="w-full border rounded-lg p-2.5 text-xs" placeholder="Leave empty to use store payee name ({{ $settings['upi_payee_name'] ?: 'Not set' }})">
+                        </div>
+
+                        <div>
+                            <label class="block font-semibold text-stone-700 mb-1.5">Upload Dedicated Delivery QR Code Image</label>
+                            <div class="relative" 
+                                 @dragover.prevent="isDropping = true" 
+                                 @dragleave.prevent="isDropping = false" 
+                                 @drop.prevent="isDropping = false; if($event.dataTransfer.files.length){ $refs.deliveryQrInput.files = $event.dataTransfer.files; fileSelected = true; fileName = $refs.deliveryQrInput.files[0].name; let r = new FileReader(); r.onload = (e) => { filePreview = e.target.result; }; r.readAsDataURL($refs.deliveryQrInput.files[0]); }">
+                                <label :class="isDropping ? 'border-[#4A2C1D] bg-[#FAF7F0]' : 'border-[#D4AF6A] bg-stone-50/50 hover:bg-[#FAF7F0]'" 
+                                       class="flex flex-col items-center justify-center w-full min-h-[130px] border-2 border-dashed rounded-xl cursor-pointer transition-colors group p-3.5">
+                                    
+                                    <div class="flex flex-col items-center justify-center text-center">
+                                        <!-- Empty State -->
+                                        <div x-show="!fileSelected" class="space-y-1">
+                                            <svg class="w-7 h-7 mx-auto text-[#996E2E] group-hover:scale-110 transition-transform" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"></path></svg>
+                                            <p class="text-xs text-stone-700 font-semibold"><span class="font-bold text-[#4A2C1D] underline">Click to upload</span> or drag and drop</p>
+                                            <p class="text-[10px] text-stone-400">PNG, JPG, WEBP up to 10MB (Square QR recommended)</p>
+                                        </div>
+                                        
+                                        <!-- Selected State -->
+                                        <div x-show="fileSelected" x-cloak class="space-y-1">
+                                            <svg class="w-6 h-6 mx-auto text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+                                            <p class="text-xs font-bold text-emerald-800 truncate max-w-[220px]" x-text="fileName"></p>
+                                            <p class="text-[10px] text-stone-400">Click or drag to replace selected QR</p>
+                                        </div>
+                                    </div>
+                                    
+                                    <input x-ref="deliveryQrInput" type="file" name="cod_delivery_qr_file" accept="image/*" class="hidden" 
+                                           @change="if($el.files.length){ fileSelected = true; fileName = $el.files[0].name; let r = new FileReader(); r.onload = (e) => { filePreview = e.target.result; }; r.readAsDataURL($el.files[0]); } else { fileSelected = false; fileName = ''; filePreview = null; }">
+                                </label>
+                            </div>
+                            <p class="text-[10px] text-stone-500 mt-1">If left empty, the store's primary UPI QR code will be used automatically.</p>
+                        </div>
+                    </div>
+
+                    <div class="text-center p-3.5 bg-[#FAF7F0] rounded-xl border border-[#D4AF6A]/40 min-h-[170px] flex flex-col items-center justify-center">
+                        <span class="text-[10px] uppercase font-bold text-[#996E2E] block mb-1.5">Active Delivery QR Preview:</span>
+                        
+                        <!-- When new file selected in input -->
+                        <div x-show="filePreview" x-cloak class="space-y-1">
+                            <img :src="filePreview" alt="New Delivery QR Preview" class="w-32 h-32 object-contain mx-auto border rounded-lg p-1 bg-white shadow-2xs">
+                            <span class="text-[10px] text-emerald-700 font-bold block">✓ New QR Selected (Save Settings to Apply)</span>
+                        </div>
+
+                        <!-- Current saved state -->
+                        <div x-show="!filePreview" class="space-y-1">
+                            @if(!empty($settings['cod_delivery_qr_image']))
+                                <img src="{{ asset($settings['cod_delivery_qr_image']) }}" alt="Dedicated Delivery QR" class="w-32 h-32 object-contain mx-auto border rounded-lg p-1 bg-white shadow-2xs">
+                                <span class="text-[10px] text-emerald-700 font-semibold block">✓ Dedicated Delivery QR Configured</span>
+                                <label class="inline-flex items-center gap-1.5 mt-1.5 text-[11px] text-red-600 hover:text-red-700 cursor-pointer">
+                                    <input type="checkbox" name="remove_cod_delivery_qr" value="1" class="rounded border-stone-300 text-red-600 focus:ring-red-500">
+                                    <span>Reset to Primary Store QR</span>
+                                </label>
+                            @else
+                                <img src="{{ asset($settings['qr_code_image']) }}" alt="Primary Store QR" class="w-32 h-32 object-contain mx-auto border rounded-lg p-1 bg-white shadow-2xs">
+                                <span class="text-[10px] text-stone-500 font-medium block">Using Primary Store UPI QR (Default)</span>
+                            @endif
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Live Frontend Customer Preview Card (Mobile Responsive) -->
+            <div class="p-3.5 bg-gradient-to-r from-[#FAF7F0] to-white rounded-xl border border-[#D4AF6A]/60 shadow-2xs space-y-2">
+                <span class="text-[10px] uppercase font-bold tracking-wider text-[#996E2E] block">Live Storefront Checkout Preview (How Customer Sees COD):</span>
+                <div class="p-3.5 rounded-xl bg-white border border-[#D4AF6A] shadow-xs space-y-2.5 max-w-xl">
+                    <div class="flex items-center justify-between">
+                        <span class="inline-flex items-center gap-1.5 text-xs font-bold text-[#4A2C1D]">
+                            <span class="w-2.5 h-2.5 rounded-full bg-emerald-600"></span>
+                            Cash on Delivery (COD) Selected
+                        </span>
+                        <span class="bg-[#4A2C1D] text-[#E7C77B] text-[10px] font-bold px-2 py-0.5 rounded-full" x-text="codAdvance + '% Advance Required'"></span>
+                    </div>
+                    <div class="p-2.5 rounded-lg bg-[#FAF7F0] border border-[#D4AF6A]/40 text-[11px] text-stone-700 leading-relaxed" x-text="codNotice || 'Pay advance online via UPI to confirm booking. Remaining balance can be paid on delivery via Cash or QR.'"></div>
+                    <div class="flex items-center justify-between text-xs pt-1 border-t border-stone-100">
+                        <span class="text-stone-600">Advance to Pay Now via QR:</span>
+                        <span class="font-bold text-emerald-800" x-text="'₹' + calcAdvance()"></span>
+                    </div>
+                    <div class="flex items-center justify-between text-xs">
+                        <span class="text-stone-600">Balance to Pay on Delivery:</span>
+                        <span class="font-bold text-[#4A2C1D]" x-text="'₹' + calcBalance()"></span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- 1. PAYMENT QR CODE & UPI SETTINGS (Crucial for Phase 1 Checkout) -->
         <div class="p-4 sm:p-6 rounded-2xl bg-[#FAF7F0] border-2 border-[#D4AF6A] space-y-4">
             <div class="flex items-center justify-between pb-3 border-b border-[#D4AF6A]/40">
@@ -80,7 +427,7 @@
                 </span>
             </div>
 
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 items-center" x-data="{ isDropping: false, fileSelected: false, fileName: '', filePreview: null }">
                 <div class="space-y-3">
                     <div>
                         <label class="block font-semibold text-stone-700 mb-1">Official UPI ID (VPA) *</label>
@@ -95,10 +442,9 @@
                     <div>
                         <label class="block font-semibold text-stone-700 mb-2">Upload New UPI QR Code Image</label>
                         <div class="relative" 
-                             x-data="{ isDropping: false, fileSelected: false, fileName: '' }"
                              @dragover.prevent="isDropping = true" 
                              @dragleave.prevent="isDropping = false" 
-                             @drop.prevent="isDropping = false; $refs.qrInput.files = $event.dataTransfer.files; if($refs.qrInput.files.length){ fileSelected = true; fileName = $refs.qrInput.files[0].name; }"
+                             @drop.prevent="isDropping = false; if($event.dataTransfer.files.length){ $refs.qrInput.files = $event.dataTransfer.files; fileSelected = true; fileName = $refs.qrInput.files[0].name; let r = new FileReader(); r.onload = (e) => { filePreview = e.target.result; }; r.readAsDataURL($refs.qrInput.files[0]); }"
                         >
                             <label :class="isDropping ? 'border-[#4A2C1D] bg-[#FAF7F0]' : 'border-stone-300 bg-white hover:bg-stone-50'" 
                                    class="flex flex-col items-center justify-center w-full min-h-[140px] border-2 border-dashed rounded-xl cursor-pointer transition-colors group">
@@ -116,15 +462,21 @@
                                 </div>
                                 
                                 <input x-ref="qrInput" type="file" name="qr_code_file" accept="image/*" class="hidden" 
-                                       @change="if($el.files.length){ fileSelected = true; fileName = $el.files[0].name; } else { fileSelected = false; fileName = ''; }">
+                                       @change="if($el.files.length){ fileSelected = true; fileName = $el.files[0].name; let r = new FileReader(); r.onload = (e) => { filePreview = e.target.result; }; r.readAsDataURL($el.files[0]); } else { fileSelected = false; fileName = ''; filePreview = null; }">
                             </label>
                         </div>
                     </div>
                 </div>
 
-                <div class="text-center p-4 bg-white rounded-xl border border-[#D4AF6A]/50">
+                <div class="text-center p-4 bg-white rounded-xl border border-[#D4AF6A]/50 min-h-[170px] flex flex-col items-center justify-center">
                     <span class="text-[10px] uppercase font-bold text-[#996E2E] block mb-2">Current Active QR Code:</span>
-                    <img src="{{ asset($settings['qr_code_image']) }}" alt="Active QR" class="w-40 h-40 object-contain mx-auto border rounded p-1">
+                    <div x-show="filePreview" x-cloak class="space-y-1">
+                        <img :src="filePreview" alt="New Active QR Preview" class="w-40 h-40 object-contain mx-auto border rounded p-1 bg-white shadow-2xs">
+                        <span class="text-[10px] text-emerald-700 font-bold block">✓ New QR Selected (Save Settings to Apply)</span>
+                    </div>
+                    <div x-show="!filePreview">
+                        <img src="{{ asset($settings['qr_code_image']) }}" alt="Active QR" class="w-40 h-40 object-contain mx-auto border rounded p-1">
+                    </div>
                 </div>
             </div>
         </div>
@@ -364,11 +716,16 @@
                 <!-- Category Checkboxes -->
                 <div class="sm:col-span-2">
                     <label class="block font-semibold text-stone-700 mb-2">Select Categories to Show in Showcase Tabs:</label>
+                    @php
+                        $showcaseCats = is_array($settings['showcase_categories'] ?? []) 
+                            ? ($settings['showcase_categories'] ?? []) 
+                            : (json_decode((string)($settings['showcase_categories'] ?? '[]'), true) ?: []);
+                    @endphp
                     <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-2.5">
                         @foreach($allCategories ?? [] as $cat)
-                            <label class="flex items-center space-x-2.5 p-2.5 rounded-lg border bg-white cursor-pointer transition hover:border-[#D4AF6A] {{ in_array((string)$cat->id, $settings['showcase_categories'] ?? []) ? 'border-[#D4AF6A] bg-[#FFFDF7]' : 'border-stone-200' }}">
+                            <label class="flex items-center space-x-2.5 p-2.5 rounded-lg border bg-white cursor-pointer transition hover:border-[#D4AF6A] {{ in_array((string)$cat->id, $showcaseCats) ? 'border-[#D4AF6A] bg-[#FFFDF7]' : 'border-stone-200' }}">
                                 <input type="checkbox" name="showcase_categories[]" value="{{ $cat->id }}" 
-                                       {{ in_array((string)$cat->id, $settings['showcase_categories'] ?? []) ? 'checked' : '' }} 
+                                       {{ in_array((string)$cat->id, $showcaseCats) ? 'checked' : '' }} 
                                        class="rounded text-[#996E2E] focus:ring-[#D4AF6A]">
                                 <span class="text-xs font-semibold text-[#4A2C1D] flex-1 truncate">{{ $cat->name }}</span>
                                 <span class="text-[10px] text-stone-500 bg-stone-100 px-1.5 py-0.5 rounded-full font-mono">{{ $cat->products_count ?? $cat->products()->count() }}</span>

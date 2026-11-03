@@ -27,6 +27,15 @@ class Order extends Model
         'tracking_carrier',
         'tracking_number',
         'notes',
+        'payment_method',
+        'advance_amount',
+        'balance_amount',
+        'cod_extra_charge',
+        'advance_percentage',
+        'balance_status',
+        'delivery_payment_screenshot',
+        'delivery_transaction_reference',
+        'delivery_paid_at',
     ];
 
     protected $casts = [
@@ -34,8 +43,40 @@ class Order extends Model
         'coupon_discount' => 'decimal:2',
         'shipping_fee' => 'decimal:2',
         'total_amount' => 'decimal:2',
+        'advance_amount' => 'decimal:2',
+        'balance_amount' => 'decimal:2',
+        'cod_extra_charge' => 'decimal:2',
+        'advance_percentage' => 'integer',
         'cancelled_at' => 'datetime',
+        'delivery_paid_at' => 'datetime',
     ];
+
+    public function isCod(): bool
+    {
+        return str_contains(strtolower((string) $this->payment_method), 'cod')
+            || str_contains(strtolower((string) $this->payment_method), 'delivery')
+            || (float) $this->balance_amount > 0;
+    }
+
+    public function hasBalancePending(): bool
+    {
+        return $this->isCod() && (float) $this->balance_amount > 0 && in_array($this->balance_status, ['Pending', 'N/A', '']);
+    }
+
+    public function isBalanceSettled(): bool
+    {
+        return ! $this->isCod() || in_array($this->balance_status, ['Collected Cash', 'Paid Online', 'Waived', 'Settled']);
+    }
+
+    public function getBalanceStatusBadgeClassAttribute(): string
+    {
+        return match ($this->balance_status) {
+            'Collected Cash', 'Paid Online', 'Settled' => 'bg-emerald-100 text-emerald-800 border-emerald-300',
+            'Pending' => 'bg-amber-100 text-amber-800 border-amber-300',
+            'Waived' => 'bg-blue-100 text-blue-800 border-blue-300',
+            default => 'bg-stone-100 text-stone-700 border-stone-300',
+        };
+    }
 
     public function user(): BelongsTo
     {

@@ -93,6 +93,23 @@ class CheckoutController extends Controller
         $upiId = StoreSetting::get('upi_id', 'raykajewellery@icici');
         $upiPayeeName = StoreSetting::get('upi_payee_name', 'Rayka Imitation Jewellery');
 
+        $codEnabled = StoreSetting::get('cod_enabled', '1') === '1';
+        $codAdvancePercentage = (int) StoreSetting::get('cod_advance_percentage', '20');
+        if ($codAdvancePercentage < 10) {
+            $codAdvancePercentage = 10;
+        } elseif ($codAdvancePercentage > 100) {
+            $codAdvancePercentage = 100;
+        }
+        $codExtraCharge = (float) StoreSetting::get('cod_extra_charge', '0');
+        $codNotice = StoreSetting::get('cod_notice', 'Pay advance online via UPI to confirm booking. Remaining balance can be paid on delivery via Cash or QR.');
+        $codDeliveryQrImage = StoreSetting::get('cod_delivery_qr_image') ?: $qrCodeImage;
+        $codDeliveryUpiId = StoreSetting::get('cod_delivery_upi_id') ?: $upiId;
+        $codDeliveryPayeeName = StoreSetting::get('cod_delivery_payee_name') ?: $upiPayeeName;
+
+        $codTotal = $total + $codExtraCharge;
+        $codAdvanceAmount = round($codTotal * ($codAdvancePercentage / 100));
+        $codBalanceAmount = max(0, $codTotal - $codAdvanceAmount);
+
         return view('storefront.checkout', compact(
             'cart',
             'subtotal',
@@ -104,7 +121,17 @@ class CheckoutController extends Controller
             'savedAddresses',
             'qrCodeImage',
             'upiId',
-            'upiPayeeName'
+            'upiPayeeName',
+            'codEnabled',
+            'codAdvancePercentage',
+            'codExtraCharge',
+            'codNotice',
+            'codDeliveryQrImage',
+            'codDeliveryUpiId',
+            'codDeliveryPayeeName',
+            'codTotal',
+            'codAdvanceAmount',
+            'codBalanceAmount'
         ));
     }
 
@@ -159,6 +186,7 @@ class CheckoutController extends Controller
             'name' => 'required|string|max:255',
             'mobile' => 'required|string|digits:10',
             'email' => 'required|email:rfc,filter|max:255',
+            'payment_method' => 'nullable|string|in:upi,cod,Static QR / UPI,Cash on Delivery',
             'transaction_reference' => 'nullable|string|max:100',
             'notes' => 'nullable|string|max:500',
             'payment_screenshot' => [
@@ -337,7 +365,16 @@ class CheckoutController extends Controller
                     }
                 }
 
-                // Calculate Totals
+                // Calculate Totals & Payment Method Breakdown
+                $isCodRequested = in_array(strtolower((string) $request->input('payment_method')), ['cod', 'cash on delivery']);
+                $codEnabled = StoreSetting::get('cod_enabled', '1') === '1';
+
+                if ($isCodRequested && ! $codEnabled) {
+                    throw new \Exception('Cash on Delivery is currently disabled by store administration. Please choose Full Online UPI.');
+                }
+
+                $isCod = $isCodRequested && $codEnabled;
+
                 $subtotal = $cart->subtotal;
                 $freeShippingMin = (float) StoreSetting::get('free_shipping_min', '999');
                 $shippingFee = ($subtotal >= $freeShippingMin) ? 0.0 : (float) StoreSetting::get('shipping_flat_fee', '99');
@@ -352,7 +389,26 @@ class CheckoutController extends Controller
                     }
                 }
 
-                $total = max(0, $subtotal - $discount + $shippingFee);
+                $baseTotal = max(0, $subtotal - $discount + $shippingFee);
+                $codExtraCharge = $isCod ? (float) StoreSetting::get('cod_extra_charge', '0') : 0.0;
+                $total = $baseTotal + $codExtraCharge;
+
+                if ($isCod) {
+                    $advancePercentage = (int) StoreSetting::get('cod_advance_percentage', '20');
+                    $advancePercentage = min(100, max(10, $advancePercentage));
+                    $advanceAmount = round($total * ($advancePercentage / 100));
+                    $balanceAmount = max(0, $total - $advanceAmount);
+                    $paymentMethod = 'Cash on Delivery';
+                    $balanceStatus = ($balanceAmount > 0) ? 'Pending' : 'Settled';
+                } else {
+                    $advancePercentage = 100;
+                    $advanceAmount = $total;
+                    $balanceAmount = 0.0;
+                    $codExtraCharge = 0.0;
+                    $paymentMethod = 'Static QR / UPI';
+                    $balanceStatus = 'N/A';
+                }
+
                 $orderNumber = 'RAY-'.date('Ymd').'-'.strtoupper(Str::random(5));
 
                 // Create Order
@@ -366,6 +422,12 @@ class CheckoutController extends Controller
                     'coupon_code' => $couponCode,
                     'shipping_fee' => $shippingFee,
                     'total_amount' => $total,
+                    'payment_method' => $paymentMethod,
+                    'advance_amount' => $advanceAmount,
+                    'balance_amount' => $balanceAmount,
+                    'cod_extra_charge' => $codExtraCharge,
+                    'advance_percentage' => $advancePercentage,
+                    'balance_status' => $balanceStatus,
                     'status' => 'Pending Verification',
                     'notes' => $request->notes,
                 ]);
@@ -400,9 +462,12 @@ class CheckoutController extends Controller
                 // Create Payment Record with Screenshot
                 Payment::create([
                     'order_id' => $order->id,
-                    'payment_method' => 'Static QR / UPI',
+                    'payment_method' => $paymentMethod,
                     'screenshot_path' => $screenshotPath,
-                    'transaction_reference' => $request->transaction_reference ?: 'UPI-PROMPT-SUBMISSION',
+                    'transaction_reference' => $request->transaction_reference ?: ($isCod ? 'COD-ADVANCE-SUBMISSION' : 'UPI-PROMPT-SUBMISSION'),
+                    'advance_amount' => $advanceAmount,
+                    'balance_amount' => $balanceAmount,
+                    'advance_percentage' => $advancePercentage,
                     'status' => 'Pending Verification',
                 ]);
 
@@ -412,7 +477,7 @@ class CheckoutController extends Controller
 
                 ActivityLog::record(
                     action: 'ORDER_PLACED',
-                    description: "Order #{$order->order_number} placed by " . ($address->full_name ?? 'Customer') . " for ₹" . number_format((float) $order->total_amount, 2) . " (" . $order->items->count() . " items).",
+                    description: "Order #{$order->order_number} placed by " . ($address->full_name ?? 'Customer') . " for ₹" . number_format((float) $order->total_amount, 2) . " [{$paymentMethod}: Advance ₹" . number_format($advanceAmount, 2) . ", Balance ₹" . number_format($balanceAmount, 2) . "] (" . $order->items->count() . " items).",
                     category: 'orders',
                     actorType: 'customer',
                     actorName: $address->full_name ?? ($user?->name ?? 'Customer'),
@@ -424,8 +489,10 @@ class CheckoutController extends Controller
                     metadata: [
                         'order_number' => $order->order_number,
                         'total_amount' => (float) $order->total_amount,
+                        'advance_amount' => (float) $advanceAmount,
+                        'balance_amount' => (float) $balanceAmount,
+                        'payment_method' => $paymentMethod,
                         'items_count' => $order->items->count(),
-                        'payment_method' => 'Static QR / UPI',
                     ]
                 );
 
@@ -459,8 +526,12 @@ class CheckoutController extends Controller
             }
         });
 
+        $successMsg = $order->isCod()
+            ? "Order placed with Cash on Delivery! We are verifying your advance token payment of ₹" . number_format((float) $order->advance_amount) . ". The remaining ₹" . number_format((float) $order->balance_amount) . " will be collected upon delivery."
+            : 'Order placed successfully! We are verifying your payment screenshot.';
+
         return redirect()->route('order.confirmation', $order->order_number)
-            ->with('success', 'Order placed successfully! We are verifying your payment screenshot.');
+            ->with('success', $successMsg);
     }
 
     public function confirmation($orderNumber)

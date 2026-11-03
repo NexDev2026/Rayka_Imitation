@@ -20,6 +20,7 @@ use App\Models\Review;
 use App\Models\StoreSetting;
 use App\Models\User;
 use App\Services\GuestSessionService;
+use App\Services\ImageUploadService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -28,6 +29,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class CustomerAccountController extends Controller
 {
@@ -668,6 +670,75 @@ class CustomerAccountController extends Controller
         });
 
         return back()->with('success', 'Your order has been successfully cancelled.');
+    }
+
+    /**
+     * Customer uploads proof of balance payment paid to delivery executive or online via delivery QR.
+     */
+    public function submitDeliveryPayment(Request $request, $orderNumber)
+    {
+        /** @var Order $order */
+        $order = Auth::user()->orders()
+            ->where('order_number', $orderNumber)
+            ->firstOrFail();
+
+        if (! $order->isCod() || (float) $order->balance_amount <= 0) {
+            return back()->with('error', 'This order does not have a pending balance.');
+        }
+
+        $request->validate([
+            'delivery_payment_screenshot' => 'required|file|mimes:jpeg,png,jpg,webp,svg,gif,heic|max:10240',
+            'delivery_transaction_reference' => 'nullable|string|max:100',
+        ], [
+            'delivery_payment_screenshot.required' => 'Please upload the payment confirmation screenshot for your balance payment.',
+            'delivery_payment_screenshot.max' => 'The payment screenshot must not exceed 10MB.',
+        ]);
+
+        $file = $request->file('delivery_payment_screenshot');
+        $uploadDir = public_path('uploads/payments');
+        if (! file_exists($uploadDir)) {
+            mkdir($uploadDir, 0777, true);
+        }
+        $rawExt = strtolower($file->getClientOriginalExtension() ?: 'jpg');
+        $filename = 'delivery_pay_'.time().'_'.Str::random(10).'.'.$rawExt;
+        $file->move($uploadDir, $filename);
+        $path = '/uploads/payments/'.$filename;
+        ImageUploadService::mirrorToExternalUploads($uploadDir.DIRECTORY_SEPARATOR.$filename, 'payments', $filename);
+
+        $order->update([
+            'delivery_payment_screenshot' => $path,
+            'delivery_transaction_reference' => $request->delivery_transaction_reference,
+            'delivery_paid_at' => now(),
+            'balance_status' => 'Paid Online',
+        ]);
+
+        if ($order->payment) {
+            $order->payment->update([
+                'delivery_screenshot_path' => $path,
+                'delivery_transaction_reference' => $request->delivery_transaction_reference,
+                'delivery_paid_at' => now(),
+            ]);
+        }
+
+        ActivityLog::record(
+            action: 'DELIVERY_PAYMENT_SUBMITTED',
+            description: 'Customer '.(Auth::user()?->name ?? 'Customer').' uploaded balance payment screenshot (₹'.number_format((float) $order->balance_amount, 2).") for Order #{$order->order_number}.",
+            category: 'orders',
+            actorType: 'customer',
+            actorName: Auth::user()?->name ?? 'Customer',
+            actorEmail: Auth::user()?->email,
+            actorId: Auth::id(),
+            subjectType: 'Order',
+            subjectId: (string) $order->id,
+            subjectRef: $order->order_number,
+            metadata: [
+                'order_number' => $order->order_number,
+                'balance_amount' => (float) $order->balance_amount,
+                'utr' => $request->delivery_transaction_reference,
+            ]
+        );
+
+        return back()->with('success', 'Your balance payment proof has been uploaded successfully! Our atelier concierge will verify it.');
     }
 
     public function downloadInvoice($orderNumber)

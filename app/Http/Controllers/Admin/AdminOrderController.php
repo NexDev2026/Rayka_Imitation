@@ -8,11 +8,13 @@ use App\Mail\OrderStatusUpdatedCustomerMail;
 use App\Models\ActivityLog;
 use App\Models\Order;
 use App\Models\StoreSetting;
+use App\Services\ImageUploadService;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Str;
 
 class AdminOrderController extends Controller
 {
@@ -168,6 +170,75 @@ class AdminOrderController extends Controller
         }
 
         return back();
+    }
+
+    /**
+     * Settle or update Cash on Delivery (COD) balance collection status.
+     */
+    public function settleBalance(Request $request, $id)
+    {
+        $order = Order::with(['payment', 'address', 'user'])->findOrFail($id);
+
+        $request->validate([
+            'balance_status' => 'required|in:Pending,Collected Cash,Paid Online,Waived',
+            'delivery_transaction_reference' => 'nullable|string|max:100',
+            'delivery_payment_screenshot' => 'nullable|file|mimes:jpeg,png,jpg,webp,svg,gif,heic|max:10240',
+            'admin_balance_note' => 'nullable|string|max:500',
+        ]);
+
+        $order->balance_status = $request->balance_status;
+
+        if ($request->filled('delivery_transaction_reference')) {
+            $order->delivery_transaction_reference = trim((string) $request->delivery_transaction_reference);
+        }
+
+        if (in_array($request->balance_status, ['Collected Cash', 'Paid Online'])) {
+            $order->delivery_paid_at = now();
+        } elseif ($request->balance_status === 'Pending') {
+            $order->delivery_paid_at = null;
+        }
+
+        if ($request->hasFile('delivery_payment_screenshot')) {
+            $file = $request->file('delivery_payment_screenshot');
+            $uploadDir = public_path('uploads/payments');
+            if (! file_exists($uploadDir)) {
+                mkdir($uploadDir, 0777, true);
+            }
+            $rawExt = strtolower($file->getClientOriginalExtension() ?: 'jpg');
+            $filename = 'delivery_pay_'.time().'_'.Str::random(10).'.'.$rawExt;
+            $file->move($uploadDir, $filename);
+            $order->delivery_payment_screenshot = '/uploads/payments/'.$filename;
+            ImageUploadService::mirrorToExternalUploads($uploadDir.DIRECTORY_SEPARATOR.$filename, 'payments', $filename);
+        }
+
+        $order->save();
+
+        if ($order->payment) {
+            $order->payment->update([
+                'balance_amount' => $order->balance_amount,
+                'delivery_screenshot_path' => $order->delivery_payment_screenshot,
+                'delivery_transaction_reference' => $order->delivery_transaction_reference,
+                'delivery_paid_at' => $order->delivery_paid_at,
+                'admin_note' => $request->filled('admin_balance_note') ? trim((string) $request->admin_balance_note) : $order->payment->admin_note,
+            ]);
+        }
+
+        ActivityLog::record(
+            action: 'BALANCE_STATUS_UPDATED',
+            description: 'Administrator '.(Auth::user()?->name ?? 'Admin')." updated COD balance status to '{$order->balance_status}' for Order #{$order->order_number} (₹".number_format((float) $order->balance_amount, 2).').',
+            category: 'orders',
+            actorType: 'admin',
+            subjectType: 'Order',
+            subjectId: (string) $order->id,
+            subjectRef: $order->order_number,
+            metadata: [
+                'order_number' => $order->order_number,
+                'balance_amount' => (float) $order->balance_amount,
+                'balance_status' => $order->balance_status,
+            ]
+        );
+
+        return back()->with('success', "COD Balance for Order #{$order->order_number} marked as '{$order->balance_status}'.");
     }
 
     public function updateStatus(Request $request, $id)

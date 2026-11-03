@@ -135,6 +135,7 @@ Route::get('/order-confirmation/{orderNumber}', [CheckoutController::class, 'con
 Route::get('/track-order', [TrackOrderController::class, 'index'])->name('order.track');
 Route::post('/track-order', [TrackOrderController::class, 'search'])->name('order.track.search');
 Route::get('/track-order/{orderNumber}/invoice', [TrackOrderController::class, 'downloadInvoice'])->name('order.track.invoice');
+Route::post('/track-order/{orderNumber}/delivery-payment', [TrackOrderController::class, 'submitDeliveryPayment'])->name('order.track.delivery_payment');
 
 /*
 |--------------------------------------------------------------------------
@@ -159,6 +160,7 @@ Route::middleware('auth')->group(function () {
     Route::get('/account/orders', [CustomerAccountController::class, 'orders'])->name('account.orders');
     Route::get('/account/orders/{orderNumber}', [CustomerAccountController::class, 'orderDetail'])->name('account.order.detail');
     Route::post('/account/orders/{orderNumber}/cancel', [CustomerAccountController::class, 'cancelOrder'])->name('account.order.cancel');
+    Route::post('/account/orders/{orderNumber}/delivery-payment', [CustomerAccountController::class, 'submitDeliveryPayment'])->name('account.order.delivery_payment');
     Route::get('/account/orders/{orderNumber}/invoice', [CustomerAccountController::class, 'downloadInvoice'])->name('account.order.invoice');
 
     // Saved Addresses
@@ -242,6 +244,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/orders', [AdminOrderController::class, 'index'])->name('orders.index');
         Route::get('/orders/{id}', [AdminOrderController::class, 'show'])->name('orders.show');
         Route::post('/orders/{id}/verify-payment', [AdminOrderController::class, 'verifyPayment'])->name('orders.verify_payment');
+        Route::post('/orders/{id}/settle-balance', [AdminOrderController::class, 'settleBalance'])->name('orders.settle_balance');
         Route::post('/orders/{id}/update-status', [AdminOrderController::class, 'updateStatus'])->name('orders.update_status');
         Route::get('/orders/{id}/invoice', [AdminOrderController::class, 'downloadInvoice'])->name('orders.invoice');
         Route::delete('/orders/{id}', [AdminOrderController::class, 'destroy'])->name('orders.destroy');
@@ -278,6 +281,7 @@ Route::prefix('admin')->name('admin.')->group(function () {
         Route::get('/settings', [AdminSettingController::class, 'index'])->name('settings.index');
         Route::post('/settings', [AdminSettingController::class, 'update'])->name('settings.update');
         Route::post('/settings/toggle-order-buttons', [AdminSettingController::class, 'toggleOrderButtons'])->name('settings.toggle_order_buttons');
+        Route::post('/settings/toggle-cod', [AdminSettingController::class, 'toggleCod'])->name('settings.toggle_cod');
         Route::post('/settings/email', [AdminSettingController::class, 'updateEmail'])->name('settings.update_email');
         Route::post('/settings/email/verify', [AdminSettingController::class, 'verifyEmailOtp'])->name('settings.verify_email');
         Route::post('/settings/backup', [AdminSettingController::class, 'runBackup'])->name('settings.backup');

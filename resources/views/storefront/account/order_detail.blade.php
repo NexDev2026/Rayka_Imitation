@@ -371,8 +371,20 @@
                             @endif
                         </div>
 
-                        <div class="bg-white p-4 sm:p-6 rounded-2xl border border-[#D4AF6A]/30 shadow-sm">
-                            <h4 class="font-serif-royal font-bold text-lg text-[#4A2C1D] mb-4">Payment Summary</h4>
+                        <div class="bg-white p-4 sm:p-6 rounded-2xl border border-[#D4AF6A]/30 shadow-sm space-y-4">
+                            <div class="flex items-center justify-between pb-2 border-b border-[#D4AF6A]/20">
+                                <h4 class="font-serif-royal font-bold text-lg text-[#4A2C1D]">Payment Summary</h4>
+                                @if($order->isCod())
+                                    <span class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300 uppercase">
+                                        Cash on Delivery
+                                    </span>
+                                @else
+                                    <span class="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300 uppercase">
+                                        Full Online UPI
+                                    </span>
+                                @endif
+                            </div>
+
                             <div class="space-y-3 text-sm text-stone-600">
                                 <div class="flex justify-between">
                                     <span>Subtotal ({{ $order->items->sum('quantity') }} items)</span>
@@ -395,18 +407,197 @@
                                         {{ $order->shipping_fee == 0 ? 'FREE' : '₹' . number_format($order->shipping_fee) }}
                                     </span>
                                 </div>
+
+                                @if($order->cod_extra_charge > 0)
+                                    <div class="flex justify-between">
+                                        <span>COD Courier Handling Fee:</span>
+                                        <span class="font-semibold text-[#4A2C1D]">+ ₹{{ number_format($order->cod_extra_charge) }}</span>
+                                    </div>
+                                @endif
                                 
-                                <div class="pt-4 border-t border-[#D4AF6A]/30 flex justify-between items-end mt-2">
+                                <div class="pt-3 border-t border-[#D4AF6A]/30 flex justify-between items-end">
                                     <div class="min-w-0 pr-2">
-                                        <span class="block text-xs uppercase tracking-wider font-bold text-stone-400">Grand Total</span>
-                                        <span class="block text-xs text-stone-500 mt-0.5 truncate">Paid via {{ $order->payment?->payment_method ?? 'Static QR/UPI' }}</span>
+                                        <span class="block text-xs uppercase tracking-wider font-bold text-stone-400">Total Order Value</span>
+                                        <span class="block text-xs text-stone-500 mt-0.5 truncate">{{ $order->payment_method ?: 'Static QR / UPI' }}</span>
                                     </div>
                                     <span class="font-serif-royal text-2xl sm:text-3xl font-bold text-[#4A2C1D] shrink-0">₹{{ number_format($order->total_amount) }}</span>
                                 </div>
+
+                                @if($order->isCod())
+                                    <!-- Detailed COD Token & Balance Breakdown -->
+                                    <div class="pt-3 border-t border-stone-200/80 space-y-2">
+                                        <div class="p-3 rounded-xl bg-amber-50/80 border border-amber-200/80 space-y-2 text-xs">
+                                            <div class="flex items-center justify-between">
+                                                <span class="text-emerald-800 font-bold">1. Advance Token Paid ({{ $order->advance_percentage }}%):</span>
+                                                <span class="font-bold text-emerald-800 font-serif-royal text-sm">₹{{ number_format($order->advance_amount) }}</span>
+                                            </div>
+                                            <div class="flex items-center justify-between">
+                                                <span class="text-[#4A2C1D] font-bold">2. Remaining Balance Due on Delivery:</span>
+                                                <span class="font-bold text-[#4A2C1D] font-serif-royal text-base">₹{{ number_format($order->balance_amount) }}</span>
+                                            </div>
+                                            <div class="flex items-center justify-between pt-1 border-t border-amber-200/60 text-[11px]">
+                                                <span class="text-stone-600">Balance Collection Status:</span>
+                                                <span class="font-bold px-2 py-0.5 rounded-full border {{ $order->balance_status_badge_class }}">
+                                                    {{ $order->balance_status }}
+                                                </span>
+                                            </div>
+                                        </div>
+                                    </div>
+                                @endif
                             </div>
                         </div>
+
                     </div>
                 </div>
+
+                @if($order->isCod() && (float)$order->balance_amount > 0 && !$order->isCancelled() && !$order->isRejected())
+                    @if($order->isBalanceSettled())
+                        <!-- SETTLED STATE: Balance is completely paid & verified (No payment reminders or forms) -->
+                        <div class="p-4 sm:p-6 rounded-2xl bg-gradient-to-r from-emerald-50 via-white to-emerald-50 border-2 border-emerald-300 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+                            <div class="flex items-center gap-3.5">
+                                <div class="w-11 h-11 rounded-2xl bg-emerald-600 text-white flex items-center justify-center font-bold text-lg shrink-0 shadow-xs">
+                                    ✓
+                                </div>
+                                <div class="space-y-0.5">
+                                    <h4 class="font-serif-royal font-bold text-base text-emerald-950">Cash on Delivery Balance Fully Settled</h4>
+                                    <p class="text-xs text-emerald-800">
+                                        Your remaining balance of <strong>₹{{ number_format($order->balance_amount) }}</strong> has been officially confirmed and settled via <strong>{{ $order->balance_status }}</strong>.
+                                    </p>
+                                </div>
+                            </div>
+                            <span class="self-start sm:self-auto px-3.5 py-1.5 bg-emerald-200/80 text-emerald-900 border border-emerald-300 text-xs font-bold rounded-full uppercase tracking-wider shrink-0">
+                                ✓ Fully Paid
+                            </span>
+                        </div>
+                    @elseif($order->delivery_payment_screenshot)
+                        <!-- UNDER REVIEW STATE: Customer has uploaded proof, awaiting admin verification (No form or reminder) -->
+                        <div class="p-4 sm:p-6 rounded-2xl bg-gradient-to-r from-amber-50/70 via-white to-amber-50/70 border-2 border-amber-300 shadow-xs space-y-3">
+                            <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-3 border-b border-amber-200">
+                                <div class="flex items-center gap-3">
+                                    <div class="w-10 h-10 rounded-xl bg-amber-500 text-white flex items-center justify-center font-bold text-base shrink-0 shadow-xs">
+                                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    </div>
+                                    <div>
+                                        <h4 class="font-serif-royal font-bold text-base text-[#4A2C1D]">Delivery Balance Proof Uploaded (Under Review)</h4>
+                                        <p class="text-xs text-stone-500">Remaining Balance: <strong>₹{{ number_format($order->balance_amount) }}</strong> • Our boutique team is verifying this with our accounts.</p>
+                                    </div>
+                                </div>
+                                <span class="self-start sm:self-auto text-xs font-bold text-amber-900 bg-amber-100 border border-amber-300 px-3 py-1 rounded-full">
+                                    Proof Under Review
+                                </span>
+                            </div>
+                            <div class="flex items-center gap-4 pt-1">
+                                <img src="{{ asset($order->delivery_payment_screenshot) }}" alt="Submitted Proof" class="w-20 h-20 rounded-xl object-contain border border-amber-200 bg-white p-1 shadow-2xs shrink-0">
+                                <div class="text-xs text-stone-600 space-y-1">
+                                    @if($order->delivery_transaction_reference)
+                                        <p>UTR / Transaction Ref: <strong class="font-mono text-stone-900">{{ $order->delivery_transaction_reference }}</strong></p>
+                                    @endif
+                                    <p class="text-[11px] text-stone-500">Submitted on: {{ $order->delivery_paid_at?->format('d M, Y \a\t h:i A') ?? 'Recently' }}</p>
+                                    <p class="text-[11px] text-stone-500">No further action is required from you. Once approved, status will automatically update.</p>
+                                </div>
+                            </div>
+                        </div>
+                    @else
+                        <!-- UNPAID / PENDING STATE: Show 2-Column Full-Width Payment Card -->
+                        @php
+                            $deliveryQr = !empty($storeSettings['cod_delivery_qr_image']) ? $storeSettings['cod_delivery_qr_image'] : ($storeSettings['qr_code_image'] ?? '/images/qr/sample-upi-qr.svg');
+                            $deliveryUpi = !empty($storeSettings['cod_delivery_upi_id']) ? $storeSettings['cod_delivery_upi_id'] : ($storeSettings['upi_id'] ?? 'raykajewellery@icici');
+                            $deliveryPayee = !empty($storeSettings['cod_delivery_payee_name']) ? $storeSettings['cod_delivery_payee_name'] : ($storeSettings['upi_payee_name'] ?? 'Rayka Imitation Jewellery');
+                        @endphp
+                        <div class="bg-gradient-to-br from-[#FAF7F0] via-white to-amber-50/40 p-5 sm:p-8 rounded-3xl border-2 border-[#D4AF6A] shadow-sm space-y-6"
+                             x-data="{
+                                deliveryProofPreview: null,
+                                copiedDeliveryUpi: false,
+                                previewDeliveryFile(e) {
+                                    let file = e.target.files[0];
+                                    if (file) {
+                                        if (file.size > 10 * 1024 * 1024) {
+                                            alert('File exceeds 10MB limit.');
+                                            e.target.value = '';
+                                            this.deliveryProofPreview = null;
+                                            return;
+                                        }
+                                        let reader = new FileReader();
+                                        reader.onload = (re) => { this.deliveryProofPreview = re.target.result; };
+                                        reader.readAsDataURL(file);
+                                    }
+                                }
+                             }">
+                            
+                            <div class="border-b border-[#D4AF6A]/30 pb-4 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                                <div>
+                                    <h4 class="font-serif-royal font-bold text-lg text-[#4A2C1D] flex items-center gap-2">
+                                        <svg class="w-5 h-5 text-[#996E2E]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v1m6 11h2m-6 0h-2v4m0-11v3m0 0h.01M12 12h4.01M16 20h4M4 12h4m12 0h.01M5 8h2a1 1 0 001-1V5a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1zm12 0h2a1 1 0 001-1V5a1 1 0 00-1-1h-2a1 1 0 00-1 1v2a1 1 0 001 1zM5 20h2a1 1 0 001-1v-2a1 1 0 00-1-1H5a1 1 0 00-1 1v2a1 1 0 001 1z"/></svg>
+                                        <span>Pay Remaining Balance Online (After Delivery Final Payment)</span>
+                                    </h4>
+                                    <p class="text-xs text-stone-500 mt-0.5">
+                                        Paying the delivery agent or online upon receiving your consignment? Scan the QR below to pay the remaining ₹{{ number_format($order->balance_amount) }} and attach your screenshot.
+                                    </p>
+                                </div>
+                                <span class="self-start sm:self-auto text-xs font-bold text-emerald-800 bg-emerald-100 border border-emerald-300 px-3.5 py-1 rounded-full shadow-2xs">
+                                    ₹{{ number_format($order->balance_amount) }} Due
+                                </span>
+                            </div>
+
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8 items-center">
+                                <!-- Left: QR Display Box -->
+                                <div class="text-center p-4 sm:p-5 bg-[#FAF7F0]/60 rounded-2xl border border-[#D4AF6A]/40 shadow-inner space-y-3">
+                                    <img src="{{ asset($deliveryQr) }}" alt="Delivery Payment QR" class="w-40 h-40 sm:w-44 sm:h-44 object-contain mx-auto border rounded-xl bg-white p-2 shadow-xs">
+                                    
+                                    <div class="inline-flex items-center space-x-2 bg-white px-3.5 py-1.5 rounded-full border border-[#D4AF6A]/40 text-xs shadow-2xs">
+                                        <span class="font-mono text-stone-700 select-all font-semibold">{{ $deliveryUpi }}</span>
+                                        <button type="button" @click="navigator.clipboard.writeText('{{ $deliveryUpi }}'); copiedDeliveryUpi = true; setTimeout(() => copiedDeliveryUpi = false, 2000)" class="font-bold text-[#996E2E] hover:underline cursor-pointer">
+                                            <span x-show="!copiedDeliveryUpi">Copy</span>
+                                            <span x-show="copiedDeliveryUpi" class="text-emerald-700 font-bold" style="display:none;">✓ Copied</span>
+                                        </button>
+                                    </div>
+                                    <p class="text-[11px] text-stone-500">Payee: <strong>{{ $deliveryPayee }}</strong> • Payable: <strong class="text-[#4A2C1D]">₹{{ number_format($order->balance_amount) }}</strong></p>
+                                </div>
+
+                                <!-- Right: Screenshot Upload Form -->
+                                <div>
+                                    <form action="{{ route('account.order.delivery_payment', $order->order_number) }}" method="POST" enctype="multipart/form-data" class="space-y-3.5 text-xs">
+                                        @csrf
+                                        <div>
+                                            <label class="block font-bold text-stone-700 mb-1">
+                                                Upload Balance Payment Screenshot (Proof) *
+                                            </label>
+                                            <div class="flex flex-col items-center justify-center border-2 border-dashed border-[#D4AF6A] bg-stone-50/50 hover:bg-[#FAF7F0] rounded-xl p-4 text-center cursor-pointer relative transition">
+                                                <input type="file" 
+                                                       name="delivery_payment_screenshot" 
+                                                       accept="image/*,.heic,.heif" 
+                                                       required
+                                                       @change="previewDeliveryFile($event)"
+                                                       class="absolute inset-0 opacity-0 cursor-pointer w-full h-full z-10">
+
+                                                <div x-show="!deliveryProofPreview" class="pointer-events-none space-y-1">
+                                                    <svg class="w-7 h-7 text-[#996E2E] mx-auto" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z"/></svg>
+                                                    <p class="text-xs font-bold text-stone-700">Click or Drag Screenshot Proof Here</p>
+                                                    <p class="text-[10px] text-stone-400">JPG, PNG, WebP up to 10MB</p>
+                                                </div>
+
+                                                <div x-show="deliveryProofPreview" class="pointer-events-none space-y-1.5" style="display: none;">
+                                                    <img :src="deliveryProofPreview" class="max-h-24 rounded border border-emerald-300 mx-auto shadow-xs">
+                                                    <p class="text-[10px] text-emerald-700 font-bold">Screenshot selected (Click to replace)</p>
+                                                </div>
+                                            </div>
+                                        </div>
+
+                                        <div>
+                                            <label class="block font-semibold text-stone-700 mb-1">UPI Reference / UTR Number (Optional)</label>
+                                            <input type="text" name="delivery_transaction_reference" placeholder="e.g. 428901839210 or UPI Transaction ID" class="w-full border rounded-lg p-2.5 text-xs font-mono bg-white">
+                                        </div>
+
+                                        <button type="submit" class="w-full py-3 bg-[#4A2C1D] hover:bg-[#2E180E] text-[#E7C77B] rounded-xl font-bold uppercase tracking-wider text-xs transition shadow-sm flex items-center justify-center gap-2 cursor-pointer">
+                                            <svg class="w-4 h-4 text-[#E7C77B]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-8l-4-4m0 0L8 8m4-4v12"/></svg>
+                                            <span>Upload Balance Payment Proof (₹{{ number_format($order->balance_amount) }})</span>
+                                        </button>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    @endif
+                @endif
 
             </div>
         </div>

@@ -214,6 +214,7 @@
                 <div class="card-inner">
                     <div class="section-title">Order & Logistics Status</div>
                     <strong>Order Status:</strong> {{ $order->status }}<br>
+                    <strong>Payment Method:</strong> {{ $order->payment_method ?: ($order->isCod() ? 'Cash on Delivery (Advance Paid)' : 'Direct UPI / QR Code') }}<br>
                     <strong>Logistics Carrier:</strong> {{ $order->tracking_carrier ?: 'Standard Royal Dispatch' }}<br>
                     <strong>Airway Bill (AWB):</strong> {{ $order->tracking_number ?: 'Pending Dispatch' }}<br>
                     <strong>GST Included:</strong> Yes (HSN Code: 7117 — Imitation Jewellery)
@@ -310,14 +311,34 @@
                         <td style="padding: 3px 0; font-size: 10.5px;">Shipping Charges:</td>
                         <td class="text-right" style="padding: 3px 0; font-size: 10.5px;">{{ $order->shipping_fee == 0 ? 'FREE' : 'Rs. ' . number_format($order->shipping_fee, 2) }}</td>
                     </tr>
+                    @if($order->cod_extra_charge > 0)
+                        <tr>
+                            <td style="padding: 3px 0; font-size: 10.5px; color: #996E2E;">COD Handling Fee:</td>
+                            <td class="text-right" style="padding: 3px 0; font-size: 10.5px; font-weight: bold; color: #996E2E;">+ Rs. {{ number_format($order->cod_extra_charge, 2) }}</td>
+                        </tr>
+                    @endif
                     <tr class="grand-total">
                         <td style="padding: 8px 6px; font-size: 13px; font-weight: bold; color: #4A2C1D; background: #FAF7F0; border-top: 2px solid #D4AF6A; border-bottom: 2px solid #D4AF6A;">
-                            Grand Total (Paid):
+                            Grand Total (Order Value):
                         </td>
                         <td class="text-right" style="padding: 8px 6px; font-size: 14px; font-weight: bold; color: #4A2C1D; background: #FAF7F0; border-top: 2px solid #D4AF6A; border-bottom: 2px solid #D4AF6A;">
                             Rs. {{ number_format($order->total_amount, 2) }}
                         </td>
                     </tr>
+                    @if($order->isCod())
+                        <tr style="color: #065F46; font-size: 10px; font-weight: bold;">
+                            <td style="padding: 5px 6px 2px 6px;">Advance Token Paid ({{ $order->advance_percentage }}%):</td>
+                            <td class="text-right" style="padding: 5px 6px 2px 6px;">Rs. {{ number_format($order->advance_amount, 2) }}</td>
+                        </tr>
+                        <tr style="color: #4A2C1D; font-size: 10px; font-weight: bold;">
+                            <td style="padding: 2px 6px;">Balance Due on Delivery:</td>
+                            <td class="text-right" style="padding: 2px 6px;">Rs. {{ number_format($order->balance_amount, 2) }}</td>
+                        </tr>
+                        <tr style="color: #666666; font-size: 9px;">
+                            <td style="padding: 2px 6px;">Balance Settlement Status:</td>
+                            <td class="text-right" style="padding: 2px 6px; font-weight: bold;">{{ $order->balance_status }}</td>
+                        </tr>
+                    @endif
                 </table>
             </td>
         </tr>

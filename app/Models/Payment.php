@@ -16,10 +16,20 @@ class Payment extends Model
         'verified_at',
         'verified_by',
         'admin_note',
+        'advance_amount',
+        'balance_amount',
+        'advance_percentage',
+        'delivery_screenshot_path',
+        'delivery_transaction_reference',
+        'delivery_paid_at',
     ];
 
     protected $casts = [
         'verified_at' => 'datetime',
+        'advance_amount' => 'decimal:2',
+        'balance_amount' => 'decimal:2',
+        'advance_percentage' => 'integer',
+        'delivery_paid_at' => 'datetime',
     ];
 
     public function order(): BelongsTo

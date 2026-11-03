@@ -382,25 +382,158 @@
                             <span>Shipping:</span>
                             <span>{{ $shippingFee == 0 ? 'FREE' : '₹' . number_format($shippingFee) }}</span>
                         </div>
+
+                        <!-- Extra COD Fee Row -->
+                        <div x-show="paymentMethod === 'cod' && codExtraCharge > 0" class="flex justify-between text-stone-600 font-medium">
+                            <span>COD Courier Handling Fee:</span>
+                            <span class="font-bold text-[#4A2C1D]">+ ₹{{ number_format($codExtraCharge) }}</span>
+                        </div>
+
                         <div class="pt-2 border-t border-[#D4AF6A]/30 flex justify-between items-baseline">
-                            <span class="font-serif-royal font-bold text-sm text-[#4A2C1D]">Payable Amount:</span>
-                            <span class="font-serif-royal font-bold text-2xl text-[#996E2E]">₹{{ number_format($total) }}</span>
+                            <span class="font-serif-royal font-bold text-sm text-[#4A2C1D]">Total Order Value:</span>
+                            <span class="font-serif-royal font-bold text-2xl text-[#996E2E]">₹<span x-text="grandTotal.toLocaleString('en-IN')"></span></span>
+                        </div>
+
+                        <!-- COD Token Breakdown -->
+                        <div x-show="paymentMethod === 'cod'" class="p-2.5 rounded-xl bg-amber-50/90 border border-amber-300 text-xs space-y-1.5 mt-2">
+                            <div class="flex justify-between text-emerald-800 font-bold">
+                                <span>Advance Token Payable Now (<span x-text="codAdvancePercentage"></span>%):</span>
+                                <span>₹<span x-text="advancePayable.toLocaleString('en-IN')"></span></span>
+                            </div>
+                            <div class="flex justify-between text-[#4A2C1D] font-bold">
+                                <span>Remaining Due on Delivery:</span>
+                                <span>₹<span x-text="balanceDueOnDelivery.toLocaleString('en-IN')"></span></span>
+                            </div>
                         </div>
                     </div>
                 </div>
+
+                @if($codEnabled)
+                    <!-- 1.5 PAYMENT METHOD SELECTION (FULL ONLINE VS COD) -->
+                    <div class="bg-white rounded-2xl border border-[#D4AF6A]/40 p-5 sm:p-6 shadow-xs space-y-4">
+                        <div class="flex items-center justify-between pb-3 border-b border-[#D4AF6A]/30">
+                            <h3 class="font-serif-royal text-base font-bold text-[#4A2C1D] flex items-center space-x-2">
+                                <span>4. Payment Method Selection</span>
+                            </h3>
+                            <span class="text-[10px] font-bold text-[#996E2E] bg-[#FAF7F0] px-2.5 py-0.5 rounded-full border border-[#D4AF6A]/40 uppercase tracking-wider">
+                                Real-Time Choice
+                            </span>
+                        </div>
+
+                        <!-- Options Grid (100% responsive for small mobiles to large desktops) -->
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 text-xs">
+                            <!-- Option 1: Full Online UPI (100% Advance) -->
+                            <label class="p-4 rounded-xl border-2 cursor-pointer transition-all flex flex-col justify-between space-y-3 relative overflow-hidden select-none"
+                                   :class="paymentMethod === 'upi' ? 'border-[#4A2C1D] bg-[#FAF7F0] shadow-sm' : 'border-stone-200 bg-white hover:border-[#D4AF6A]/60'">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex items-center space-x-2.5">
+                                        <input type="radio" name="payment_method_choice" value="upi" x-model="paymentMethod" class="w-4 h-4 text-[#4A2C1D] focus:ring-[#D4AF6A]">
+                                        <div>
+                                            <p class="font-bold text-sm text-[#4A2C1D]">Full Online Payment</p>
+                                            <p class="text-[11px] text-stone-500">100% Instant UPI Payment</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800">
+                                        Fast Dispatch
+                                    </span>
+                                </div>
+                                <div class="pt-2 border-t border-stone-200/60 flex items-baseline justify-between">
+                                    <span class="text-[11px] text-stone-500">Payable Now:</span>
+                                    <span class="font-serif-royal font-bold text-base text-[#4A2C1D]">₹<span x-text="baseTotal.toLocaleString('en-IN')"></span></span>
+                                </div>
+                            </label>
+
+                            <!-- Option 2: Cash on Delivery (Advance Token) -->
+                            <label class="p-4 rounded-xl border-2 cursor-pointer transition-all flex flex-col justify-between space-y-3 relative overflow-hidden select-none"
+                                   :class="paymentMethod === 'cod' ? 'border-[#996E2E] bg-amber-50/70 shadow-sm' : 'border-stone-200 bg-white hover:border-[#D4AF6A]/60'">
+                                <div class="flex items-start justify-between">
+                                    <div class="flex items-center space-x-2.5">
+                                        <input type="radio" name="payment_method_choice" value="cod" x-model="paymentMethod" class="w-4 h-4 text-[#996E2E] focus:ring-[#D4AF6A]">
+                                        <div>
+                                            <p class="font-bold text-sm text-[#4A2C1D]">Cash on Delivery (COD)</p>
+                                            <p class="text-[11px] text-[#996E2E] font-semibold"><span x-text="codAdvancePercentage"></span>% Advance + Balance on Delivery</p>
+                                        </div>
+                                    </div>
+                                    <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#4A2C1D] text-[#E7C77B]">
+                                        COD Token
+                                    </span>
+                                </div>
+                                <div class="pt-2 border-t border-stone-200/60 flex items-baseline justify-between">
+                                    <span class="text-[11px] text-stone-500">Pay Token Now:</span>
+                                    <span class="font-serif-royal font-bold text-base text-[#996E2E]">₹<span x-text="advancePayable.toLocaleString('en-IN')"></span></span>
+                                </div>
+                            </label>
+                        </div>
+
+                        <!-- Form Value -->
+                        <input type="hidden" name="payment_method" :value="paymentMethod === 'cod' ? 'Cash on Delivery' : 'Static QR / UPI'">
+
+                        <!-- Dynamic COD Notification & Description Alert Box -->
+                        <div x-show="paymentMethod === 'cod'" 
+                             x-transition:enter="transition ease-out duration-300"
+                             x-transition:enter-start="opacity-0 -translate-y-2"
+                             x-transition:enter-end="opacity-100 translate-y-0"
+                             class="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-amber-50 via-white to-amber-50 border-2 border-[#D4AF6A] shadow-xs space-y-3">
+                            
+                            <div class="flex items-start gap-3">
+                                <div class="w-9 h-9 rounded-xl bg-[#4A2C1D] text-[#E7C77B] flex items-center justify-center font-bold shrink-0 shadow-2xs mt-0.5">
+                                    <svg class="w-5 h-5 text-[#E7C77B]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                </div>
+                                <div class="space-y-1 min-w-0 flex-1">
+                                    <h4 class="font-serif-royal font-bold text-sm text-[#4A2C1D] flex items-center gap-2 flex-wrap">
+                                        <span>Cash on Delivery Booking Policy</span>
+                                        <span class="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-800" x-text="codAdvancePercentage + '% Advance Token Required'"></span>
+                                    </h4>
+                                    <p class="text-stone-700 text-xs leading-relaxed font-medium">
+                                        {{ $codNotice }}
+                                    </p>
+                                </div>
+                            </div>
+
+                            <!-- Responsive 3-Pill Breakdown -->
+                            <div class="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-1 text-xs">
+                                <div class="p-3 rounded-xl bg-white border border-[#D4AF6A]/50 shadow-2xs flex flex-row sm:flex-col justify-between sm:justify-start items-center sm:items-start">
+                                    <span class="text-[10px] uppercase font-bold text-stone-500 block">Total Order Value:</span>
+                                    <span class="font-serif-royal font-bold text-sm sm:text-base text-[#4A2C1D] mt-0.5">₹<span x-text="grandTotal.toLocaleString('en-IN')"></span></span>
+                                </div>
+                                <div class="p-3 rounded-xl bg-emerald-50/70 border border-emerald-300 shadow-2xs flex flex-row sm:flex-col justify-between sm:justify-start items-center sm:items-start">
+                                    <span class="text-[10px] uppercase font-bold text-emerald-800 block">Advance Token (Pay Now):</span>
+                                    <span class="font-serif-royal font-bold text-sm sm:text-base text-emerald-800 mt-0.5">₹<span x-text="advancePayable.toLocaleString('en-IN')"></span> (<span x-text="codAdvancePercentage"></span>%)</span>
+                                </div>
+                                <div class="p-3 rounded-xl bg-amber-50/70 border border-amber-300 shadow-2xs flex flex-row sm:flex-col justify-between sm:justify-start items-center sm:items-start">
+                                    <span class="text-[10px] uppercase font-bold text-amber-900 block">Balance on Delivery:</span>
+                                    <span class="font-serif-royal font-bold text-sm sm:text-base text-[#4A2C1D] mt-0.5">₹<span x-text="balanceDueOnDelivery.toLocaleString('en-IN')"></span></span>
+                                </div>
+                            </div>
+
+                            @if($codExtraCharge > 0)
+                                <div class="p-2.5 rounded-lg bg-stone-50 border border-stone-200 text-[11px] text-stone-600 flex items-center gap-2">
+                                    <svg class="w-4 h-4 text-[#996E2E] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                    <span>Includes ₹{{ number_format($codExtraCharge) }} extra courier COD handling & insurance fee.</span>
+                                </div>
+                            @endif
+
+                            <p class="text-[10px] text-stone-500 leading-snug italic pt-1">
+                                ✓ Pay the token advance of ₹<span x-text="advancePayable.toLocaleString('en-IN')"></span> via QR below to book your creations. The remaining balance of ₹<span x-text="balanceDueOnDelivery.toLocaleString('en-IN')"></span> is collected by courier in cash or via QR upon delivery.
+                            </p>
+                        </div>
+                    </div>
+                @else
+                    <input type="hidden" name="payment_method" value="Static QR / UPI">
+                @endif
 
                 <!-- 2. STATIC QR CODE & PAYMENT PROOF UPLOAD -->
                 <div class="bg-gradient-to-b from-[#FAF7F0] to-white rounded-2xl border-2 border-[#D4AF6A] p-5 sm:p-6 shadow-md space-y-5">
                     <div class="text-center space-y-1">
                         <span class="inline-flex items-center gap-1 bg-[#4A2C1D] text-[#E7C77B] text-[10px] uppercase font-bold tracking-widest px-3 py-1 rounded-full shadow-xs">
                             <svg class="w-3.5 h-3.5 text-[#E7C77B]" viewBox="0 0 24 24" fill="currentColor"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5m14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z"/></svg>
-                            <span>Step 4: Scan & Pay via UPI</span>
+                            <span x-text="paymentMethod === 'cod' ? 'Scan & Pay COD Advance Token via UPI' : 'Step 4: Scan & Pay via UPI'"></span>
                         </span>
                         <h4 class="font-serif-royal text-lg font-bold text-[#4A2C1D] pt-2">
-                            Pay ₹{{ number_format($total) }} to Rayka
+                            Pay ₹<span x-text="advancePayable.toLocaleString('en-IN')"></span> to Rayka
                         </h4>
                         <p class="text-xs text-stone-500">
-                            Scan with Google Pay, PhonePe, Paytm, or BHIM UPI
+                            <span x-text="paymentMethod === 'cod' ? 'Pay ' + codAdvancePercentage + '% advance token of ₹' + advancePayable.toLocaleString('en-IN') + ' to confirm COD dispatch' : 'Scan with Google Pay, PhonePe, Paytm, or BHIM UPI'"></span>
                         </p>
                     </div>
 
@@ -411,12 +544,12 @@
                         <!-- UPI ID with 1-Click Copy -->
                         <div class="mt-3 flex items-center space-x-2 bg-[#FAF7F0] px-3 py-1.5 rounded-full border border-[#D4AF6A]/40 text-xs">
                             <span class="font-mono text-stone-700 select-all">{{ $upiId }}</span>
-                            <button type="button" @click="copyUpi('{{ $upiId }}')" class="font-bold text-[#996E2E] hover:text-[#4A2C1D] transition flex items-center gap-1">
+                            <button type="button" @click="copyUpi('{{ $upiId }}')" class="font-bold text-[#996E2E] hover:text-[#4A2C1D] transition flex items-center gap-1 cursor-pointer">
                                 <span x-show="!copiedUpi" class="flex items-center gap-1">
                                     <svg class="w-3.5 h-3.5 text-[#996E2E]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path></svg>
                                     <span>Copy</span>
                                 </span>
-                                <span x-show="copiedUpi" class="flex items-center gap-1 text-emerald-700">
+                                <span x-show="copiedUpi" class="flex items-center gap-1 text-emerald-700" style="display: none;">
                                     <svg class="w-3.5 h-3.5 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"></path></svg>
                                     <span>Copied!</span>
                                 </span>
@@ -429,10 +562,10 @@
                     <div class="space-y-2 text-xs">
                         <label class="block font-bold text-[#4A2C1D] flex items-center gap-1.5">
                             <svg class="w-4 h-4 text-[#996E2E]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 9a2 2 0 012-2h.93a2 2 0 001.664-.89l.812-1.22A2 2 0 0110.07 4h3.86a2 2 0 011.664.89l.812 1.22A2 2 0 0018.07 7H19a2 2 0 012 2v9a2 2 0 01-2 2H5a2 2 0 01-2-2V9z"></path><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 13a3 3 0 11-6 0 3 3 0 016 0z"></path></svg>
-                            <span>Upload Payment Screenshot (Proof) *</span>
+                            <span x-text="paymentMethod === 'cod' ? 'Upload COD Advance Payment Screenshot (Proof) *' : 'Upload Payment Screenshot (Proof) *'"></span>
                         </label>
                         <p class="text-[11px] text-stone-500 leading-snug">
-                            After completing the UPI payment, please attach the confirmation screenshot so our admin can verify and dispatch your jewels.
+                            <span x-text="paymentMethod === 'cod' ? 'Attach screenshot proof of the advance payment (₹' + advancePayable.toLocaleString('en-IN') + ') so our admin can confirm and pack your order.' : 'After completing the UPI payment, please attach the confirmation screenshot so our admin can verify and dispatch your jewels.'"></span>
                         </p>
                         
                         <div class="mt-2 flex flex-col items-center justify-center border-2 border-dashed @error('payment_screenshot') border-rose-500 bg-rose-50/20 @else border-[#D4AF6A] bg-white hover:bg-[#FAF7F0] @enderror rounded-xl p-4 transition cursor-pointer relative">
@@ -473,9 +606,14 @@
                     <!-- Complete Order CTA -->
                     <div class="pt-2">
                         <button type="submit" 
-                                class="w-full py-4 text-center rounded-full bg-gradient-to-r from-[#F0B429] via-[#E7C77B] to-[#D4AF6A] text-[#2E180E] font-bold text-xs uppercase tracking-wider hover:shadow-xl hover:scale-[1.02] transition border border-[#E7C77B] flex items-center justify-center gap-1.5 cursor-pointer">
-                            <svg class="w-4 h-4 text-[#2E180E]" viewBox="0 0 24 24" fill="currentColor"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5m14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z"/></svg>
-                            <span class="flex items-center gap-1.5">Submit Order for Verification <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg></span>
+                                class="w-full px-3 sm:px-6 py-3.5 sm:py-4 rounded-2xl sm:rounded-full bg-gradient-to-r from-[#F0B429] via-[#E7C77B] to-[#D4AF6A] text-[#2E180E] font-bold text-xs uppercase tracking-wider hover:shadow-xl hover:scale-[1.01] active:scale-98 transition border border-[#E7C77B] flex items-center justify-center gap-2 cursor-pointer shadow-md">
+                            <svg class="w-4 h-4 text-[#2E180E] shrink-0" viewBox="0 0 24 24" fill="currentColor"><path d="M5 16L3 5l5.5 5L12 4l3.5 6L21 5l-2 11H5m14 3c0 .6-.4 1-1 1H6c-.6 0-1-.4-1-1v-1h14v1z"/></svg>
+                            <span class="flex flex-col sm:flex-row items-center justify-center gap-0.5 sm:gap-2 text-center leading-tight">
+                                <span x-text="paymentMethod === 'cod' ? 'Confirm COD Order' : 'Submit Order for Verification'"></span>
+                                <span class="text-[11px] font-extrabold text-[#4A2C1D] bg-white/50 px-2.5 py-0.5 rounded-full font-mono shadow-2xs" 
+                                      x-text="paymentMethod === 'cod' ? '(Advance: ₹' + advancePayable.toLocaleString('en-IN') + ')' : '(₹' + grandTotal.toLocaleString('en-IN') + ')'"></span>
+                            </span>
+                            <svg class="w-4 h-4 text-[#2E180E] shrink-0" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2.5" d="M14 5l7 7m0 0l-7 7m7-7H3"></path></svg>
                         </button>
                         <p class="text-[10px] text-center text-stone-500 mt-2">
                             Status will be set to <strong>"Pending Verification"</strong>. Upon admin confirmation, your order will be confirmed and the downloadable invoice will be unlocked.
@@ -494,6 +632,33 @@
 <script>
 function checkoutPage() {
     return {
+        paymentMethod: '{{ old('payment_method', ($codEnabled && in_array(old('payment_method'), ['cod', 'Cash on Delivery'])) ? 'cod' : 'upi') }}',
+        codEnabled: {{ $codEnabled ? 'true' : 'false' }},
+        baseSubtotal: {{ (float) $subtotal }},
+        shippingFee: {{ (float) $shippingFee }},
+        discount: {{ (float) $discount }},
+        codAdvancePercentage: {{ (int) $codAdvancePercentage }},
+        codExtraCharge: {{ (float) $codExtraCharge }},
+        baseTotal: {{ (float) $total }},
+
+        get effectiveExtraCharge() {
+            return (this.codEnabled && this.paymentMethod === 'cod') ? this.codExtraCharge : 0;
+        },
+        get grandTotal() {
+            return this.baseTotal + this.effectiveExtraCharge;
+        },
+        get advancePayable() {
+            if (this.paymentMethod === 'cod' && this.codEnabled) {
+                return Math.round(this.grandTotal * (this.codAdvancePercentage / 100));
+            }
+            return this.grandTotal;
+        },
+        get balanceDueOnDelivery() {
+            if (this.paymentMethod === 'cod' && this.codEnabled) {
+                return Math.max(0, this.grandTotal - this.advancePayable);
+            }
+            return 0;
+        },
         screenshotPreview: null,
         copiedUpi: false,
         couponCodeInput: '',

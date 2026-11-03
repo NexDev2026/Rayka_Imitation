@@ -44,10 +44,17 @@
                     <!-- Card Top: Order #, Status & Date -->
                     <div class="flex items-start justify-between gap-2">
                         <div>
-                            <span class="font-mono font-bold text-sm text-[#4A2C1D] block">
-                                {{ $ord->order_number }}
-                            </span>
-                            <span class="text-[11px] text-stone-400">
+                            <div class="flex items-center gap-1.5 flex-wrap">
+                                <span class="font-mono font-bold text-sm text-[#4A2C1D]">
+                                    {{ $ord->order_number }}
+                                </span>
+                                @if($ord->isCod())
+                                    <span class="px-1.5 py-0.5 rounded text-[9px] font-bold uppercase bg-amber-100 text-amber-900 border border-amber-300">
+                                        COD ({{ $ord->advance_percentage }}%)
+                                    </span>
+                                @endif
+                            </div>
+                            <span class="text-[11px] text-stone-400 block mt-0.5">
                                 {{ $ord->created_at->format('d M, Y h:i A') }}
                             </span>
                         </div>
@@ -89,20 +96,32 @@
                         <div class="text-right">
                             <strong class="text-stone-900 text-sm font-serif-royal block">₹{{ number_format($ord->total_amount) }}</strong>
                             <span class="text-stone-400 text-[10px]">{{ $ord->items->count() }} items</span>
+                            @if($ord->isCod())
+                                <span class="block text-[10px] font-semibold text-emerald-800">Adv: ₹{{ number_format($ord->advance_amount) }}</span>
+                                <span class="block text-[10px] font-semibold text-[#4A2C1D]">Bal: ₹{{ number_format($ord->balance_amount) }} ({{ $ord->balance_status }})</span>
+                            @endif
                         </div>
                     </div>
 
                     <!-- Payment Proof Indicator -->
-                    <div class="flex items-center justify-between text-xs pt-1">
-                        <span class="text-stone-500 text-[11px]">Payment Proof:</span>
-                        @if($ord->payment && $ord->payment->screenshot_path)
-                            <a href="{{ asset($ord->payment->screenshot_path) }}" target="_blank" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-50 border border-amber-300 text-amber-900 font-bold text-[11px] hover:bg-amber-100">
-                                <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" /></svg>
-                                <span>View Proof</span>
-                            </a>
-                        @else
-                            <span class="text-stone-400 italic text-[11px]">No Screenshot</span>
-                        @endif
+                    <div class="flex items-center justify-between text-xs pt-1 flex-wrap gap-1">
+                        <span class="text-stone-500 text-[11px]">Proofs:</span>
+                        <div class="flex items-center gap-1.5 flex-wrap">
+                            @if($ord->payment && $ord->payment->screenshot_path)
+                                <a href="{{ asset($ord->payment->screenshot_path) }}" target="_blank" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-amber-50 border border-amber-300 text-amber-900 font-bold text-[11px] hover:bg-amber-100">
+                                    <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" /></svg>
+                                    <span>Advance</span>
+                                </a>
+                            @else
+                                <span class="text-stone-400 italic text-[11px]">No Advance Proof</span>
+                            @endif
+
+                            @if($ord->delivery_payment_screenshot)
+                                <a href="{{ asset($ord->delivery_payment_screenshot) }}" target="_blank" class="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-emerald-50 border border-emerald-300 text-emerald-900 font-bold text-[11px] hover:bg-emerald-100">
+                                    <span>Bal Proof</span>
+                                </a>
+                            @endif
+                        </div>
                     </div>
 
                     <!-- Action Buttons -->
@@ -154,8 +173,13 @@
                 <tbody class="divide-y divide-stone-100">
                     @forelse($orders as $ord)
                         <tr class="hover:bg-stone-50 transition">
-                            <td class="p-4 font-mono font-bold text-[#4A2C1D]">
-                                {{ $ord->order_number }}
+                            <td class="p-4 font-mono font-bold text-[#4A2C1D] whitespace-nowrap">
+                                <div>{{ $ord->order_number }}</div>
+                                @if($ord->isCod())
+                                    <span class="inline-block mt-0.5 px-1.5 py-0.5 rounded text-[9px] font-bold uppercase bg-amber-100 text-amber-900 border border-amber-300">
+                                        COD ({{ $ord->advance_percentage }}%)
+                                    </span>
+                                @endif
                             </td>
                             <td class="p-4 text-stone-500 whitespace-nowrap">
                                 {{ $ord->created_at->format('d M, Y h:i A') }}
@@ -167,16 +191,33 @@
                             <td class="p-4 whitespace-nowrap">
                                 <strong class="text-stone-900">₹{{ number_format($ord->total_amount) }}</strong>
                                 <span class="text-stone-400 block text-[11px]">{{ $ord->items->count() }} items</span>
+                                @if($ord->isCod())
+                                    <div class="mt-1 space-y-0.5 text-[10px]">
+                                        <span class="text-emerald-800 font-semibold block">Adv: ₹{{ number_format($ord->advance_amount) }}</span>
+                                        <span class="text-[#4A2C1D] font-semibold block">Bal: ₹{{ number_format($ord->balance_amount) }}</span>
+                                        <span class="font-bold px-1.5 py-0.2 rounded inline-block text-[9px] border {{ $ord->balance_status_badge_class }}">
+                                            {{ $ord->balance_status }}
+                                        </span>
+                                    </div>
+                                @endif
                             </td>
                             <td class="p-4 whitespace-nowrap">
-                                @if($ord->payment && $ord->payment->screenshot_path)
-                                    <a href="{{ asset($ord->payment->screenshot_path) }}" target="_blank" class="inline-flex items-center space-x-1 px-2.5 py-1 rounded bg-amber-50 border border-amber-300 text-amber-900 font-bold hover:bg-amber-100">
-                                        <svg class="w-4 h-4 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" /></svg>
-                                        <span>View Proof</span>
-                                    </a>
-                                @else
-                                    <span class="text-stone-400 italic">No Screenshot</span>
-                                @endif
+                                <div class="space-y-1">
+                                    @if($ord->payment && $ord->payment->screenshot_path)
+                                        <a href="{{ asset($ord->payment->screenshot_path) }}" target="_blank" class="inline-flex items-center space-x-1 px-2.5 py-1 rounded bg-amber-50 border border-amber-300 text-amber-900 font-bold hover:bg-amber-100 text-[11px]">
+                                            <svg class="w-3.5 h-3.5 shrink-0" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 0021.75 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" /><path stroke-linecap="round" stroke-linejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" /></svg>
+                                            <span>Advance Proof</span>
+                                        </a>
+                                    @else
+                                        <span class="text-stone-400 italic text-[11px] block">No Advance Proof</span>
+                                    @endif
+
+                                    @if($ord->delivery_payment_screenshot)
+                                        <a href="{{ asset($ord->delivery_payment_screenshot) }}" target="_blank" class="inline-flex items-center space-x-1 px-2.5 py-1 rounded bg-emerald-50 border border-emerald-300 text-emerald-900 font-bold hover:bg-emerald-100 text-[11px] block w-fit">
+                                            <span>✓ Bal Proof</span>
+                                        </a>
+                                    @endif
+                                </div>
                             </td>
                             <td class="p-4 whitespace-nowrap">
                                 @if($ord->isCancelledByCustomer())
