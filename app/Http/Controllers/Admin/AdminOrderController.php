@@ -241,6 +241,88 @@ class AdminOrderController extends Controller
         return back()->with('success', "COD Balance for Order #{$order->order_number} marked as '{$order->balance_status}'.");
     }
 
+    /**
+     * Admin updates refund settlement details for a Cancelled order.
+     */
+    public function updateRefund(Request $request, $id)
+    {
+        $order = Order::with(['payment', 'address', 'user'])->findOrFail($id);
+
+        if (! $order->isCancelled()) {
+            return back()->with('error', 'Refund management is only available for Cancelled orders.');
+        }
+
+        $request->validate([
+            'refund_status' => 'required|in:Pending,Refunded,Not Applicable',
+            'refund_amount' => 'required|numeric|min:0',
+            'refund_method' => 'nullable|string|max:100',
+            'refund_transaction_reference' => 'nullable|string|max:100',
+            'refund_screenshot' => 'nullable|file|mimes:jpeg,png,jpg,webp,svg,gif,pdf|max:10240',
+            'refund_note' => 'nullable|string|max:1000',
+        ]);
+
+        $order->refund_status = $request->refund_status;
+        $order->refund_amount = (float) $request->refund_amount;
+        $order->refund_method = $request->refund_method ? trim((string) $request->refund_method) : null;
+        $order->refund_transaction_reference = $request->refund_transaction_reference ? trim((string) $request->refund_transaction_reference) : null;
+        $order->refund_note = $request->refund_note ? trim((string) $request->refund_note) : null;
+
+        if ($request->refund_status === 'Refunded') {
+            $order->refunded_at = $order->refunded_at ?? now();
+            $order->refunded_by = Auth::id();
+        } elseif ($request->refund_status === 'Pending') {
+            $order->refunded_at = null;
+            $order->refunded_by = null;
+        }
+
+        if ($request->hasFile('refund_screenshot')) {
+            $file = $request->file('refund_screenshot');
+            $ext = strtolower($file->getClientOriginalExtension());
+            if ($ext === 'pdf') {
+                $filename = 'refund_' . time() . '_' . Str::random(8) . '.pdf';
+                $destinationPath = public_path('uploads/refunds');
+                if (! file_exists($destinationPath)) {
+                    mkdir($destinationPath, 0755, true);
+                }
+                $file->move($destinationPath, $filename);
+                $path = '/uploads/refunds/' . $filename;
+            } else {
+                $path = ImageUploadService::uploadAndConvertToWebp(
+                    file: $file,
+                    folder: 'uploads/refunds',
+                    prefix: 'refund',
+                    maxWidth: 1600,
+                    maxHeight: 1600,
+                    quality: 88
+                );
+            }
+            $order->refund_screenshot = $path;
+            $fn = basename($path);
+            ImageUploadService::mirrorToExternalUploads(public_path('uploads/refunds/' . $fn), 'refunds', $fn);
+        }
+
+        $order->save();
+
+        ActivityLog::record(
+            action: 'ORDER_REFUND_UPDATED',
+            description: 'Administrator ' . (Auth::user()?->name ?? 'Admin') . " updated refund for Cancelled Order #{$order->order_number} to '{$order->refund_status}' (Amount: ₹" . number_format((float) $order->refund_amount, 2) . ").",
+            category: 'orders',
+            actorType: 'admin',
+            subjectType: 'Order',
+            subjectId: (string) $order->id,
+            subjectRef: $order->order_number,
+            metadata: [
+                'order_number' => $order->order_number,
+                'refund_status' => $order->refund_status,
+                'refund_amount' => (float) $order->refund_amount,
+                'refund_method' => $order->refund_method,
+                'refund_transaction_reference' => $order->refund_transaction_reference,
+            ]
+        );
+
+        return back()->with('success', "Refund details for Order #{$order->order_number} successfully updated to '{$order->refund_status}'.");
+    }
+
     public function updateStatus(Request $request, $id)
     {
         $order = Order::with(['payment', 'items.product', 'address', 'user'])->findOrFail($id);
@@ -281,12 +363,22 @@ class AdminOrderController extends Controller
             $order->cancelled_by = 'admin';
             $order->cancellation_reason = $reasonNote;
             $order->cancelled_at = now();
+
+            if ($newStatus === 'Cancelled') {
+                if ($order->refund_status === 'None' || empty($order->refund_status)) {
+                    $refundable = $order->getRefundableAmount();
+                    $order->refund_status = $refundable > 0 ? 'Pending' : 'Not Applicable';
+                    $order->refund_amount = $refundable;
+                }
+            }
+
             $order->notes = trim(($order->notes ?? '')."\n\n{$newStatus} by administrator on {$timestamp}. Reason: {$reasonNote}");
         } elseif (in_array($oldStatus, ['Cancelled', 'Rejected'])) {
             // Reinstating/reactivating order clears cancellation attributes
             $order->cancelled_by = null;
             $order->cancellation_reason = null;
             $order->cancelled_at = null;
+            $order->refund_status = 'None';
         }
 
         $order->save();

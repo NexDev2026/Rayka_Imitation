@@ -36,6 +36,14 @@ class Order extends Model
         'delivery_payment_screenshot',
         'delivery_transaction_reference',
         'delivery_paid_at',
+        'refund_status',
+        'refund_amount',
+        'refund_method',
+        'refund_transaction_reference',
+        'refund_screenshot',
+        'refund_note',
+        'refunded_at',
+        'refunded_by',
     ];
 
     protected $casts = [
@@ -49,6 +57,8 @@ class Order extends Model
         'advance_percentage' => 'integer',
         'cancelled_at' => 'datetime',
         'delivery_paid_at' => 'datetime',
+        'refund_amount' => 'decimal:2',
+        'refunded_at' => 'datetime',
     ];
 
     public function isCod(): bool
@@ -75,6 +85,35 @@ class Order extends Model
             'Pending' => 'bg-amber-100 text-amber-800 border-amber-300',
             'Waived' => 'bg-blue-100 text-blue-800 border-blue-300',
             default => 'bg-stone-100 text-stone-700 border-stone-300',
+        };
+    }
+
+    public function getRefundableAmount(): float
+    {
+        if ($this->isCod()) {
+            return (float) $this->advance_amount;
+        }
+
+        return (float) $this->total_amount;
+    }
+
+    public function isRefunded(): bool
+    {
+        return $this->refund_status === 'Refunded';
+    }
+
+    public function isRefundPending(): bool
+    {
+        return $this->isCancelled() && (in_array($this->refund_status, ['Pending', 'None', '']) && $this->getRefundableAmount() > 0);
+    }
+
+    public function getRefundStatusBadgeClassAttribute(): string
+    {
+        return match ($this->refund_status) {
+            'Refunded' => 'bg-emerald-100 text-emerald-800 border-emerald-300',
+            'Pending' => 'bg-amber-100 text-amber-800 border-amber-300',
+            'Not Applicable' => 'bg-stone-100 text-stone-600 border-stone-300',
+            default => 'bg-stone-100 text-stone-600 border-stone-300',
         };
     }
 

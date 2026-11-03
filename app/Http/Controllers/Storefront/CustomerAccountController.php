@@ -620,11 +620,16 @@ class CustomerAccountController extends Controller
         // Use a transaction to safely cancel order and restore stock
         DB::transaction(function () use ($order, $fullReason) {
             $timestamp = now()->format('d M, Y \a\t h:i A');
+            $refundable = $order->getRefundableAmount();
+            $refundStatus = $refundable > 0 ? 'Pending' : 'Not Applicable';
+
             $order->update([
                 'status' => 'Cancelled',
                 'cancelled_by' => 'customer',
                 'cancellation_reason' => $fullReason,
                 'cancelled_at' => now(),
+                'refund_status' => $refundStatus,
+                'refund_amount' => $refundable,
                 'notes' => trim(($order->notes ?? '')."\n\nCancelled by user on {$timestamp}. Reason: {$fullReason}"),
             ]);
 

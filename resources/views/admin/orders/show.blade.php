@@ -7,6 +7,7 @@
 <div class="space-y-8 max-w-5xl" x-data="{ 
     proofModal: false,
     deliveryProofModal: false,
+    refundProofModal: false,
     reasonModal: false,
     modalAction: 'reject',
     selectedReason: 'Payment screenshot invalid or illegible',
@@ -301,18 +302,34 @@
                 </div>
             </div>
         </div>
+    @elseif($order->isCancelledByAdmin())
+        @php $adminCancelData = $order->getCancellationDetails(); @endphp
+        <div class="bg-white rounded-2xl border border-rose-200 p-4 sm:p-6 shadow-xs space-y-3">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-3 border-b border-rose-200 gap-2">
+                <h3 class="font-serif-royal text-base font-bold text-rose-800 flex items-center gap-2">
+                    <svg class="w-4 h-4 text-rose-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                    <span>Dispatch Workflow & Logistics Tracking (Locked)</span>
+                </h3>
+                <span class="text-[11px] font-bold text-rose-800 bg-rose-100 px-3 py-1 rounded-full border border-rose-300 self-start sm:self-auto">
+                    Cancelled by Administrator
+                </span>
+            </div>
+            <div class="p-4 bg-rose-50/70 rounded-xl border border-rose-200 text-xs text-rose-900 flex items-start gap-3">
+                <svg class="w-5 h-5 text-rose-500 shrink-0 mt-0.5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                <div class="space-y-1.5">
+                    <p class="font-semibold text-rose-950">Dispatch Actions are Disabled</p>
+                    <p>This order was cancelled by the administrator. Reason: <span class="font-semibold text-rose-950 bg-white px-2 py-0.5 rounded border border-rose-300 inline-block my-0.5">{{ $adminCancelData['reason'] ?? 'Order cancelled by admin.' }}</span></p>
+                    <p class="text-[11px] text-rose-700">Items have been returned to available stock.</p>
+                </div>
+            </div>
+        </div>
     @else
         <div class="bg-white rounded-2xl border border-stone-200 p-4 sm:p-6 shadow-xs space-y-4">
             <div class="flex items-center justify-between pb-3 border-b border-stone-200">
                 <h3 class="font-serif-royal text-base font-bold text-[#4A2C1D]">
                     Dispatch Workflow & Logistics Tracking
                 </h3>
-                @if($order->isCancelledByAdmin())
-                    @php $adminCancelData = $order->getCancellationDetails(); @endphp
-                    <span class="text-[11px] font-bold text-rose-700 bg-rose-50 px-2.5 py-0.5 rounded-full border border-rose-200">
-                        Status: Cancelled by Admin
-                    </span>
-                @elseif($order->isRejected())
+                @if($order->isRejected())
                     <span class="text-[11px] font-bold text-rose-700 bg-rose-50 px-2.5 py-0.5 rounded-full border border-rose-200">
                         Status: Rejected
                     </span>
@@ -377,8 +394,248 @@
         </div>
     @endif
 
-    <!-- 2.5. CASH ON DELIVERY BALANCE SETTLEMENT & DELIVERY RECEIPT CARD -->
-    @if($order->isCod())
+    <!-- REFUND & SETTLEMENT ENGINE (STRICTLY SHOWN ONLY WHEN ORDER IS CANCELLED) -->
+    @if($order->isCancelled())
+        <div class="bg-gradient-to-r from-amber-50/70 via-white to-amber-50/70 rounded-2xl border-2 border-[#D4AF6A] p-4 sm:p-6 shadow-sm space-y-5"
+             x-data="{
+                refundScreenshotPreview: null,
+                previewRefundFile(e) {
+                    let file = e.target.files[0];
+                    if (file) {
+                        if (file.size > 10 * 1024 * 1024) {
+                            alert('Receipt image exceeds 10MB limit.');
+                            e.target.value = '';
+                            return;
+                        }
+                        if (file.type.startsWith('image/')) {
+                            let reader = new FileReader();
+                            reader.onload = (ev) => { this.refundScreenshotPreview = ev.target.result; };
+                            reader.readAsDataURL(file);
+                        } else {
+                            this.refundScreenshotPreview = null;
+                        }
+                    }
+                }
+             }">
+            <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-amber-200 gap-3">
+                <div>
+                    <span class="bg-[#4A2C1D] text-[#E7C77B] text-[10px] uppercase font-bold tracking-widest px-3 py-1 rounded-full">
+                        Cancellation Settlement Engine
+                    </span>
+                    <h3 class="font-serif-royal text-lg font-bold text-[#4A2C1D] mt-2 flex items-center gap-2">
+                        <span>Payment Refund & Settlement (₹{{ number_format($order->getRefundableAmount(), 2) }} {{ $order->isCod() ? 'Advance Token' : 'Total Prepaid' }})</span>
+                    </h3>
+                    <p class="text-xs text-stone-500 mt-0.5">
+                        @if($order->isCod())
+                            Customer placed order via Cash on Delivery with {{ $order->advance_percentage }}% advance token online (₹{{ number_format($order->advance_amount, 2) }}). Uncollected balance of ₹{{ number_format($order->balance_amount, 2) }} is voided.
+                        @else
+                            Customer paid total amount online via UPI (₹{{ number_format($order->total_amount, 2) }}).
+                        @endif
+                    </p>
+                </div>
+                <div class="flex items-center gap-2">
+                    @if($order->isRefunded())
+                        <span class="text-xs font-bold px-3 py-1.5 rounded-full border bg-emerald-100 text-emerald-800 border-emerald-300">
+                            ✓ Refund Settled & Completed
+                        </span>
+                    @elseif($order->isRefundPending())
+                        <span class="text-xs font-bold px-3 py-1.5 rounded-full border bg-amber-100 text-amber-800 border-amber-300 animate-pulse">
+                            ⏳ Action Required: Refund Pending
+                        </span>
+                    @elseif($order->refund_status === 'Not Applicable')
+                        <span class="text-xs font-bold px-3 py-1.5 rounded-full border bg-stone-100 text-stone-600 border-stone-300">
+                            No Refund Applicable
+                        </span>
+                    @else
+                        <span class="text-xs font-bold px-3 py-1.5 rounded-full border {{ $order->refund_status_badge_class }}">
+                            Refund Status: {{ $order->refund_status }}
+                        </span>
+                    @endif
+                </div>
+            </div>
+
+            <div class="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start text-xs">
+                <!-- Left: Customer Payment Summary & Direct WhatsApp/Call Actions (5 cols) -->
+                <div class="lg:col-span-5 bg-white p-4 rounded-xl border border-stone-200 space-y-4">
+                    <div class="flex items-center justify-between border-b pb-2">
+                        <span class="font-bold text-stone-800">Refund Target & Customer Details</span>
+                        <span class="text-[10px] text-stone-400 font-mono">Order #{{ $order->order_number }}</span>
+                    </div>
+
+                    @php
+                        $custName = $order->address?->name ?: ($order->user?->name ?: 'Customer');
+                        $custPhone = $order->address?->mobile ?: ($order->user?->mobile ?: '');
+                        $cleanCustPhone = preg_replace('/[^0-9]/', '', (string)$custPhone);
+                        if (strlen($cleanCustPhone) === 10) {
+                            $cleanCustPhone = '91' . $cleanCustPhone;
+                        }
+                        $refundable = $order->getRefundableAmount();
+                    @endphp
+
+                    <div class="p-3 bg-stone-50 rounded-xl space-y-2 border border-stone-200/80">
+                        <div class="flex items-center justify-between">
+                            <span class="text-stone-500">Customer:</span>
+                            <strong class="text-stone-900 font-semibold">{{ $custName }}</strong>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-stone-500">Phone / WhatsApp:</span>
+                            <span class="font-mono font-bold text-stone-800">{{ $custPhone ?: 'Not provided' }}</span>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <span class="text-stone-500">Payment Channel:</span>
+                            <span class="font-bold {{ $order->isCod() ? 'text-amber-800' : 'text-indigo-800' }}">{{ $order->payment_method }}</span>
+                        </div>
+                        @if($order->isCod())
+                            <div class="flex items-center justify-between text-emerald-800 bg-emerald-50/70 px-2 py-1 rounded">
+                                <span class="font-semibold">Advance Token Paid:</span>
+                                <strong class="font-mono text-sm">₹{{ number_format($order->advance_amount, 2) }}</strong>
+                            </div>
+                            <div class="flex items-center justify-between text-stone-500 px-2 py-0.5">
+                                <span>Voided Delivery Balance:</span>
+                                <span class="font-mono line-through">₹{{ number_format($order->balance_amount, 2) }}</span>
+                            </div>
+                        @else
+                            <div class="flex items-center justify-between text-emerald-800 bg-emerald-50/70 px-2 py-1 rounded">
+                                <span class="font-semibold">Full Total Paid:</span>
+                                <strong class="font-mono text-sm">₹{{ number_format($order->total_amount, 2) }}</strong>
+                            </div>
+                        @endif
+
+                        @if($order->payment?->transaction_reference)
+                            <div class="flex items-center justify-between pt-1 border-t border-stone-200 text-[11px]">
+                                <span class="text-stone-500">Customer UTR / Ref:</span>
+                                <span class="font-mono font-bold text-stone-700">{{ $order->payment->transaction_reference }}</span>
+                            </div>
+                        @endif
+                    </div>
+
+                    @if(!empty($cleanCustPhone))
+                        <div class="flex items-center gap-2">
+                            <a href="https://wa.me/{{ $cleanCustPhone }}?text={{ urlencode("Hello {$custName}, this is Rayka Imitation Jewellery regarding your cancelled Order #{$order->order_number}. We are processing your ₹" . number_format($refundable, 2) . " refund. Kindly share your UPI ID (Google Pay / PhonePe / Paytm) to complete the reversal:") }}" target="_blank" class="flex-1 py-2 px-3 bg-emerald-700 hover:bg-emerald-800 text-white rounded-lg font-bold text-[11px] flex items-center justify-center gap-1.5 transition">
+                                <svg class="w-3.5 h-3.5 fill-current shrink-0" viewBox="0 0 24 24"><path d="M.057 24l1.687-6.163c-1.041-1.804-1.588-3.849-1.587-5.946.003-6.556 5.338-11.891 11.893-11.891 3.181.001 6.167 1.24 8.413 3.488 2.245 2.248 3.481 5.236 3.48 8.414-.003 6.557-5.338 11.892-11.893 11.892-1.99-.001-3.951-.5-5.688-1.448l-6.305 1.654zm6.597-3.807c1.676.995 3.276 1.591 5.392 1.592 5.448 0 9.886-4.434 9.889-9.885.002-5.462-4.415-9.89-9.881-9.892-5.452 0-9.887 4.434-9.889 9.884-.001 2.225.651 3.891 1.746 5.634l-.999 3.648 3.742-.981zm11.387-5.464c-.074-.124-.272-.198-.57-.347-.297-.149-1.758-.868-2.031-.967-.272-.099-.47-.149-.669.149-.198.297-.768.967-.941 1.165-.173.198-.347.223-.644.074-.297-.149-1.255-.462-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.297-.347.446-.521.151-.172.2-.296.3-.495.099-.198.05-.372-.025-.521-.075-.148-.669-1.611-.916-2.206-.242-.579-.487-.501-.669-.51l-.57-.01c-.198 0-.52.074-.792.372s-1.04 1.016-1.04 2.479 1.065 2.876 1.213 3.074c.149.198 2.095 3.2 5.076 4.487.709.306 1.263.489 1.694.626.712.226 1.36.194 1.872.118.571-.085 1.758-.719 2.006-1.413.248-.695.248-1.29.173-1.414z"/></svg>
+                                <span>Request UPI on WhatsApp</span>
+                            </a>
+                            <a href="tel:{{ $custPhone }}" class="py-2 px-3 bg-stone-100 hover:bg-stone-200 text-stone-700 rounded-lg font-bold text-[11px] transition">
+                                Call Customer
+                            </a>
+                        </div>
+                    @endif
+
+                    @if($order->isRefunded())
+                        <div class="p-3 bg-emerald-50 rounded-xl border border-emerald-200 space-y-1.5">
+                            <div class="flex items-center justify-between text-emerald-900 font-bold">
+                                <span>✓ Refund Processed</span>
+                                <span class="font-mono text-xs">₹{{ number_format($order->refund_amount, 2) }}</span>
+                            </div>
+                            <div class="text-[11px] text-emerald-800 space-y-0.5">
+                                <p><strong>Method:</strong> {{ $order->refund_method ?: 'UPI / Bank Reversal' }}</p>
+                                @if($order->refund_transaction_reference)
+                                    <p><strong>Bank Ref / UTR:</strong> <span class="font-mono font-bold">{{ $order->refund_transaction_reference }}</span></p>
+                                @endif
+                                <p><strong>Settled on:</strong> {{ $order->refunded_at?->format('d M, Y \a\t h:i A') ?? 'Recently' }}</p>
+                                @if($order->refund_note)
+                                    <p class="pt-1 text-stone-600 italic">"{{ $order->refund_note }}"</p>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
+
+                    @if($order->refund_screenshot)
+                        <div class="pt-2 border-t border-stone-200">
+                            <span class="font-bold text-stone-800 block mb-2">Attached Refund Transfer Proof / Slip</span>
+                            <div class="p-2 bg-stone-50 rounded-lg border border-stone-200 text-center cursor-pointer group" @click="refundProofModal = true">
+                                <img src="{{ asset($order->refund_screenshot) }}" alt="Refund Proof" class="max-h-36 max-w-full mx-auto rounded object-contain group-hover:scale-105 transition">
+                                <span class="text-[11px] text-[#996E2E] font-semibold mt-1.5 block underline">
+                                    Click to Enlarge Refund Proof
+                                </span>
+                            </div>
+                        </div>
+                    @endif
+                </div>
+
+                <!-- Right: Admin Refund Action Form (7 cols) -->
+                <div class="lg:col-span-7 bg-white p-4 rounded-xl border border-stone-200 space-y-4">
+                    <form action="{{ route('admin.orders.update_refund', $order->id) }}" method="POST" enctype="multipart/form-data" class="space-y-3.5">
+                        @csrf
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block font-bold text-stone-700 mb-1">Refund Settlement Status *</label>
+                                <select name="refund_status" class="w-full border rounded-lg p-2.5 bg-stone-50 font-semibold focus:border-[#D4AF6A] focus:ring-1 focus:ring-[#D4AF6A]">
+                                    <option value="Pending" {{ $order->refund_status === 'Pending' ? 'selected' : '' }}>⏳ Pending (Refund Queued / Awaiting)</option>
+                                    <option value="Refunded" {{ $order->refund_status === 'Refunded' ? 'selected' : '' }}>✓ Refunded (Payment Returned to Client)</option>
+                                    <option value="Not Applicable" {{ $order->refund_status === 'Not Applicable' ? 'selected' : '' }}>✕ Not Applicable (No Refund Due)</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block font-bold text-stone-700 mb-1">Refund Amount (₹) *</label>
+                                <div class="relative">
+                                    <span class="absolute left-3 top-2.5 text-stone-400 font-bold">₹</span>
+                                    <input type="number" step="0.01" name="refund_amount" value="{{ $order->refund_amount > 0 ? $order->refund_amount : $order->getRefundableAmount() }}" required class="w-full border rounded-lg pl-7 pr-3 py-2.5 font-bold font-mono text-stone-900 bg-stone-50 focus:border-[#D4AF6A] focus:ring-1 focus:ring-[#D4AF6A]">
+                                </div>
+                                <span class="text-[10px] text-stone-400 block mt-0.5">
+                                    Recommended: ₹{{ number_format($order->getRefundableAmount(), 2) }} ({{ $order->isCod() ? 'Advance Token' : 'Prepaid Total' }})
+                                </span>
+                            </div>
+                        </div>
+
+                        <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                            <div>
+                                <label class="block font-bold text-stone-700 mb-1">Refund Method</label>
+                                <select name="refund_method" class="w-full border rounded-lg p-2.5 bg-stone-50 text-xs focus:border-[#D4AF6A] focus:ring-1 focus:ring-[#D4AF6A]">
+                                    <option value="UPI (Google Pay / PhonePe / Paytm / BHIM)" {{ ($order->refund_method ?? '') === 'UPI (Google Pay / PhonePe / Paytm / BHIM)' ? 'selected' : '' }}>UPI (Google Pay / PhonePe / Paytm / BHIM)</option>
+                                    <option value="Direct Bank Transfer (IMPS / NEFT)" {{ ($order->refund_method ?? '') === 'Direct Bank Transfer (IMPS / NEFT)' ? 'selected' : '' }}>Direct Bank Transfer (IMPS / NEFT)</option>
+                                    <option value="Cash Return Handover" {{ ($order->refund_method ?? '') === 'Cash Return Handover' ? 'selected' : '' }}>Cash Return Handover</option>
+                                    <option value="Store Credit Voucher" {{ ($order->refund_method ?? '') === 'Store Credit Voucher' ? 'selected' : '' }}>Store Credit Voucher</option>
+                                </select>
+                            </div>
+
+                            <div>
+                                <label class="block font-bold text-stone-700 mb-1">Bank UTR / Transaction Ref</label>
+                                <input type="text" name="refund_transaction_reference" value="{{ $order->refund_transaction_reference }}" placeholder="e.g. 428901839210 or BANK-REF-01" class="w-full border rounded-lg p-2.5 font-mono text-xs">
+                            </div>
+                        </div>
+
+                        <!-- Drag & Drop / File Chooser with Live Preview -->
+                        <div>
+                            <label class="block font-bold text-stone-700 mb-1">Upload Refund Receipt / Screenshot (Optional)</label>
+                            <label class="relative flex flex-col items-center justify-center p-3 sm:p-4 border-2 border-dashed border-stone-300 rounded-xl bg-stone-50 hover:bg-stone-100/70 cursor-pointer transition">
+                                <input type="file" name="refund_screenshot" accept="image/*,.pdf" @change="previewRefundFile($event)" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
+                                
+                                <template x-if="refundScreenshotPreview">
+                                    <div class="space-y-1.5 text-center">
+                                        <img :src="refundScreenshotPreview" class="max-h-24 mx-auto rounded shadow-sm border border-stone-200">
+                                        <p class="text-[10px] text-emerald-700 font-bold">New receipt selected (Click or drag to change)</p>
+                                    </div>
+                                </template>
+
+                                <template x-if="!refundScreenshotPreview">
+                                    <div class="space-y-1 text-center">
+                                        <svg class="w-6 h-6 mx-auto text-stone-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="1.8" d="M7 16a4 4 0 01-.88-7.903A5 5 0 1115.9 6L16 6a5 5 0 011 9.9M15 13l-3-3m0 0l-3 3m3-3v12"/></svg>
+                                        <p class="text-xs font-semibold text-stone-700">Click to upload or drag & drop refund receipt</p>
+                                        <p class="text-[10px] text-stone-400">PNG, JPG, WEBP, PDF up to 10MB</p>
+                                    </div>
+                                </template>
+                            </label>
+                        </div>
+
+                        <div>
+                            <label class="block font-bold text-stone-700 mb-1">Admin Audit Note / Customer Reversal Note</label>
+                            <textarea name="refund_note" rows="2" placeholder="e.g. ₹{{ number_format($order->getRefundableAmount(), 2) }} transferred back to customer Google Pay account at mobile {{ $custPhone }}." class="w-full border rounded-lg p-2.5 text-xs">{{ $order->refund_note }}</textarea>
+                        </div>
+
+                        <button type="submit" class="w-full py-3 bg-[#4A2C1D] hover:bg-[#2E180E] text-[#E7C77B] rounded-xl font-bold uppercase tracking-wider text-xs transition shadow-sm cursor-pointer flex items-center justify-center gap-2">
+                            <svg class="w-4 h-4 text-[#E7C77B]" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 13l4 4L19 7"/></svg>
+                            <span>Save Refund Settlement Status</span>
+                        </button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    @endif
+
+    <!-- 2.5. CASH ON DELIVERY BALANCE SETTLEMENT & DELIVERY RECEIPT CARD (ONLY FOR ACTIVE COD ORDERS) -->
+    @if($order->isCod() && !$order->isCancelled() && !$order->isRejected())
         <div class="bg-gradient-to-r from-amber-50/70 via-white to-amber-50/70 rounded-2xl border-2 border-amber-400/80 p-4 sm:p-6 shadow-sm space-y-5">
             <div class="flex flex-col sm:flex-row sm:items-center justify-between pb-4 border-b border-amber-200 gap-3">
                 <div>
@@ -622,6 +879,37 @@
                 <div class="p-3 sm:p-4 border-t border-stone-200 bg-stone-50 shrink-0 flex items-center justify-between">
                     <span class="text-xs text-stone-600">Balance: <strong>₹{{ number_format($order->balance_amount) }}</strong> • Status: <strong>{{ $order->balance_status }}</strong></span>
                     <button type="button" @click="deliveryProofModal = false" class="px-6 py-2 bg-stone-800 hover:bg-stone-900 text-white rounded-lg text-xs font-semibold cursor-pointer transition">
+                        Close
+                    </button>
+                </div>
+            </div>
+        </div>
+    </template>
+    @endif
+
+    <!-- ENLARGED REFUND PROOF MODAL -->
+    @if($order->refund_screenshot)
+    <template x-if="refundProofModal">
+        <div class="fixed inset-0 z-50 bg-black/90 flex items-center justify-center p-0 sm:p-4 backdrop-blur-xs overflow-hidden"
+             @click.self="refundProofModal = false"
+             @keydown.escape.window="refundProofModal = false">
+            <div class="bg-white rounded-none sm:rounded-2xl w-full h-full sm:h-auto sm:max-w-3xl sm:max-h-[92dvh] text-center shadow-2xl relative flex flex-col overflow-hidden">
+                <div class="flex justify-between items-center p-3 sm:p-4 border-b border-stone-200 shrink-0 bg-stone-50">
+                    <h4 class="font-bold text-stone-800 text-sm flex items-center gap-2">
+                        <svg class="w-4 h-4 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                        Official Bank / UPI Refund Transfer Receipt
+                    </h4>
+                    <button type="button" @click="refundProofModal = false" class="w-8 h-8 rounded-full bg-stone-100 hover:bg-stone-200 text-stone-600 hover:text-stone-900 font-bold flex items-center justify-center text-lg leading-none cursor-pointer transition">✕</button>
+                </div>
+                <div class="flex-1 overflow-auto bg-stone-100 flex items-center justify-center p-2 sm:p-4 min-h-0">
+                    <img src="{{ asset($order->refund_screenshot) }}" 
+                         alt="Refund Transfer Proof" 
+                         class="max-w-full max-h-full w-auto h-auto object-contain rounded-lg shadow-md"
+                         style="max-height: calc(100dvh - 130px);">
+                </div>
+                <div class="p-3 sm:p-4 border-t border-stone-200 bg-stone-50 shrink-0 flex items-center justify-between">
+                    <span class="text-xs text-stone-600">Refunded: <strong>₹{{ number_format($order->refund_amount, 2) }}</strong> • Ref: <strong>{{ $order->refund_transaction_reference ?? 'N/A' }}</strong></span>
+                    <button type="button" @click="refundProofModal = false" class="px-6 py-2 bg-stone-800 hover:bg-stone-900 text-white rounded-lg text-xs font-semibold cursor-pointer transition">
                         Close
                     </button>
                 </div>
