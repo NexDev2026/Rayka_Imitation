@@ -22,18 +22,23 @@ class AdminOrderController extends Controller
 {
     public function index(Request $request)
     {
-        $query = Order::with(['user', 'payment', 'items']);
+        $query = Order::with(['user', 'address', 'payment', 'items']);
 
         if ($request->filled('status')) {
             $query->where('status', $request->status);
         }
 
         if ($request->filled('search')) {
-            $term = $request->search;
+            $term = trim((string) $request->search);
             $query->where(function ($q) use ($term) {
                 $q->where('order_number', 'like', "%{$term}%")
                     ->orWhereHas('user', function ($uq) use ($term) {
                         $uq->where('name', 'like', "%{$term}%")
+                            ->orWhere('mobile', 'like', "%{$term}%")
+                            ->orWhere('email', 'like', "%{$term}%");
+                    })
+                    ->orWhereHas('address', function ($aq) use ($term) {
+                        $aq->where('name', 'like', "%{$term}%")
                             ->orWhere('mobile', 'like', "%{$term}%")
                             ->orWhere('email', 'like', "%{$term}%");
                     });
@@ -42,8 +47,10 @@ class AdminOrderController extends Controller
 
         $orders = $query->latest()->paginate(15)->withQueryString();
         $pendingCount = Order::where('status', 'Pending Verification')->count();
+        $totalOrdersCount = Order::count();
+        $codOrdersCount = Order::whereNotNull('advance_percentage')->where('advance_percentage', '>', 0)->count();
 
-        return view('admin.orders.index', compact('orders', 'pendingCount'));
+        return view('admin.orders.index', compact('orders', 'pendingCount', 'totalOrdersCount', 'codOrdersCount'));
     }
 
     public function show($id)
